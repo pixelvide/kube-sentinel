@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, X } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -173,7 +173,11 @@ export function MultiSelect({
                             </div>
                         )}
                     </div>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    {open ? (
+                        <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    ) : (
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    )}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0" align="start">
