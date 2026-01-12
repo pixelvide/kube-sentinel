@@ -250,9 +250,11 @@ function PodsContent() {
                     onClose={() => setLogPod(null)}
                     context={selectedContext}
                     namespace={logPod.namespace}
-                    pod={logPod.name}
                     containers={logPod.containers}
                     initContainers={logPod.init_containers || []}
+                    pods={[{ name: logPod.name, status: logPod.status }]}
+                    showPodSelector={false}
+                    title={logPod.name}
                 />
             )}
         </div >

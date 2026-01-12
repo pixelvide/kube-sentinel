@@ -14,33 +14,43 @@ export function LogViewerModal({
     onClose,
     context,
     namespace,
-    pod,
     containers,
     initContainers = [],
     selector,
     pods = [],
+    showPodSelector,
+    title,
 }: {
     isOpen: boolean;
     onClose: () => void;
     context: string;
     namespace: string;
-    pod: string;
     containers: string[];
     initContainers?: string[];
     selector?: string;
     pods?: Array<{ name: string, status: string }>;
+    showPodSelector?: boolean;
+    title?: string;
 }) {
-    const allContainers = [...initContainers, ...containers];
+    const allContainers = [...(initContainers || []), ...(containers || [])];
     const terminalRef = useRef<HTMLDivElement>(null);
     const wsRef = useRef<WebSocket | null>(null);
     const xtermRef = useRef<Terminal | null>(null);
     const fitAddonRef = useRef<FitAddon | null>(null);
     const [status, setStatus] = useState<"connecting" | "connected" | "disconnected" | "error">("connecting");
     const [isWrapEnabled, setIsWrapEnabled] = useState(false);
-    const [showTimestamps, setShowTimestamps] = useState(true);
-    const [showPrefix, setShowPrefix] = useState(allContainers.length > 1);
+    const [showTimestamps, setShowTimestamps] = useState(false);
+    // Show prefix by default if multiple containers OR if pod selector is shown (multi-pod view)
+    const [showPrefix, setShowPrefix] = useState(allContainers.length > 1 || (showPodSelector ?? false));
     const [selectedContainers, setSelectedContainers] = useState<string[]>(["__all__"]);
-    const [selectedPods, setSelectedPods] = useState<string[]>(pods.length > 0 ? ["__all__"] : [pod]);
+    // Smart default: if pod selector is hidden and we have exactly one pod, use that pod name
+    // Otherwise default to __all__ for multi-pod views
+    const [selectedPods, setSelectedPods] = useState<string[]>(() => {
+        if (showPodSelector === false && pods && pods.length === 1) {
+            return [pods[0].name];
+        }
+        return ["__all__"];
+    });
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     // Handle Resize Logic
@@ -117,7 +127,8 @@ export function LogViewerModal({
                 handleResize();
             });
 
-            if (selectedContainers.length === 0) {
+
+            if (selectedContainers.length === 0 || selectedPods.length === 0) {
                 if (wsRef.current) {
                     wsRef.current.close();
                     wsRef.current = null;
@@ -211,7 +222,7 @@ export function LogViewerModal({
             // Logic to dispose xterm is handled at start of effect or on modal close
         };
 
-    }, [isOpen, context, namespace, selectedContainers, selectedPods, pod, showTimestamps, showPrefix, selector]); // Re-run when container changes
+    }, [isOpen, context, namespace, selectedContainers, selectedPods, showTimestamps, showPrefix, selector]); // Re-run when container changes
 
     const toggleContainer = (c: string) => {
         if (c === "__all__") {
@@ -264,7 +275,7 @@ export function LogViewerModal({
                 <DialogHeader className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex flex-row items-center justify-between space-y-0 text-left">
                     <div className="flex flex-col gap-1">
                         <DialogTitle className="flex items-center gap-2 text-sm font-mono text-zinc-200">
-                            <span>Logs: {pod}</span>
+                            <span>Logs: {title || "Unknown Resource"}</span>
                             {status === "connecting" && <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />}
                             {status === "connected" && <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
                             {status === "disconnected" && <div className="h-2 w-2 rounded-full bg-zinc-500" />}
@@ -277,14 +288,15 @@ export function LogViewerModal({
 
                     <div className="flex items-center gap-2">
                         {/* Pod Selector - Only show if multiple pods available */}
-                        {pods.length > 0 && (
+                        {(showPodSelector ?? (pods && pods.length > 0)) && (
                             <div className="w-48 overflow-hidden">
                                 <MultiSelect
-                                    options={pods.map(p => ({ value: p.name, label: p.name }))}
+                                    options={(pods || []).map(p => ({ value: p.name, label: p.name }))}
                                     selected={selectedPods}
                                     onChange={handlePodSelection}
                                     placeholder="Select Pods"
                                     showSearch={false}
+                                    allOption={{ label: "All Pods", value: "__all__" }}
                                 />
                             </div>
                         )}
@@ -391,7 +403,14 @@ export function LogViewerModal({
                     </div>
                 </DialogHeader>
                 <div className="flex-1 w-full relative bg-[#09090b] p-2 overflow-hidden">
-                    {selectedContainers.length === 0 && (
+                    {selectedPods.length === 0 && (
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#09090b]/80 backdrop-blur-sm text-zinc-400">
+                            <TerminalIcon className="h-12 w-12 mb-4 opacity-20" />
+                            <p className="text-sm font-mono">Select at least one pod</p>
+                            <p className="text-xs text-zinc-600 mt-2">Use the pod selector above to view logs</p>
+                        </div>
+                    )}
+                    {selectedContainers.length === 0 && selectedPods.length > 0 && (
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#09090b]/80 backdrop-blur-sm text-zinc-400">
                             <Tag className="h-12 w-12 mb-4 opacity-20" />
                             <p className="text-sm font-mono">Select at least one container</p>

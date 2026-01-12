@@ -55,31 +55,49 @@ func HandleLogs(c *gin.Context) {
 	prefixStr := c.Query("prefix")
 	showPrefix := prefixStr == "true"
 
-	showTimestamps := timestampsStr != "false"
+	showTimestamps := timestampsStr == "true"
 
-	// Handle __all__ for pods - stream from all pods matching selector
-	if podName == "__all__" {
-		if selectorStr == "" {
-			ws.WriteMessage(websocket.TextMessage, []byte("Error: selector required when pod=__all__"))
+	// Handle comma-separated pods or __all__
+	if podName == "__all__" || strings.Contains(podName, ",") {
+		var podList []v1.Pod
+		if podName == "__all__" {
+			if selectorStr == "" {
+				ws.WriteMessage(websocket.TextMessage, []byte("Error: selector required when pod=__all__"))
+				return
+			}
+			listOpts := metav1.ListOptions{LabelSelector: selectorStr}
+			resp, err := clientset.CoreV1().Pods(ns).List(c.Request.Context(), listOpts)
+			if err != nil {
+				ws.WriteMessage(websocket.TextMessage, []byte("Error listing pods: "+err.Error()))
+				return
+			}
+			podList = resp.Items
+		} else {
+			names := strings.Split(podName, ",")
+			for _, name := range names {
+				name = strings.TrimSpace(name)
+				if name == "" {
+					continue
+				}
+				p, err := clientset.CoreV1().Pods(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+				if err != nil {
+					ws.WriteMessage(websocket.TextMessage, []byte("Error getting pod "+name+": "+err.Error()))
+					return
+				}
+				podList = append(podList, *p)
+			}
+		}
+
+		if len(podList) == 0 {
+			ws.WriteMessage(websocket.TextMessage, []byte("No pods found"))
 			return
 		}
 
-		// List all pods matching selector
-		listOpts := metav1.ListOptions{LabelSelector: selectorStr}
-		podList, err := clientset.CoreV1().Pods(ns).List(c.Request.Context(), listOpts)
-		if err != nil {
-			ws.WriteMessage(websocket.TextMessage, []byte("Error listing pods: "+err.Error()))
-			return
+		// Default to true for multi-pod if not explicitly specified
+		if prefixStr == "" {
+			showPrefix = true
 		}
-
-		if len(podList.Items) == 0 {
-			ws.WriteMessage(websocket.TextMessage, []byte("No pods found matching selector"))
-			return
-		}
-
-		// Always show prefix for multi-pod logs
-		showPrefix = true
-		streamMultiplePods(c, ws, clientset, ns, podList.Items, containerName, showTimestamps, showPrefix)
+		streamMultiplePods(c, ws, clientset, ns, podList, containerName, showTimestamps, showPrefix)
 		return
 	}
 
@@ -106,7 +124,7 @@ func HandleLogs(c *gin.Context) {
 	}
 
 	// Unified streaming logic for both single and multi-container requests
-	// Default showPrefix to true if we are streaming multiple sources
+	// Default showPrefix to true if we are streaming multiple containers and not explicitly specified
 	if prefixStr == "" && (len(targetContainers) > 1 || containerName == "__all__") {
 		showPrefix = true
 	}

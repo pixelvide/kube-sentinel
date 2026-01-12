@@ -9,13 +9,17 @@ This document outlines the behavior of the Cloud Sentinel Log Viewer across diff
 *   **Default View:**
     *   Logs are streamed immediately.
     *   **Prefixes:** Hidden by default. The user sees raw log output.
+    *   **Timestamps:** OFF by default. User can click the clock icon to enable.
 *   **Container Selector:**
     *   Shows: "All Containers" (Active) and the single container name.
     *   Since there is only one container, switching selection effectively does nothing to the stream content, but is available for consistency.
+*   **Pod Selector:**
+    *   **Visibility:** Hidden by default when viewing a single pod (e.g., from Pods page).
+    *   Can be explicitly shown via `showPodSelector={true}` prop.
 *   **Prefix Toggle:**
     *   **Visible:** Yes.
-    *   **State:** Defaults to `OFF`.
-    *   **Interaction:** User can click the tag icon to manually show `[container-name]` prefix if desired.
+    *   **State:** Defaults to `OFF` for single pod views, `ON` for multi-pod views.
+    *   **Interaction:** User can click the tag icon to manually show/hide prefixes in any view. Preference is respected and passed to the backend.
 
 ## 2. Multi-Container Pods
 
@@ -39,15 +43,39 @@ This document outlines the behavior of the Cloud Sentinel Log Viewer across diff
     *   **Deselection**: User can deselect all containers (showing "Select at least one container" empty state).
     *   **Auto-Revert**: Selecting all individual containers automatically reverts to the "All Containers" sentinel state.
 
-## 3. Init Containers
+## 3. Multi-Pod Views (Deployments, DaemonSets, StatefulSets, Jobs)
+
+**Scenario:** A user views logs from multiple pods for a workload resource.
+
+*   **Default View:**
+    *   **Pod Selector:** Visible and defaults to `__all__` (all pods selected).
+    *   **Container Selector:** Shows "All Containers" by default.
+    *   **Prefixes:** Enabled by default to distinguish between pods/containers.
+*   **Pod Selection:**
+    *   **Default:** `__all__` is selected (streaming logs from all pods matching the selector).
+    *   **Dropdown:** MultiSelect component showing all available pods.
+    *   **Behavior:** User can select specific pods or multiple pods. Prefix is automatically enabled when multiple pods are selected.
+
+## 4. Init Containers
 *   **Visibility**: Listed in a separate "INIT CONTAINERS" section in the dropdown.
 *   **Behavior**: Fully selectable, included in "All Containers" stream.
 *   **Styling**: Distinct headers in dropdown to separate from standard containers.
 
-## 4. Technical Implementation details
+## 5. Technical Implementation Details
 *   **Concurrency**: Backend uses goroutines to stream multiple containers.
 *   **Stability**: WebSocket heartbeat (Ping every 15s) prevents connection timeouts.
 *   **Streaming**: Unified logic (`streamContainers`) handles both single and multi-container requests efficiently.
+*   **Validation:**
+    *   **Pod Selection:** WebSocket connection prevented if no pods are selected. Shows empty state overlay.
+    *   **Container Selection:** WebSocket connection prevented if no containers are selected. Shows empty state overlay.
+    *   **Priority:** Pod selection validation takes precedence over container validation.
+*   **API Changes:**
+    *   **Removed:** `pod` prop (replaced with `pods` array).
+    *   **Added:** `showPodSelector?: boolean` prop to control pod selector visibility.
+    *   **Default:** Pod selector shows when `pods` array has items, unless explicitly disabled.
 *   **UI**:
     *   **Dropdown**: Rounded-lg container, rounded-sm checkboxes.
-    *   **Empty State**: Overlay message when no selection.
+    *   **Empty States**:
+        *   No pods selected: Terminal icon with "Select at least one pod"
+        *   No containers selected: Tag icon with "Select at least one container"
+    *   **Pod Selector**: 300px wide MultiSelect component with search disabled.

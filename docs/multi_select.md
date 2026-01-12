@@ -94,3 +94,28 @@ When `allOption` is provided, the component handles mutual exclusivity: identify
 ```
 
 If `selected` contains `__all__`, the component visually checks all items. Clicking a specific item will switch to focusing only on that item.
+
+### With Search Disabled
+
+For compact dropdowns where search is not needed:
+
+```tsx
+<MultiSelect
+    options={pods.map(p => ({ value: p.name, label: p.name }))}
+    selected={selectedPods}
+    onChange={setSelectedPods}
+    placeholder="Select Pods"
+    showSearch={false}
+    allOption={{ label: "All Pods", value: "__all__" }}
+/>
+```
+
+## Real-World Usage
+
+### Log Viewer Pod Selector
+
+The MultiSelect component is used in the LogViewerModal to allow users to select which pods to stream logs from:
+
+- **Default:** `__all__` option selected (streaming from all pods)
+- **Search:** Disabled for cleaner UI when pod count is manageable
+- **Behavior:** Switching from "All Pods" to a specific pod enters focus mode

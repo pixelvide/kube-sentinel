@@ -42,7 +42,14 @@ function DaemonSetsContent() {
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedDaemonSet, setSelectedDaemonSet] = useState<DaemonSet | null>(null);
-    const [logResource, setLogResource] = useState<{ namespace: string, selector: string, pods: Array<{ name: string, status: string }> } | null>(null);
+    const [logResource, setLogResource] = useState<{
+        name: string,
+        namespace: string,
+        selector: string,
+        pods: Array<{ name: string, status: string }>,
+        containers: string[],
+        initContainers: string[]
+    } | null>(null);
 
     useEffect(() => {
         if (selectedContext && selectedNamespace) {
@@ -186,9 +193,12 @@ function DaemonSetsContent() {
                                                                 const data = await res.json();
                                                                 const pods = data.pods || [];
                                                                 setLogResource({
+                                                                    name: ds.name,
                                                                     namespace: ds.namespace,
                                                                     selector: ds.selector,
-                                                                    pods: pods.map((p: any) => ({ name: p.name, status: p.status }))
+                                                                    pods: pods.map((p: any) => ({ name: p.name, status: p.status })),
+                                                                    containers: (pods.length > 0 && pods[0].containers) ? pods[0].containers : ["__all__"],
+                                                                    initContainers: (pods.length > 0 && pods[0].init_containers) ? pods[0].init_containers : []
                                                                 });
                                                             }
                                                         } catch (error) {
@@ -223,11 +233,12 @@ function DaemonSetsContent() {
                     onClose={() => setLogResource(null)}
                     context={selectedContext || ""}
                     namespace={logResource.namespace}
-                    pod={logResource.pods.length > 0 ? logResource.pods[0].name : ""}
                     selector={logResource.selector}
-                    containers={["__all__"]}
-                    initContainers={[]}
+                    containers={logResource.containers}
+                    initContainers={logResource.initContainers}
                     pods={logResource.pods}
+                    showPodSelector={true}
+                    title={logResource.name}
                 />
             )}
         </div>
