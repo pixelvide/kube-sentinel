@@ -8,6 +8,51 @@ import "@xterm/xterm/css/xterm.css";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, CornerDownLeft, X, Copy } from "lucide-react";
+
+interface KeyConfig {
+    label: string | React.ReactNode;
+    value: string;
+    width?: string;
+    variant?: "default" | "secondary" | "outline";
+}
+
+function MobileKeyboard({ onKeyPress }: { onKeyPress: (key: string) => void }) {
+    const keys: KeyConfig[] = [
+        { label: "Esc", value: "\x1b", width: "col-span-2" },
+        { label: "/", value: "/" },
+        { label: "-", value: "-" },
+        { label: "Tab", value: "\t", width: "col-span-2" },
+
+        { label: "Ctrl+C", value: "\x03", variant: "secondary" },
+        { label: <ArrowUp className="w-4 h-4" />, value: "\x1b[A" },
+        { label: "Ctrl+D", value: "\x04", variant: "secondary" },
+        { label: "Ctrl+Z", value: "\x1a", variant: "secondary" },
+
+        { label: <ArrowLeft className="w-4 h-4" />, value: "\x1b[D" },
+        { label: <ArrowDown className="w-4 h-4" />, value: "\x1b[B" },
+        { label: <ArrowRight className="w-4 h-4" />, value: "\x1b[C" },
+        { label: <CornerDownLeft className="w-4 h-4" />, value: "\r", variant: "default" },
+    ];
+
+    return (
+        <div className="lg:hidden grid grid-cols-8 gap-1 p-2 bg-zinc-900 border-t border-white/10 shrink-0 safer-bottom">
+            {keys.map((key, i) => (
+                <Button
+                    key={i}
+                    variant={key.variant === "default" ? "default" : "secondary"}
+                    size="sm"
+                    className={`h-10 text-xs font-mono font-bold ${key.width || "col-span-2"} ${key.variant === "secondary" ? "bg-white/10 hover:bg-white/20 text-zinc-300" : ""
+                        }`}
+                    onClick={() => onKeyPress(key.value)}
+                    onMouseDown={(e) => e.preventDefault()} // Prevent focus loss from terminal
+                >
+                    {key.label}
+                </Button>
+            ))}
+        </div>
+    );
+}
 
 function ExecContent() {
     const searchParams = useSearchParams();
@@ -124,20 +169,20 @@ function ExecContent() {
         <div className="flex flex-col h-screen w-screen bg-[#020817] text-white overflow-hidden font-mono antialiased">
             {/* Window Header (Dashboard Style) */}
             <div className="h-10 bg-black/40 border-b border-white/5 flex items-center justify-between px-4 shrink-0 backdrop-blur-md z-10 w-full">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
                     {/* Traffic Lights */}
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5 shrink-0">
                         <div className="h-2.5 w-2.5 rounded-full bg-red-500/50 hover:bg-red-500 transition-colors shadow-sm" />
                         <div className="h-2.5 w-2.5 rounded-full bg-orange-500/50 hover:bg-orange-500 transition-colors shadow-sm" />
                         <div className="h-2.5 w-2.5 rounded-full bg-green-500/50 hover:bg-green-500 transition-colors shadow-sm" />
                     </div>
                     {/* Title */}
-                    <div className="flex items-center gap-2 text-xs font-mono select-none">
-                        <span className="text-zinc-300 font-bold">{pod}</span>
-                        <span className="text-zinc-600">/</span>
-                        <span className="text-zinc-400">{container || "default"}</span>
-                        <span className="text-zinc-600">@</span>
-                        <span className="text-zinc-500 max-w-[200px] truncate">{context}</span>
+                    <div className="flex items-center gap-2 text-xs font-mono select-none min-w-0 flex-1 overflow-hidden">
+                        <span className="text-zinc-300 font-bold truncate shrink-1">{pod}</span>
+                        <span className="text-zinc-600 shrink-0">/</span>
+                        <span className="text-zinc-400 shrink-0">{container || "default"}</span>
+                        <span className="text-zinc-600 shrink-0">@</span>
+                        <span className="text-zinc-500 truncate shrink-1 min-w-[50px]">{context}</span>
                     </div>
                 </div>
 
@@ -162,9 +207,17 @@ function ExecContent() {
             </div>
 
             {/* Terminal Area */}
-            <div className="flex-1 bg-[#020817] p-0 relative">
+            <div className="flex-1 bg-[#020817] p-0 relative min-h-0">
                 <div ref={terminalRef} className="h-full w-full p-4 overflow-hidden" />
             </div>
+
+            <MobileKeyboard onKeyPress={(key) => {
+                if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                    wsRef.current.send(key);
+                    // Also focus terminal to keep cursor active
+                    xtermRef.current?.focus();
+                }
+            }} />
         </div>
     );
 }
