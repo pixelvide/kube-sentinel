@@ -56,6 +56,11 @@ A modern, read-optimized Kubernetes dashboard built with Next.js and Go.
     - **Frontend**: Available at `http://localhost:3000`
     - **Backend**: Available at `http://localhost:8080` (API)
 
+    **Note:** To restart the deployment and rebuild containers (e.g., after configuration changes), use:
+    ```bash
+    docker compose up -d --build
+    ```
+
 ## Deployment Note
 
 - **Frontend-Backend Communication**:

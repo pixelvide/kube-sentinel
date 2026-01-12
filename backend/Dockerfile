@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM public.ecr.aws/docker/library/golang:1.25-alpine AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -6,7 +6,7 @@ RUN go mod download
 COPY . .
 RUN go build -o server main.go
 
-FROM alpine:latest
+FROM public.ecr.aws/docker/library/alpine:latest
 
 # Install necessary runtime dependencies
 RUN apk add --no-cache curl glab aws-cli ca-certificates git openssh libc6-compat
