@@ -3,7 +3,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, LayoutDashboard, Box, Grid, Globe, HardDrive, Layers, PlayCircle, Clock, Boxes, AlertCircle, RefreshCw, Server, Database, History, Cloud } from "lucide-react";
+import { Menu, LayoutDashboard, Box, Grid, Globe, HardDrive, Layers, PlayCircle, Clock, Boxes, AlertCircle, RefreshCw, Server, Database, History, Cloud, FileCode, Lock, Scale, Zap, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClusterContextSelector } from "@/components/ClusterContextSelector";
 import { GlobalSearch } from "@/components/GlobalSearch";
@@ -92,6 +92,36 @@ const PAGE_CONFIG: Record<string, { title: string; description: string; icon: an
         description: "Legacy workload management",
         icon: Boxes,
         searchPlaceholder: "Search replication controllers..."
+    },
+    "/configmaps": {
+        title: "Config Maps",
+        description: "Manage configuration data",
+        icon: FileCode,
+        searchPlaceholder: "Search config maps..."
+    },
+    "/secrets": {
+        title: "Secrets",
+        description: "Manage sensitive information",
+        icon: Lock,
+        searchPlaceholder: "Search secrets..."
+    },
+    "/resourcequotas": {
+        title: "Resource Quotas",
+        description: "Manage resource limits",
+        icon: Scale,
+        searchPlaceholder: "Search resource quotas..."
+    },
+    "/limitranges": {
+        title: "Limit Ranges",
+        description: "Manage container resource limits",
+        icon: Zap,
+        searchPlaceholder: "Search limit ranges..."
+    },
+    "/hpa": {
+        title: "HPA",
+        description: "Horizontal Pod Autoscalers",
+        icon: Activity,
+        searchPlaceholder: "Search HPA..."
     },
 };
 

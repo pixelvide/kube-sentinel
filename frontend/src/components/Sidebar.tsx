@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import { Home, Settings, LogOut, LayoutDashboard, X, Cloud, ChevronDown, Layers, HardDrive, Box, Grid, Globe, Network, PlayCircle, Clock, Boxes, AlertCircle, Server, Database, History } from "lucide-react";
+import { Home, Settings, LogOut, LayoutDashboard, X, Cloud, ChevronDown, Layers, HardDrive, Box, Grid, Globe, Network, PlayCircle, Clock, Boxes, AlertCircle, Server, Database, History, FileCode, Lock, Scale, Zap, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [networkOpen, setNetworkOpen] = useState(false);
     const [workloadsOpen, setWorkloadsOpen] = useState(false);
+    const [configOpen, setConfigOpen] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -134,18 +135,6 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                             <span className="font-medium text-sm">Nodes</span>
                         </Button>
                     </Link>
-                    <Link href={getLinkHref("/events")} className="block" onClick={onClose}>
-                        <Button
-                            variant={isActive("/events") ? "secondary" : "ghost"}
-                            className={cn(
-                                "w-full justify-start gap-3 h-11 px-4 transition-all duration-200",
-                                isActive("/events") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
-                            )}
-                        >
-                            <AlertCircle className={cn("h-4 w-4", isActive("/events") ? "text-primary" : "opacity-60")} />
-                            <span className="font-medium text-sm">Events</span>
-                        </Button>
-                    </Link>
                     <Button
                         variant="ghost"
                         className="w-full justify-between gap-3 h-11 px-4 mt-1 hover:bg-white/10 hover:text-white"
@@ -183,6 +172,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                     <span className="font-medium text-sm">Deployments</span>
                                 </Button>
                             </Link>
+
                             <Link href={getLinkHref("/daemonsets")} className="block" onClick={onClose}>
                                 <Button
                                     variant={isActive("/daemonsets") ? "secondary" : "ghost"}
@@ -258,6 +248,84 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                         </div>
 
                     )}
+
+                    {/* Config Menu */}
+                    <Button
+                        variant="ghost"
+                        className="w-full justify-between gap-3 h-11 px-4 mt-1 hover:bg-white/10 hover:text-white"
+                        onClick={() => setConfigOpen(!configOpen)}
+                    >
+                        <div className="flex items-center gap-3">
+                            <FileCode className="h-4 w-4 opacity-60" />
+                            <span className="font-medium text-sm">Config</span>
+                        </div>
+                        <ChevronDown className={cn("h-4 w-4 opacity-40 transition-transform", configOpen && "rotate-180")} />
+                    </Button>
+                    {configOpen && (
+                        <div className="ml-4 space-y-1">
+                            <Link href={getLinkHref("/configmaps")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/configmaps") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/configmaps") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <FileCode className={cn("h-4 w-4", isActive("/configmaps") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">Config Maps</span>
+                                </Button>
+                            </Link>
+                            <Link href={getLinkHref("/secrets")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/secrets") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/secrets") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <Lock className={cn("h-4 w-4", isActive("/secrets") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">Secrets</span>
+                                </Button>
+                            </Link>
+                            <Link href={getLinkHref("/resourcequotas")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/resourcequotas") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/resourcequotas") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <Scale className={cn("h-4 w-4", isActive("/resourcequotas") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">Resource Quotas</span>
+                                </Button>
+                            </Link>
+                            <Link href={getLinkHref("/limitranges")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/limitranges") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/limitranges") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <Zap className={cn("h-4 w-4", isActive("/limitranges") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">Limit Ranges</span>
+                                </Button>
+                            </Link>
+                            <Link href={getLinkHref("/hpa")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/hpa") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/hpa") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <Activity className={cn("h-4 w-4", isActive("/hpa") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">HPA</span>
+                                </Button>
+                            </Link>
+                        </div>
+                    )}
+
                     <Button
                         variant="ghost"
                         className="w-full justify-between gap-3 h-11 px-4 mt-1 hover:bg-white/10 hover:text-white"
@@ -297,6 +365,18 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                             </Link>
                         </div>
                     )}
+                    <Link href={getLinkHref("/events")} className="block" onClick={onClose}>
+                        <Button
+                            variant={isActive("/events") ? "secondary" : "ghost"}
+                            className={cn(
+                                "w-full justify-start gap-3 h-11 px-4 mt-1 transition-all duration-200",
+                                isActive("/events") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                            )}
+                        >
+                            <AlertCircle className={cn("h-4 w-4", isActive("/events") ? "text-primary" : "opacity-60")} />
+                            <span className="font-medium text-sm">Events</span>
+                        </Button>
+                    </Link>
                     <Button
                         variant="ghost"
                         className="w-full justify-between gap-3 h-11 px-4 mt-4 hover:bg-white/10 hover:text-white"

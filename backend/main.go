@@ -102,6 +102,11 @@ func main() {
 			kubeGroup.GET("/cronjobs", api.GetCronJobs)
 			kubeGroup.GET("/daemonsets", api.GetDaemonSets)
 			kubeGroup.GET("/statefulsets", api.GetStatefulSets)
+			kubeGroup.GET("/configmaps", api.GetConfigMaps)
+			kubeGroup.GET("/secrets", api.GetSecrets)
+			kubeGroup.GET("/resourcequotas", api.GetResourceQuotas)
+			kubeGroup.GET("/limitranges", api.GetLimitRanges)
+			kubeGroup.GET("/hpa", api.GetHPAs)
 			kubeGroup.GET("/events", api.GetEvents)
 			kubeGroup.GET("/scopes", api.GetResourceScopes)
 			kubeGroup.GET("/resource", api.GetResourceDetails) // <--- New endpoint
