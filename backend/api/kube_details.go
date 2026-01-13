@@ -226,5 +226,6 @@ func GetResourceDetails(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"manifest": string(yamlBytes),
 		"events":   events,
+		"raw":      resourceObj,
 	})
 }

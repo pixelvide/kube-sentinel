@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { KubeProperties } from "@/components/KubeProperties";
 
 interface ResourceDetailsSheetProps {
     isOpen: boolean;
@@ -32,6 +33,7 @@ interface EventSimple {
 interface ResourceDetails {
     manifest: string;
     events: EventSimple[];
+    raw: any;
 }
 
 export function ResourceDetailsSheet({
@@ -114,19 +116,19 @@ export function ResourceDetailsSheet({
 
     return (
         <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-[#09090b] border-l border-white/10 p-0 flex flex-col h-full">
-                <SheetHeader className="p-6 border-b border-white/10 shrink-0">
-                    <SheetTitle className="text-xl font-bold font-mono">
+            <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-zinc-50 border-l border-zinc-200 p-0 flex flex-col h-full">
+                <SheetHeader className="p-6 border-b border-zinc-200 shrink-0 bg-white">
+                    <SheetTitle className="text-xl font-bold font-mono text-zinc-900">
                         {kind}: {name}
                     </SheetTitle>
-                    <SheetDescription className="text-zinc-400 font-mono text-xs">
+                    <SheetDescription className="text-zinc-500 font-mono text-xs">
                         {namespace} @ {context}
                     </SheetDescription>
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto">
                     {loading && (
-                        <div className="p-6 text-zinc-400 font-mono text-sm animate-pulse">
+                        <div className="p-6 text-zinc-500 font-mono text-sm animate-pulse">
                             Loading details...
                         </div>
                     )}
@@ -139,15 +141,18 @@ export function ResourceDetailsSheet({
 
                     {details && (
                         <div className="flex flex-col gap-6 p-6">
+                            {/* Properties Section */}
+                            <KubeProperties resource={details.raw} />
+
                             {/* Events Section */}
                             <div className="space-y-3">
-                                <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">
+                                <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">
                                     Recent Events
                                 </h3>
                                 {details.events?.length > 0 ? (
-                                    <div className="rounded-md border border-white/10 bg-black/20 overflow-hidden">
+                                    <div className="rounded-md border border-zinc-200 bg-white overflow-hidden shadow-sm">
                                         <table className="w-full text-xs text-left font-mono">
-                                            <thead className="bg-white/5 text-zinc-400">
+                                            <thead className="bg-zinc-50 text-zinc-500 border-b border-zinc-200">
                                                 <tr>
                                                     <th className="p-2 font-medium">Type</th>
                                                     <th className="p-2 font-medium">Reason</th>
@@ -163,19 +168,19 @@ export function ResourceDetailsSheet({
                                                                 variant="outline"
                                                                 className={
                                                                     e.type === "Warning"
-                                                                        ? "text-red-400 border-red-400/30 bg-red-400/10"
-                                                                        : "text-zinc-400 border-zinc-700"
+                                                                        ? "text-red-600 border-red-200 bg-red-50"
+                                                                        : "text-zinc-600 border-zinc-200 bg-zinc-50"
                                                                 }
                                                             >
                                                                 {e.type}
                                                             </Badge>
                                                         </td>
-                                                        <td className="p-2 text-zinc-300">{e.reason}</td>
-                                                        <td className="p-2 text-zinc-500 whitespace-nowrap">
+                                                        <td className="p-2 text-zinc-600">{e.reason}</td>
+                                                        <td className="p-2 text-zinc-400 whitespace-nowrap text-[10px]">
                                                             {/* TODO: Format age better if needed, backend sends RFC3339 */}
                                                             {new Date(e.last_seen).toLocaleTimeString()}
                                                         </td>
-                                                        <td className="p-2 text-zinc-400 break-words max-w-[200px]">
+                                                        <td className="p-2 text-zinc-500 break-words max-w-[200px]">
                                                             {e.message} ({e.count})
                                                         </td>
                                                     </tr>
@@ -184,7 +189,7 @@ export function ResourceDetailsSheet({
                                         </table>
                                     </div>
                                 ) : (
-                                    <div className="text-zinc-500 text-sm italic">
+                                    <div className="text-zinc-400 text-sm italic py-4">
                                         No events found.
                                     </div>
                                 )}
@@ -192,11 +197,11 @@ export function ResourceDetailsSheet({
 
                             {/* Manifest Section */}
                             <div className="space-y-3">
-                                <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">
+                                <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">
                                     YAML Manifest
                                 </h3>
-                                <div className="relative rounded-md border border-white/10 bg-[#020817] p-4 text-xs font-mono text-emerald-100 overflow-auto max-h-[600px] shadow-inner">
-                                    <pre>{details.manifest}</pre>
+                                <div className="relative rounded-md border border-zinc-200 bg-white p-4 text-xs font-mono text-zinc-800 overflow-auto max-h-[600px] shadow-sm">
+                                    <pre className="whitespace-pre-wrap break-all">{details.manifest}</pre>
                                 </div>
                             </div>
                         </div>
