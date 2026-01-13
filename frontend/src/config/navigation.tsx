@@ -36,6 +36,7 @@ export interface NavigationItem {
     description: string;
     icon: any;
     category?: 'Workloads' | 'Config' | 'Network' | 'Storage' | 'Access Control' | 'Settings';
+    kind?: string; // Standard K8s Kind
     searchPlaceholder?: string;
     isClusterWide?: boolean;
     showHeader?: boolean;
@@ -54,6 +55,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Namespaces",
         description: "Manage cluster namespaces",
         icon: Layers,
+        kind: "Namespace",
         searchPlaceholder: "Search namespaces...",
         isClusterWide: true,
         showHeader: true
@@ -63,16 +65,17 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Nodes",
         description: "Cluster nodes and capacity",
         icon: HardDrive,
+        kind: "Node",
         searchPlaceholder: "Search nodes...",
         isClusterWide: true,
         showHeader: true
     },
-    // Workloads
     {
         path: "/kube-workload/pods",
         title: "Pods",
         description: "Manage workload instances",
         icon: Box,
+        kind: "Pod",
         category: 'Workloads',
         searchPlaceholder: "Search pods...",
         showHeader: true
@@ -82,6 +85,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Deployments",
         description: "Manage application deployments",
         icon: Layers,
+        kind: "Deployment",
         category: 'Workloads',
         searchPlaceholder: "Search deployments...",
         showHeader: true
@@ -91,6 +95,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "DaemonSets",
         description: "Manage daemon set workloads",
         icon: Server,
+        kind: "DaemonSet",
         category: 'Workloads',
         searchPlaceholder: "Search daemonsets...",
         showHeader: true
@@ -100,6 +105,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "StatefulSets",
         description: "Manage stateful applications",
         icon: Database,
+        kind: "StatefulSet",
         category: 'Workloads',
         searchPlaceholder: "Search statefulsets...",
         showHeader: true
@@ -109,6 +115,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "ReplicaSets",
         description: "Manage replica set workloads",
         icon: Layers,
+        kind: "ReplicaSet",
         category: 'Workloads',
         searchPlaceholder: "Search replicasets...",
         showHeader: true
@@ -118,6 +125,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Replication Controllers",
         description: "Legacy workload management",
         icon: Boxes,
+        kind: "ReplicationController",
         category: 'Workloads',
         searchPlaceholder: "Search replication controllers...",
         showHeader: true
@@ -127,6 +135,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Jobs",
         description: "Manage batch jobs",
         icon: PlayCircle,
+        kind: "Job",
         category: 'Workloads',
         searchPlaceholder: "Search jobs...",
         showHeader: true
@@ -136,6 +145,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "CronJobs",
         description: "Manage scheduled jobs",
         icon: Clock,
+        kind: "CronJob",
         category: 'Workloads',
         searchPlaceholder: "Search cronjobs...",
         showHeader: true
@@ -146,6 +156,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Config Maps",
         description: "Manage configuration data",
         icon: FileCode,
+        kind: "ConfigMap",
         category: 'Config',
         searchPlaceholder: "Search config maps...",
         showHeader: true
@@ -155,6 +166,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Secrets",
         description: "Manage sensitive information",
         icon: Lock,
+        kind: "Secret",
         category: 'Config',
         searchPlaceholder: "Search secrets...",
         showHeader: true
@@ -164,6 +176,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Resource Quotas",
         description: "Manage resource limits",
         icon: Scale,
+        kind: "ResourceQuota",
         category: 'Config',
         searchPlaceholder: "Search resource quotas...",
         showHeader: true
@@ -173,6 +186,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Limit Ranges",
         description: "Manage container resource limits",
         icon: Zap,
+        kind: "LimitRange",
         category: 'Config',
         searchPlaceholder: "Search limit ranges...",
         showHeader: true
@@ -182,6 +196,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "HPA",
         description: "Horizontal Pod Autoscalers",
         icon: Activity,
+        kind: "HorizontalPodAutoscaler",
         category: 'Config',
         searchPlaceholder: "Search HPA...",
         showHeader: true
@@ -191,6 +206,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "PDBs",
         description: "Pod Disruption Budgets",
         icon: ShieldCheck,
+        kind: "PodDisruptionBudget",
         category: 'Config',
         searchPlaceholder: "Search PDBs...",
         showHeader: true
@@ -200,6 +216,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Priority Classes",
         description: "Cluster-wide priority scheduling",
         icon: ArrowUpCircle,
+        kind: "PriorityClass",
         category: 'Config',
         searchPlaceholder: "Search priority classes...",
         isClusterWide: true,
@@ -210,6 +227,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Runtime Classes",
         description: "Cluster-wide container runtime configurations",
         icon: Cpu,
+        kind: "RuntimeClass",
         category: 'Config',
         searchPlaceholder: "Search runtime classes...",
         isClusterWide: true,
@@ -220,6 +238,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Leases",
         description: "Distributed coordination and locking",
         icon: Key,
+        kind: "Lease",
         category: 'Config',
         searchPlaceholder: "Search leases...",
         showHeader: true
@@ -229,6 +248,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Mutating Webhooks",
         description: "Cluster-wide mutation configurations",
         icon: Zap,
+        kind: "MutatingWebhookConfiguration",
         category: 'Config',
         searchPlaceholder: "Search mutating webhooks...",
         isClusterWide: true,
@@ -239,6 +259,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Validating Webhooks",
         description: "Cluster-wide validation configurations",
         icon: Zap,
+        kind: "ValidatingWebhookConfiguration",
         category: 'Config',
         searchPlaceholder: "Search validating webhooks...",
         isClusterWide: true,
@@ -250,6 +271,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Services",
         description: "Manage networking endpoints",
         icon: Grid,
+        kind: "Service",
         category: 'Network',
         searchPlaceholder: "Search services...",
         showHeader: true
@@ -259,6 +281,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Endpoints",
         description: "Manage service endpoints",
         icon: Network,
+        kind: "Endpoints",
         category: 'Network',
         searchPlaceholder: "Search endpoints...",
         showHeader: true
@@ -268,6 +291,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Ingresses",
         description: "Manage external access",
         icon: Globe,
+        kind: "Ingress",
         category: 'Network',
         searchPlaceholder: "Search ingresses...",
         showHeader: true
@@ -277,6 +301,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Ingress Classes",
         description: "Manage ingress controllers",
         icon: Globe,
+        kind: "IngressClass",
         category: 'Network',
         searchPlaceholder: "Search ingress classes...",
         isClusterWide: true,
@@ -287,6 +312,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Network Policies",
         description: "Manage network security policies",
         icon: Shield,
+        kind: "NetworkPolicy",
         category: 'Network',
         searchPlaceholder: "Search network policies...",
         showHeader: true
@@ -306,6 +332,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Persistent Volume Claims",
         description: "Manage storage requests",
         icon: Database,
+        kind: "PersistentVolumeClaim",
         category: 'Storage',
         searchPlaceholder: "Search PVCs...",
         showHeader: true
@@ -315,6 +342,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Persistent Volumes",
         description: "Manage cluster storage volumes",
         icon: HardDrive,
+        kind: "PersistentVolume",
         category: 'Storage',
         searchPlaceholder: "Search PVs...",
         isClusterWide: true,
@@ -325,6 +353,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Storage Classes",
         description: "Manage storage provisioning",
         icon: Layers,
+        kind: "StorageClass",
         category: 'Storage',
         searchPlaceholder: "Search storage classes...",
         isClusterWide: true,
@@ -336,6 +365,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Service Accounts",
         description: "Manage identity for processes",
         icon: UserCheck,
+        kind: "ServiceAccount",
         category: 'Access Control',
         searchPlaceholder: "Search service accounts...",
         showHeader: true
@@ -345,6 +375,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Cluster Roles",
         description: "Manage cluster-wide permissions",
         icon: ShieldCheck,
+        kind: "ClusterRole",
         category: 'Access Control',
         searchPlaceholder: "Search cluster roles...",
         isClusterWide: true,
@@ -355,6 +386,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Roles",
         description: "Manage namespace permissions",
         icon: Lock,
+        kind: "Role",
         category: 'Access Control',
         searchPlaceholder: "Search roles...",
         showHeader: true
@@ -364,6 +396,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Cluster Role Bindings",
         description: "Manage cluster-wide role assignments",
         icon: Link2,
+        kind: "ClusterRoleBinding",
         category: 'Access Control',
         searchPlaceholder: "Search cluster role bindings...",
         isClusterWide: true,
@@ -374,16 +407,17 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Role Bindings",
         description: "Manage namespace role assignments",
         icon: Link2,
+        kind: "RoleBinding",
         category: 'Access Control',
         searchPlaceholder: "Search role bindings...",
         showHeader: true
     },
-    // Top-level Events
     {
         path: "/kube-events",
         title: "Events",
         description: "Cluster events and alerts",
         icon: AlertCircle,
+        kind: "Event",
         searchPlaceholder: "Search events...",
         showHeader: true
     },

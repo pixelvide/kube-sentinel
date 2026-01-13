@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"sort"
-	"strings"
 	"time"
 
 	"cloud-sentinel-k8s/models"
@@ -16,17 +15,41 @@ import (
 
 // SupportedResources defines the kinds supported and their scope (Cluster vs Namespace)
 var SupportedResources = map[string]string{
-	"pod":         "Namespace",
-	"deployment":  "Namespace",
-	"service":     "Namespace",
-	"node":        "Cluster",
-	"ingress":     "Namespace",
-	"daemonset":   "Namespace",
-	"statefulset": "Namespace",
-	"job":         "Namespace",
-	"cronjob":     "Namespace",
-	"namespace":   "Cluster",
-	"event":       "Namespace",
+	"Pod":                            "Namespace",
+	"Deployment":                     "Namespace",
+	"ReplicaSet":                     "Namespace",
+	"StatefulSet":                    "Namespace",
+	"DaemonSet":                      "Namespace",
+	"Job":                            "Namespace",
+	"CronJob":                        "Namespace",
+	"ReplicationController":          "Namespace",
+	"Service":                        "Namespace",
+	"Endpoints":                      "Namespace",
+	"Ingress":                        "Namespace",
+	"NetworkPolicy":                  "Namespace",
+	"ConfigMap":                      "Namespace",
+	"Secret":                         "Namespace",
+	"ResourceQuota":                  "Namespace",
+	"LimitRange":                     "Namespace",
+	"HorizontalPodAutoscaler":        "Namespace",
+	"PodDisruptionBudget":            "Namespace",
+	"Lease":                          "Namespace",
+	"ServiceAccount":                 "Namespace",
+	"Role":                           "Namespace",
+	"RoleBinding":                    "Namespace",
+	"Node":                           "Cluster",
+	"Namespace":                      "Cluster",
+	"PersistentVolume":               "Cluster",
+	"PersistentVolumeClaim":          "Namespace",
+	"StorageClass":                   "Cluster",
+	"ClusterRole":                    "Cluster",
+	"ClusterRoleBinding":             "Cluster",
+	"PriorityClass":                  "Cluster",
+	"RuntimeClass":                   "Cluster",
+	"IngressClass":                   "Cluster",
+	"MutatingWebhookConfiguration":   "Cluster",
+	"ValidatingWebhookConfiguration": "Cluster",
+	"Event":                          "Namespace",
 }
 
 // GetResourceScopes returns the list of supported resources and their scopes
@@ -40,23 +63,21 @@ func GetResourceDetails(c *gin.Context) {
 	ns := c.Query("namespace")
 	ctxName := c.Query("context")
 	name := c.Query("name")
-	kind := c.Query("kind") // "Pod", "Deployment", "Service", "Node", "Ingress" (case insensitive)
+	kind := c.Query("kind") // e.g., "Pod", "Deployment", "Service" (Case sensitive matching SupportedResources)
 
 	if name == "" || kind == "" {
 		c.JSON(400, gin.H{"error": "name and kind are required"})
 		return
 	}
 
-	kindLower := strings.ToLower(kind)
-	scope, ok := SupportedResources[kindLower]
+	scope, ok := SupportedResources[kind]
 	if !ok {
-		// Fallback or error? For now error as we only support specific kinds
 		c.JSON(400, gin.H{"error": "Unsupported kind: " + kind})
 		return
 	}
 
 	// For namespaced resources, namespace is required
-	if scope == "Namespace" && ns == "" {
+	if scope == "Namespace" && ns == "" && kind != "Namespace" {
 		c.JSON(400, gin.H{"error": "namespace is required for " + kind})
 		return
 	}
@@ -71,43 +92,90 @@ func GetResourceDetails(c *gin.Context) {
 	var resourceObj interface{}
 	var resourceErr error
 
-	// Normalize kind
-	// kindLower is already defined above
-
-	switch kindLower {
-	case "pod":
+	switch kind {
+	// Workloads
+	case "Pod":
 		resourceObj, resourceErr = clientset.CoreV1().Pods(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "deployment":
+	case "Deployment":
 		resourceObj, resourceErr = clientset.AppsV1().Deployments(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "service":
-		resourceObj, resourceErr = clientset.CoreV1().Services(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "node":
-		// Node is cluster-scoped, ignore namespace if provided, or use it? usually ignore for get
-		resourceObj, resourceErr = clientset.CoreV1().Nodes().Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "ingress":
-		resourceObj, resourceErr = clientset.NetworkingV1().Ingresses(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "daemonset":
-		resourceObj, resourceErr = clientset.AppsV1().DaemonSets(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "statefulset":
+	case "ReplicaSet":
+		resourceObj, resourceErr = clientset.AppsV1().ReplicaSets(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "StatefulSet":
 		resourceObj, resourceErr = clientset.AppsV1().StatefulSets(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "job":
+	case "DaemonSet":
+		resourceObj, resourceErr = clientset.AppsV1().DaemonSets(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "Job":
 		resourceObj, resourceErr = clientset.BatchV1().Jobs(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "cronjob":
+	case "CronJob":
 		resourceObj, resourceErr = clientset.BatchV1().CronJobs(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "namespace":
-		// Namespace is cluster-scoped, ignore ns query param for the get, use name as the resource name
+	case "ReplicationController":
+		resourceObj, resourceErr = clientset.CoreV1().ReplicationControllers(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+
+	// Network
+	case "Service":
+		resourceObj, resourceErr = clientset.CoreV1().Services(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "Endpoints":
+		resourceObj, resourceErr = clientset.CoreV1().Endpoints(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "Ingress":
+		resourceObj, resourceErr = clientset.NetworkingV1().Ingresses(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "NetworkPolicy":
+		resourceObj, resourceErr = clientset.NetworkingV1().NetworkPolicies(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "IngressClass":
+		resourceObj, resourceErr = clientset.NetworkingV1().IngressClasses().Get(c.Request.Context(), name, metav1.GetOptions{})
+
+	// Config
+	case "ConfigMap":
+		resourceObj, resourceErr = clientset.CoreV1().ConfigMaps(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "Secret":
+		resourceObj, resourceErr = clientset.CoreV1().Secrets(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "ResourceQuota":
+		resourceObj, resourceErr = clientset.CoreV1().ResourceQuotas(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "LimitRange":
+		resourceObj, resourceErr = clientset.CoreV1().LimitRanges(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "HorizontalPodAutoscaler":
+		resourceObj, resourceErr = clientset.AutoscalingV2().HorizontalPodAutoscalers(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "PodDisruptionBudget":
+		resourceObj, resourceErr = clientset.PolicyV1().PodDisruptionBudgets(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "Lease":
+		resourceObj, resourceErr = clientset.CoordinationV1().Leases(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "PriorityClass":
+		resourceObj, resourceErr = clientset.SchedulingV1().PriorityClasses().Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "RuntimeClass":
+		resourceObj, resourceErr = clientset.NodeV1().RuntimeClasses().Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "MutatingWebhookConfiguration":
+		resourceObj, resourceErr = clientset.AdmissionregistrationV1().MutatingWebhookConfigurations().Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "ValidatingWebhookConfiguration":
+		resourceObj, resourceErr = clientset.AdmissionregistrationV1().ValidatingWebhookConfigurations().Get(c.Request.Context(), name, metav1.GetOptions{})
+
+	// Storage
+	case "PersistentVolume":
+		resourceObj, resourceErr = clientset.CoreV1().PersistentVolumes().Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "PersistentVolumeClaim":
+		resourceObj, resourceErr = clientset.CoreV1().PersistentVolumeClaims(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "StorageClass":
+		resourceObj, resourceErr = clientset.StorageV1().StorageClasses().Get(c.Request.Context(), name, metav1.GetOptions{})
+
+	// Access
+	case "ServiceAccount":
+		resourceObj, resourceErr = clientset.CoreV1().ServiceAccounts(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "ClusterRole":
+		resourceObj, resourceErr = clientset.RbacV1().ClusterRoles().Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "Role":
+		resourceObj, resourceErr = clientset.RbacV1().Roles(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "ClusterRoleBinding":
+		resourceObj, resourceErr = clientset.RbacV1().ClusterRoleBindings().Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "RoleBinding":
+		resourceObj, resourceErr = clientset.RbacV1().RoleBindings(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+
+	// Cluster Infrastructure
+	case "Node":
+		resourceObj, resourceErr = clientset.CoreV1().Nodes().Get(c.Request.Context(), name, metav1.GetOptions{})
+	case "Namespace":
 		resourceObj, resourceErr = clientset.CoreV1().Namespaces().Get(c.Request.Context(), name, metav1.GetOptions{})
-	case "event":
-		// Event is namespaced (usually)
+	case "Event":
 		resourceObj, resourceErr = clientset.CoreV1().Events(ns).Get(c.Request.Context(), name, metav1.GetOptions{})
+
 	default:
-		// Attempt dynamic client for other resources if needed, but for now error
-		// Ideally we use dynamic client for everything to be generic
-		// For now, limited set as per plan.
-		// If using dynamic client:
-		// dynClient, _ := dynamic.NewForConfig(config)
-		// gvr := ... mapping kind to GVR ...
-		// dynClient.Resource(gvr).Namespace(ns).Get(...)
 		c.JSON(400, gin.H{"error": "Unsupported kind: " + kind})
 		return
 	}
@@ -132,8 +200,8 @@ func GetResourceDetails(c *gin.Context) {
 			// We can't easily deduce generic GVK without scheme,
 			// but we know it from our switch context.
 			// Manual fix for common types to make YAML look correct:
-			switch kindLower {
-			case "pod":
+			switch kind {
+			case "Pod":
 				// Need to cast to the concrete struct to set TypeMeta
 				// struct does not embed metav1.Object direct? It embeds TypeMeta.
 				// Actually corev1.Pod embeds metav1.TypeMeta
@@ -150,39 +218,13 @@ func GetResourceDetails(c *gin.Context) {
 	}
 
 	// 2. Fetch associated Events
-	// FieldSelector: involvedObject.name=NAME, involvedObject.namespace=NAMESPACE, involvedObject.kind=KIND (roughly)
-	// Or involvedObject.uid if we had it. Name/Kind/Namespace is standard.
-	// Note: Events are namespaced. For Node, check default or all? Usually events for Node are in 'default' or where the event recorder put them.
-	// Actually events for a Node invokeObject.kind="Node", involvedObject.name=NodeName.
+	fieldSelector := "involvedObject.name=" + name + ",involvedObject.kind=" + kind
 
-	validKind := kind // Use original case or adjust? Events involvedObject.kind is usually TitleCase (e.g. "Pod")
-	// Simple capitalization fix
-	if len(validKind) > 0 {
-		validKind = strings.ToUpper(validKind[:1]) + strings.ToLower(validKind[1:])
-		// Special cases
-		if strings.ToLower(kind) == "cronjob" {
-			validKind = "CronJob"
-		}
-		if strings.ToLower(kind) == "daemonset" {
-			validKind = "DaemonSet"
-		}
-		if strings.ToLower(kind) == "statefulset" {
-			validKind = "StatefulSet"
-		}
-	}
-
-	fieldSelector := "involvedObject.name=" + name + ",involvedObject.kind=" + validKind
-
-	// For specific check
 	eventsNs := ns
-	if kindLower == "node" {
-		// Events for nodes are often in default namespace? or all?
-		// Let's try List for all namespaces or just current.
-		// client-go Events() requires namespace.
-		// Typically Node events are in 'default'.
-		if ns == "" {
-			eventsNs = "default"
-		}
+	if scope == "Cluster" {
+		// Cluster scoped resource events usually have an empty namespace in involvedObject.
+		// Searching in "" (all namespaces) with fieldSelector will find them correctly.
+		eventsNs = ""
 	}
 
 	eventList, err := clientset.CoreV1().Events(eventsNs).List(context.TODO(), metav1.ListOptions{

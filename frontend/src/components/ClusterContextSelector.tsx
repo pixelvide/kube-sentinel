@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Server, Layers } from "lucide-react";
+import { NAVIGATION_CONFIG } from "@/config/navigation";
 
 interface ContextInfo {
     name: string;
@@ -18,6 +19,7 @@ function ClusterContextSelectorContent() {
 
     const [contexts, setContexts] = useState<ContextInfo[]>([]);
     const [namespaces, setNamespaces] = useState<string[]>([]);
+    const [scopes, setScopes] = useState<Record<string, string>>({});
     const [defaultContext, setDefaultContext] = useState("");
     const [loading, setLoading] = useState(false);
     const [nsLoading, setNsLoading] = useState(false);
@@ -27,13 +29,18 @@ function ClusterContextSelectorContent() {
     // Parse comma-separated namespaces
     const currentNamespaces = searchParams.get("namespace") ? searchParams.get("namespace")!.split(",") : [];
 
+    // Find current navigation item and determine if it's cluster-scoped
+    const currentItem = NAVIGATION_CONFIG.find(item => item.path === pathname);
+    const isClusterScoped = currentItem?.isClusterWide || (currentItem?.kind && scopes[currentItem.kind] === "Cluster");
+
     useEffect(() => {
-        const fetchContexts = async () => {
+        const fetchData = async () => {
             setLoading(true);
             try {
-                const res = await fetch("/api/v1/kube/contexts", { credentials: "include" });
-                if (res.ok) {
-                    const data = await res.json();
+                // Fetch contexts
+                const ctxRes = await fetch("/api/v1/kube/contexts", { credentials: "include" });
+                if (ctxRes.ok) {
+                    const data = await ctxRes.json();
                     setContexts(data.contexts || []);
                     if (data.current) {
                         setDefaultContext(data.current);
@@ -41,13 +48,20 @@ function ClusterContextSelectorContent() {
                         setDefaultContext(data.contexts[0].name);
                     }
                 }
+
+                // Fetch scopes
+                const scopeRes = await fetch("/api/v1/kube/scopes", { credentials: "include" });
+                if (scopeRes.ok) {
+                    const scopeData = await scopeRes.json();
+                    setScopes(scopeData.scopes || {});
+                }
             } catch (error) {
-                console.error("Failed to fetch contexts:", error);
+                console.error("Failed to fetch cluster data:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchContexts();
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -59,7 +73,7 @@ function ClusterContextSelectorContent() {
 
     // Fetch namespaces when context changes
     useEffect(() => {
-        if (!currentContext) {
+        if (!currentContext || isClusterScoped) {
             setNamespaces([]);
             return;
         }
@@ -77,7 +91,6 @@ function ClusterContextSelectorContent() {
                     if (!searchParams.get("namespace")) {
                         const params = new URLSearchParams(searchParams.toString());
                         params.set("namespace", "__all__");
-                        // use replace from router, not redirect
                         router.replace(`${pathname}?${params.toString()}`);
                     }
                 }
@@ -90,7 +103,7 @@ function ClusterContextSelectorContent() {
         };
 
         fetchNamespaces();
-    }, [currentContext]);
+    }, [currentContext, isClusterScoped]);
 
 
     const updateContext = (ctx: string) => {
@@ -131,7 +144,7 @@ function ClusterContextSelectorContent() {
                 </Select>
             </div>
 
-            {currentContext && (
+            {currentContext && !isClusterScoped && (
                 <div className="flex items-center gap-2 w-full md:w-[300px]">
                     <Layers className="h-4 w-4 text-muted-foreground shrink-0 hidden md:block" />
                     <MultiSelect

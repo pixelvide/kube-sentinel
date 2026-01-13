@@ -59,37 +59,12 @@ export function ResourceDetailsSheet({
     }, []);
 
     useEffect(() => {
-        const kindLower = kind.toLowerCase();
-        // Determine scope from fetched map, default to Namespaced if unknown (safe fallback)
-        // Wait until scopes are loaded? Or just assume if not found, it might need namespace.
-        // If scopes are empty, we might skip or error. Let's assume loaded.
-
         let shouldFetch = false;
-        if (isOpen && context && name && kind) {
-            // If scopes are not loaded yet, maybe wait?
-            // But simpler: checking if scope knows about it.
-            const scope = scopes[kindLower];
-            if (scope) {
-                const isClusterScoped = scope === "Cluster";
-                if (isClusterScoped || namespace) {
-                    shouldFetch = true;
-                }
-            } else {
-                // Fallback if scopes not loaded or kind not found: try fetching if we have everything
-                // Use defensive check: if kind matches known cluster scoped by default logic?
-                // No, rely on API. If API fails, we might be stuck. 
-                // Let's implement a simple optimize: if scopes empty, don't fetch yet?
-                if (Object.keys(scopes).length > 0) {
-                    // Scopes loaded but kind not found -> likely unsupported, but let's try if namespace is there
-                    if (namespace) shouldFetch = true;
-                }
-                // If scopes not loaded, we can't decide perfectly. 
-            }
-        }
 
-        if (Object.keys(scopes).length > 0 && isOpen && context && name && kind) {
-            const scope = scopes[kindLower];
+        if (isOpen && context && name && kind && Object.keys(scopes).length > 0) {
+            const scope = scopes[kind]; // Use 'kind' directly (TitleCase)
             const isClusterScoped = scope === "Cluster";
+
             // Valid if cluster scoped OR (namespaced and namespace provided)
             if (isClusterScoped || namespace) {
                 shouldFetch = true;
