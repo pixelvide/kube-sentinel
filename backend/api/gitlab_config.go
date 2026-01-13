@@ -59,6 +59,9 @@ func CreateGitlabConfig(c *gin.Context) {
 		return
 	}
 
+	// Record Audit Log
+	RecordAuditLog(c, "CREATE_GITLAB_CONFIG", gin.H{"host": config.Host})
+
 	c.JSON(http.StatusCreated, config)
 }
 
@@ -98,6 +101,9 @@ func UpdateGitlabConfig(c *gin.Context) {
 		return
 	}
 
+	// Record Audit Log
+	RecordAuditLog(c, "UPDATE_GITLAB_CONFIG", gin.H{"host": config.Host})
+
 	c.JSON(http.StatusOK, config)
 }
 
@@ -124,6 +130,9 @@ func DeleteGitlabConfig(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "config not found"})
 		return
 	}
+
+	// Record Audit Log
+	RecordAuditLog(c, "DELETE_GITLAB_CONFIG", gin.H{"id": id})
 
 	c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 }
@@ -178,6 +187,9 @@ func ValidateGitlabConfig(c *gin.Context) {
 		log.Printf("Failed to update validation status in DB: %v", err)
 		// We still return success to the user as the CLI check passed
 	}
+
+	// Record Audit Log
+	RecordAuditLog(c, "VALIDATE_GITLAB_CONFIG", gin.H{"host": config.Host})
 
 	c.JSON(http.StatusOK, gin.H{"valid": true, "message": "Credentials verified successfully via glab CLI for " + config.Host})
 }

@@ -45,6 +45,14 @@ func HandleExec(c *gin.Context) {
 	if exists {
 		user := userVal.(*models.User)
 		storageNamespace = user.StorageNamespace
+
+		// Record Audit Log for exec
+		RecordAuditLog(c, "POD_EXEC", gin.H{
+			"namespace": ns,
+			"pod":       pod,
+			"container": container,
+			"context":   ctxName,
+		})
 	}
 
 	clientset, restConfig, err := GetClientInfo(storageNamespace, ctxName)

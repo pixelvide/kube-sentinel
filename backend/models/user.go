@@ -13,8 +13,8 @@ type User struct {
 	ID               uint           `gorm:"primaryKey" json:"id"`
 	Email            string         `gorm:"uniqueIndex;not null" json:"email"`
 	Name             string         `json:"name"`
-	Sub              string         `gorm:"uniqueIndex;not null" json:"sub"` // OIDC Subject
 	StorageNamespace string         `gorm:"uniqueIndex;not null" json:"storage_namespace"`
+	Identities       []UserIdentity `json:"identities,omitempty"`
 	GitlabConfigs    []GitlabConfig `json:"gitlab_configs,omitempty"`
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`

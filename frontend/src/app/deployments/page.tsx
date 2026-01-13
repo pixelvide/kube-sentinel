@@ -3,15 +3,13 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Layers, RefreshCw, CheckCircle2, XCircle, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Layers, RefreshCw, CheckCircle2, XCircle, FileText, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 import { LogViewerModal } from "@/components/LogViewerModal";
-import { FileText } from "lucide-react";
 
 interface DeploymentInfo {
     name: string;
@@ -38,7 +36,7 @@ function DeploymentsContent() {
 
     const [deployments, setDeployments] = useState<DeploymentInfo[]>([]);
     const [loading, setLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const searchQuery = searchParams.get("q") || "";
     const [selectedDeployment, setSelectedDeployment] = useState<DeploymentInfo | null>(null);
     const [logResource, setLogResource] = useState<{
         name: string,
@@ -113,17 +111,6 @@ function DeploymentsContent() {
                                 Refresh
                             </Button>
                         </div>
-                        {deployments.length > 0 && (
-                            <div className="relative mt-4">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search deployments by name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                        )}
                     </CardHeader>
                     <CardContent className="p-8">
                         {loading ? (
@@ -247,21 +234,23 @@ function DeploymentsContent() {
                 name={selectedDeployment?.name || ""}
                 kind="Deployment"
             />
-            {logResource && (
-                <LogViewerModal
-                    isOpen={!!logResource}
-                    onClose={() => setLogResource(null)}
-                    context={selectedContext}
-                    namespace={logResource.namespace}
-                    selector={logResource.selector}
-                    containers={logResource.containers}
-                    initContainers={logResource.initContainers}
-                    pods={logResource.pods}
-                    showPodSelector={true}
-                    title={logResource.name}
-                />
-            )}
-        </div>
+            {
+                logResource && (
+                    <LogViewerModal
+                        isOpen={!!logResource}
+                        onClose={() => setLogResource(null)}
+                        context={selectedContext}
+                        namespace={logResource.namespace}
+                        selector={logResource.selector}
+                        containers={logResource.containers}
+                        initContainers={logResource.initContainers}
+                        pods={logResource.pods}
+                        showPodSelector={true}
+                        title={logResource.name}
+                    />
+                )
+            }
+        </div >
     );
 }
 

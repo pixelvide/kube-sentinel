@@ -3,12 +3,13 @@
 import { Sidebar } from "@/components/Sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, LayoutDashboard, Box, Grid, Globe, HardDrive, Layers, PlayCircle, Clock, Boxes, AlertCircle, RefreshCw, Server, Database } from "lucide-react";
+import { Menu, LayoutDashboard, Box, Grid, Globe, HardDrive, Layers, PlayCircle, Clock, Boxes, AlertCircle, RefreshCw, Server, Database, History, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClusterContextSelector } from "@/components/ClusterContextSelector";
+import { GlobalSearch } from "@/components/GlobalSearch";
 
 // Page Configuration
-const PAGE_CONFIG: Record<string, { title: string; description: string; icon: any }> = {
+const PAGE_CONFIG: Record<string, { title: string; description: string; icon: any; searchPlaceholder?: string }> = {
     "/": {
         title: "Dashboard",
         description: "Cluster overview and health status",
@@ -17,62 +18,80 @@ const PAGE_CONFIG: Record<string, { title: string; description: string; icon: an
     "/pods": {
         title: "Pods",
         description: "Manage workload instances",
-        icon: Box
+        icon: Box,
+        searchPlaceholder: "Search pods..."
     },
     "/deployments": {
         title: "Deployments",
         description: "Manage application deployments",
-        icon: Boxes
+        icon: Boxes,
+        searchPlaceholder: "Search deployments..."
     },
     "/jobs": {
         title: "Jobs",
         description: "Manage batch jobs",
-        icon: PlayCircle
+        icon: PlayCircle,
+        searchPlaceholder: "Search jobs..."
     },
     "/cronjobs": {
         title: "CronJobs",
         description: "Manage scheduled jobs",
-        icon: Clock
+        icon: Clock,
+        searchPlaceholder: "Search cronjobs..."
     },
     "/services": {
         title: "Services",
         description: "Manage networking endpoints",
-        icon: Grid
+        icon: Grid,
+        searchPlaceholder: "Search services..."
     },
     "/ingresses": {
         title: "Ingresses",
         description: "Manage external access",
-        icon: Globe
+        icon: Globe,
+        searchPlaceholder: "Search ingresses..."
     },
     "/nodes": {
         title: "Nodes",
         description: "Cluster nodes and capacity",
-        icon: HardDrive
+        icon: HardDrive,
+        searchPlaceholder: "Search nodes..."
     },
     "/namespaces": {
         title: "Namespaces",
         description: "Manage cluster namespaces",
-        icon: Layers
+        icon: Layers,
+        searchPlaceholder: "Search namespaces..."
     },
     "/events": {
         title: "Events",
         description: "Cluster events and alerts",
-        icon: AlertCircle
+        icon: AlertCircle,
+        searchPlaceholder: "Search events..."
     },
     "/daemonsets": {
         title: "DaemonSets",
         description: "Manage daemon set workloads",
-        icon: Server
+        icon: Server,
+        searchPlaceholder: "Search daemonsets..."
     },
     "/statefulsets": {
         title: "StatefulSets",
         description: "Manage stateful applications",
-        icon: Database
+        icon: Database,
+        searchPlaceholder: "Search statefulsets..."
     },
     "/replicasets": {
         title: "ReplicaSets",
         description: "Manage replica set workloads",
-        icon: Boxes
+        icon: Boxes,
+        searchPlaceholder: "Search replicasets..."
+    },
+    "/replicationcontrollers": {
+        title: "Replication Controllers",
+        description: "Legacy workload management",
+        icon: Boxes,
+        searchPlaceholder: "Search replication controllers..."
     },
 };
 
@@ -151,7 +170,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 {/* Main Header with Global Context Selector (Visible on Context Pages) */}
                 {isContextPage && currentPage && (
                     <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 px-4 py-3 md:px-8 md:py-4 border-b bg-background/50 backdrop-blur-sm z-20">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 shrink-0">
                             <currentPage.icon className="h-5 w-5 text-primary mt-1" />
                             <div className="flex flex-col">
                                 <h1 className="text-lg font-semibold tracking-tight leading-none">
@@ -162,7 +181,12 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                                 </p>
                             </div>
                         </div>
-                        <ClusterContextSelector />
+                        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-end gap-3 md:gap-4 shrink-0">
+                            <ClusterContextSelector />
+                            {currentPage.searchPlaceholder && (
+                                <GlobalSearch placeholder={currentPage.searchPlaceholder} />
+                            )}
+                        </div>
                     </header>
                 )}
 

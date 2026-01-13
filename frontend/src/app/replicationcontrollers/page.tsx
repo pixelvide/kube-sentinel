@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Layers, RefreshCw, CheckCircle2, FileText } from "lucide-react";
+import { Boxes, RefreshCw, CheckCircle2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
@@ -11,7 +11,7 @@ import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 import { LogViewerModal } from "@/components/LogViewerModal";
 
-interface ReplicaSetInfo {
+interface ReplicationControllerInfo {
     name: string;
     namespace: string;
     replicas: number;
@@ -21,15 +21,15 @@ interface ReplicaSetInfo {
     selector?: string;
 }
 
-function ReplicaSetsContent() {
+function ReplicationControllersContent() {
     const searchParams = useSearchParams();
     const selectedContext = searchParams.get("context") || "";
     const selectedNamespace = searchParams.get("namespace") || "";
 
-    const [replicasets, setReplicaSets] = useState<ReplicaSetInfo[]>([]);
+    const [rcs, setRcs] = useState<ReplicationControllerInfo[]>([]);
     const [loading, setLoading] = useState(false);
     const searchQuery = searchParams.get("q") || "";
-    const [selectedReplicaSet, setSelectedReplicaSet] = useState<ReplicaSetInfo | null>(null);
+    const [selectedRc, setSelectedRc] = useState<ReplicationControllerInfo | null>(null);
     const [logResource, setLogResource] = useState<{
         name: string,
         namespace: string,
@@ -39,33 +39,33 @@ function ReplicaSetsContent() {
         initContainers: string[]
     } | null>(null);
 
-    const filteredReplicaSets = replicasets.filter(rs =>
-        rs.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredRcs = rcs.filter(rc =>
+        rc.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
-            setReplicaSets([]);
+            setRcs([]);
             return;
         }
-        fetchReplicaSets();
+        fetchRcs();
     }, [selectedContext, selectedNamespace]);
 
-    const fetchReplicaSets = async () => {
+    const fetchRcs = async () => {
         setLoading(true);
-        setReplicaSets([]);
+        setRcs([]);
         try {
-            const res = await fetch(`${API_URL}/kube/replicasets?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
+            const res = await fetch(`${API_URL}/kube/replicationcontrollers?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
             if (res.status === 401) {
                 window.location.href = "/login";
                 return;
             }
             if (res.ok) {
                 const data = await res.json();
-                setReplicaSets(data.replicasets || []);
+                setRcs(data.replicationcontrollers || []);
             }
         } catch (error) {
-            console.error("Failed to fetch replicasets:", error);
+            console.error("Failed to fetch replicationcontrollers:", error);
         } finally {
             setLoading(false);
         }
@@ -73,7 +73,7 @@ function ReplicaSetsContent() {
 
     const handleRefresh = () => {
         if (selectedContext && selectedNamespace) {
-            fetchReplicaSets();
+            fetchRcs();
         }
     };
 
@@ -85,11 +85,11 @@ function ReplicaSetsContent() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <CardTitle className="text-lg font-bold flex items-center gap-3">
-                                    <Layers className="h-5 w-5 text-indigo-500" />
-                                    {replicasets.length} ReplicaSets Found
+                                    <Boxes className="h-5 w-5 text-indigo-500" />
+                                    {rcs.length} Replication Controllers Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view replicasets" : null}
+                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view replication controllers" : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -111,50 +111,50 @@ function ReplicaSetsContent() {
                             </div>
                         ) : !selectedContext ? (
                             <div className="text-center py-12">
-                                <Layers className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                                <Boxes className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
                                 <p className="text-muted-foreground text-sm">
-                                    Select a cluster from the top bar to view replicasets.
+                                    Select a cluster from the top bar to view replication controllers.
                                 </p>
                             </div>
                         ) : !selectedNamespace ? (
                             <div className="text-center py-12">
-                                <Layers className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                                <Boxes className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
                                 <p className="text-muted-foreground text-sm">
-                                    Select a namespace from the top bar to view replicasets.
+                                    Select a namespace from the top bar to view replication controllers.
                                 </p>
                             </div>
-                        ) : replicasets.length === 0 ? (
+                        ) : rcs.length === 0 ? (
                             <div className="text-center py-12">
-                                <Layers className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                                <Boxes className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
                                 <p className="text-muted-foreground text-sm">
-                                    No replicasets found in this namespace.
+                                    No replication controllers found in this namespace.
                                 </p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredReplicaSets.map(rs => (
+                                {filteredRcs.map(rc => (
                                     <div
-                                        key={rs.name + rs.namespace}
+                                        key={rc.name + rc.namespace}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
-                                        onClick={() => setSelectedReplicaSet(rs)}
+                                        onClick={() => setSelectedRc(rc)}
                                     >
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
                                             <div className="flex items-center gap-4 min-w-0">
                                                 <div className={cn(
                                                     "p-3 rounded-xl",
-                                                    rs.ready_replicas === rs.replicas ? "bg-green-500/10" : "bg-amber-500/10"
+                                                    rc.ready_replicas === rc.replicas ? "bg-green-500/10" : "bg-amber-500/10"
                                                 )}>
-                                                    {rs.ready_replicas === rs.replicas ? (
+                                                    {rc.ready_replicas === rc.replicas ? (
                                                         <CheckCircle2 className="h-6 w-6 text-green-500" />
                                                     ) : (
                                                         <RefreshCw className="h-6 w-6 text-amber-500 animate-pulse" />
                                                     )}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="font-semibold text-base truncate">{rs.name}</p>
+                                                    <p className="font-semibold text-base truncate">{rc.name}</p>
                                                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                                                         <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
-                                                            {rs.ready_replicas}/{rs.replicas} ready
+                                                            {rc.ready_replicas}/{rc.replicas} ready
                                                         </span>
                                                     </div>
                                                 </div>
@@ -165,12 +165,12 @@ function ReplicaSetsContent() {
                                                 className="flex flex-col items-end min-w-[120px]"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                <NamespaceBadge namespace={rs.namespace} />
+                                                <NamespaceBadge namespace={rc.namespace} />
                                             </div>
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(rs.age)}</span>
+                                                <span className="text-xs text-muted-foreground">{formatAge(rc.age)}</span>
                                             </div>
 
                                             {/* Action Buttons */}
@@ -184,16 +184,16 @@ function ReplicaSetsContent() {
                                                     className="h-8 rounded-lg gap-2 text-xs font-semibold"
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
-                                                        if (rs.selector) {
+                                                        if (rc.selector) {
                                                             try {
-                                                                const res = await fetch(`${API_URL}/kube/pods?context=${selectedContext}&namespace=${rs.namespace}&selector=${encodeURIComponent(rs.selector)}`, { credentials: "include" });
+                                                                const res = await fetch(`${API_URL}/kube/pods?context=${selectedContext}&namespace=${rc.namespace}&selector=${encodeURIComponent(rc.selector)}`, { credentials: "include" });
                                                                 if (res.ok) {
                                                                     const data = await res.json();
                                                                     const pods = data.pods || [];
                                                                     setLogResource({
-                                                                        name: rs.name,
-                                                                        namespace: rs.namespace,
-                                                                        selector: rs.selector,
+                                                                        name: rc.name,
+                                                                        namespace: rc.namespace,
+                                                                        selector: rc.selector,
                                                                         pods: pods.map((p: any) => ({ name: p.name, status: p.status })),
                                                                         containers: (pods.length > 0 && pods[0].containers) ? pods[0].containers : ["__all__"],
                                                                         initContainers: (pods.length > 0 && pods[0].init_containers) ? pods[0].init_containers : []
@@ -219,12 +219,12 @@ function ReplicaSetsContent() {
             </div>
 
             <ResourceDetailsSheet
-                isOpen={!!selectedReplicaSet}
-                onClose={() => setSelectedReplicaSet(null)}
+                isOpen={!!selectedRc}
+                onClose={() => setSelectedRc(null)}
                 context={selectedContext}
-                namespace={selectedReplicaSet?.namespace || ""}
-                name={selectedReplicaSet?.name || ""}
-                kind="ReplicaSet"
+                namespace={selectedRc?.namespace || ""}
+                name={selectedRc?.name || ""}
+                kind="ReplicationController"
             />
             {logResource && (
                 <LogViewerModal
@@ -244,10 +244,10 @@ function ReplicaSetsContent() {
     );
 }
 
-export default function ReplicaSetsPage() {
+export default function ReplicationControllersPage() {
     return (
         <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
-            <ReplicaSetsContent />
+            <ReplicationControllersContent />
         </Suspense>
     );
 }

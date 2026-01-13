@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import { Home, Settings, LogOut, LayoutDashboard, X, Cloud, ChevronDown, Layers, HardDrive, Box, Grid, Globe, Network, PlayCircle, Clock, Boxes, AlertCircle, Server, Database } from "lucide-react";
+import { Home, Settings, LogOut, LayoutDashboard, X, Cloud, ChevronDown, Layers, HardDrive, Box, Grid, Globe, Network, PlayCircle, Clock, Boxes, AlertCircle, Server, Database, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -183,6 +183,30 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                     <span className="font-medium text-sm">Deployments</span>
                                 </Button>
                             </Link>
+                            <Link href={getLinkHref("/daemonsets")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/daemonsets") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/daemonsets") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <Server className={cn("h-4 w-4", isActive("/daemonsets") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">DaemonSets</span>
+                                </Button>
+                            </Link>
+                            <Link href={getLinkHref("/statefulsets")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/statefulsets") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/statefulsets") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <Database className={cn("h-4 w-4", isActive("/statefulsets") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">StatefulSets</span>
+                                </Button>
+                            </Link>
                             <Link href={getLinkHref("/replicasets")} className="block" onClick={onClose}>
                                 <Button
                                     variant={isActive("/replicasets") ? "secondary" : "ghost"}
@@ -193,6 +217,18 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                 >
                                     <Layers className={cn("h-4 w-4", isActive("/replicasets") ? "text-primary" : "opacity-60")} />
                                     <span className="font-medium text-sm">ReplicaSets</span>
+                                </Button>
+                            </Link>
+                            <Link href={getLinkHref("/replicationcontrollers")} className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/replicationcontrollers") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/replicationcontrollers") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <Boxes className={cn("h-4 w-4", isActive("/replicationcontrollers") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">Replication Controllers</span>
                                 </Button>
                             </Link>
                             <Link href={getLinkHref("/jobs")} className="block" onClick={onClose}>
@@ -217,30 +253,6 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                 >
                                     <Clock className={cn("h-4 w-4", isActive("/cronjobs") ? "text-primary" : "opacity-60")} />
                                     <span className="font-medium text-sm">CronJobs</span>
-                                </Button>
-                            </Link>
-                            <Link href={getLinkHref("/daemonsets")} className="block" onClick={onClose}>
-                                <Button
-                                    variant={isActive("/daemonsets") ? "secondary" : "ghost"}
-                                    className={cn(
-                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
-                                        isActive("/daemonsets") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
-                                    )}
-                                >
-                                    <Server className={cn("h-4 w-4", isActive("/daemonsets") ? "text-primary" : "opacity-60")} />
-                                    <span className="font-medium text-sm">DaemonSets</span>
-                                </Button>
-                            </Link>
-                            <Link href={getLinkHref("/statefulsets")} className="block" onClick={onClose}>
-                                <Button
-                                    variant={isActive("/statefulsets") ? "secondary" : "ghost"}
-                                    className={cn(
-                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
-                                        isActive("/statefulsets") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
-                                    )}
-                                >
-                                    <Database className={cn("h-4 w-4", isActive("/statefulsets") ? "text-primary" : "opacity-60")} />
-                                    <span className="font-medium text-sm">StatefulSets</span>
                                 </Button>
                             </Link>
                         </div>
@@ -320,6 +332,19 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                 >
                                     <Cloud className={cn("h-4 w-4", isActive("/settings/clusters") ? "text-primary" : "opacity-60")} />
                                     <span className="font-medium text-sm">Cluster Settings</span>
+                                </Button>
+                            </Link>
+
+                            <Link href="/settings/audit-logs" className="block" onClick={onClose}>
+                                <Button
+                                    variant={isActive("/settings/audit-logs") ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 px-4 transition-all duration-200",
+                                        isActive("/settings/audit-logs") ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                    )}
+                                >
+                                    <History className={cn("h-4 w-4", isActive("/settings/audit-logs") ? "text-primary" : "opacity-60")} />
+                                    <span className="font-medium text-sm">Audit Logs</span>
                                 </Button>
                             </Link>
                         </div>

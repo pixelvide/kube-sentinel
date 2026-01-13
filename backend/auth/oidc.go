@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"cloud-sentinel-k8s/api"
 	"cloud-sentinel-k8s/db"
 	"cloud-sentinel-k8s/models"
 
@@ -126,29 +127,51 @@ func CallbackHandler(c *gin.Context) {
 		return
 	}
 
-	// Persist User
-	user := models.User{
-		Email: claims.Email,
-		Name:  claims.Name,
-		Sub:   claims.Sub,
-	}
-
-	// Upsert: On conflict update name, otherwise DoNothing or similar.
-	// Simple find or create
+	// User Persistence with Multi-Auth Support
 	var dbUser models.User
-	result := db.DB.Where("sub = ?", claims.Sub).First(&dbUser)
-	if result.Error != nil {
-		// Create
-		if err := db.DB.Create(&user).Error; err != nil {
-			log.Printf("Failed to create user: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+	var identity models.UserIdentity
+
+	// 1. Check if this specific identity exists
+	err = db.DB.Where("provider = ? AND provider_id = ?", "oidc", claims.Sub).First(&identity).Error
+	if err == nil {
+		// Identity exists, get the user
+		if err := db.DB.First(&dbUser, identity.UserID).Error; err != nil {
+			log.Printf("Failed to find user for identity: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find associated user"})
 			return
 		}
-		dbUser = user
 	} else {
-		// Update (optional, e.g. name change)
+		// Identity doesn't exist, check if user with same email exists
+		err = db.DB.Where("email = ?", claims.Email).First(&dbUser).Error
+		if err != nil {
+			// No user with this email, create new user
+			dbUser = models.User{
+				Email: claims.Email,
+				Name:  claims.Name,
+			}
+			if err := db.DB.Create(&dbUser).Error; err != nil {
+				log.Printf("Failed to create user: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+				return
+			}
+		}
+
+		// Create the new identity for the user (new or existing)
+		identity = models.UserIdentity{
+			UserID:     dbUser.ID,
+			Provider:   "oidc",
+			ProviderID: claims.Sub,
+		}
+		if err := db.DB.Create(&identity).Error; err != nil {
+			log.Printf("Failed to create user identity: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to link identity"})
+			return
+		}
+	}
+
+	// Update user info if needed
+	if dbUser.Name != claims.Name {
 		dbUser.Name = claims.Name
-		dbUser.Email = claims.Email
 		db.DB.Save(&dbUser)
 	}
 
@@ -167,6 +190,12 @@ func CallbackHandler(c *gin.Context) {
 	if frontendURL == "" {
 		frontendURL = "http://localhost:3000"
 	}
+
+	// Record Audit Log for login
+	api.RecordAuditLogForUser(c, "USER_LOGIN", dbUser.Email, gin.H{
+		"email": dbUser.Email,
+		"name":  dbUser.Name,
+	})
 
 	// Redirect to Frontend
 	c.Redirect(http.StatusFound, frontendURL)

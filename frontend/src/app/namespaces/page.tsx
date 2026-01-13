@@ -22,7 +22,12 @@ function NamespacesContent() {
     const [contexts, setContexts] = useState<ContextInfo[]>([]);
     const [namespaces, setNamespaces] = useState<string[]>([]);
     const [namespacesLoading, setNamespacesLoading] = useState(false);
+    const searchQuery = searchParams.get("q") || "";
     const [viewNamespace, setViewNamespace] = useState<string | null>(null);
+
+    const filteredNamespaces = namespaces.filter(ns =>
+        ns.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     // Load contexts on mount just for names
     useEffect(() => {
@@ -145,7 +150,7 @@ function NamespacesContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {namespaces.map(ns => (
+                                {filteredNamespaces.map(ns => (
                                     <div
                                         key={ns}
                                         className="p-4 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"

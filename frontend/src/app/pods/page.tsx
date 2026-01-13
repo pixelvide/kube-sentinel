@@ -3,8 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Box, RefreshCw, CheckCircle2, XCircle, LayoutGrid, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Box, RefreshCw, CheckCircle2, XCircle, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
@@ -30,7 +29,7 @@ function PodsContent() {
 
     const [pods, setPods] = useState<PodInfo[]>([]);
     const [podsLoading, setPodsLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const searchQuery = searchParams.get("q") || "";
     const [selectedPod, setSelectedPod] = useState<PodInfo | null>(null);
     const [logPod, setLogPod] = useState<PodInfo | null>(null);
 
@@ -101,17 +100,6 @@ function PodsContent() {
                                 Refresh
                             </Button>
                         </div>
-                        {pods.length > 0 && (
-                            <div className="relative mt-4">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search pods by name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                        )}
                     </CardHeader>
                     <CardContent className="p-8">
                         {podsLoading ? (
@@ -244,19 +232,21 @@ function PodsContent() {
                 name={selectedPod?.name || ""}
                 kind="Pod"
             />
-            {logPod && (
-                <LogViewerModal
-                    isOpen={!!logPod}
-                    onClose={() => setLogPod(null)}
-                    context={selectedContext}
-                    namespace={logPod.namespace}
-                    containers={logPod.containers}
-                    initContainers={logPod.init_containers || []}
-                    pods={[{ name: logPod.name, status: logPod.status }]}
-                    showPodSelector={false}
-                    title={logPod.name}
-                />
-            )}
+            {
+                logPod && (
+                    <LogViewerModal
+                        isOpen={!!logPod}
+                        onClose={() => setLogPod(null)}
+                        context={selectedContext}
+                        namespace={logPod.namespace}
+                        containers={logPod.containers}
+                        initContainers={logPod.init_containers || []}
+                        pods={[{ name: logPod.name, status: logPod.status }]}
+                        showPodSelector={false}
+                        title={logPod.name}
+                    />
+                )
+            }
         </div >
     );
 }

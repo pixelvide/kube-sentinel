@@ -3,8 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Clock, RefreshCw, PauseCircle, PlayCircle, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Clock, RefreshCw, PauseCircle, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
@@ -28,7 +27,7 @@ function CronJobsContent() {
 
     const [cronjobs, setCronjobs] = useState<CronJobInfo[]>([]);
     const [loading, setLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const searchQuery = searchParams.get("q") || "";
     const [selectedCronJob, setSelectedCronJob] = useState<CronJobInfo | null>(null);
 
     const filteredCronJobs = cronjobs.filter(cj =>
@@ -95,17 +94,6 @@ function CronJobsContent() {
                                 Refresh
                             </Button>
                         </div>
-                        {cronjobs.length > 0 && (
-                            <div className="relative mt-4">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search cronjobs by name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                        )}
                     </CardHeader>
                     <CardContent className="p-8">
                         {loading ? (

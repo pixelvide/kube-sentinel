@@ -3,8 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Server, Globe, RefreshCw, Link as LinkIcon, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Server, Globe, RefreshCw, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
@@ -26,7 +25,7 @@ function IngressesContent() {
 
     const [ingresses, setIngresses] = useState<IngressInfo[]>([]);
     const [ingLoading, setIngLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const searchQuery = searchParams.get("q") || "";
     const [selectedIngress, setSelectedIngress] = useState<IngressInfo | null>(null);
 
     const filteredIngresses = ingresses.filter(ing =>
@@ -95,17 +94,6 @@ function IngressesContent() {
                                 Refresh
                             </Button>
                         </div>
-                        {ingresses.length > 0 && (
-                            <div className="relative mt-4">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search ingresses by name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                        )}
                     </CardHeader>
                     <CardContent className="p-8">
                         {ingLoading ? (

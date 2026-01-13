@@ -82,6 +82,7 @@ func main() {
 				contextMappings.POST("", api.UpsertContextMapping)
 				contextMappings.DELETE("/:id", api.DeleteContextMapping)
 			}
+			settings.GET("/audit-logs", api.GetMyAuditLogs)
 		}
 
 		// K8s API group - all Kubernetes related endpoints
@@ -96,6 +97,7 @@ func main() {
 			kubeGroup.GET("/ingresses", api.GetIngresses)
 			kubeGroup.GET("/deployments", api.GetDeployments)
 			kubeGroup.GET("/replicasets", api.GetReplicaSets)
+			kubeGroup.GET("/replicationcontrollers", api.GetReplicationControllers)
 			kubeGroup.GET("/jobs", api.GetJobs)
 			kubeGroup.GET("/cronjobs", api.GetCronJobs)
 			kubeGroup.GET("/daemonsets", api.GetDaemonSets)

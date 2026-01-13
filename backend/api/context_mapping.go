@@ -66,6 +66,9 @@ func UpsertContextMapping(c *gin.Context) {
 		}
 	}
 
+	// Record Audit Log
+	RecordAuditLog(c, "UPSERT_CONTEXT_MAPPING", gin.H{"context": input.ContextName, "display": input.DisplayName})
+
 	c.JSON(http.StatusOK, gin.H{"mapping": mapping})
 }
 
@@ -82,6 +85,9 @@ func DeleteContextMapping(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete mapping"})
 		return
 	}
+
+	// Record Audit Log
+	RecordAuditLog(c, "DELETE_CONTEXT_MAPPING", gin.H{"id": id})
 
 	c.JSON(http.StatusOK, gin.H{"message": "mapping deleted"})
 }

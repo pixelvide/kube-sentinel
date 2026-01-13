@@ -3,8 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { HardDrive, RefreshCw, Cpu, MemoryStick, CheckCircle2, XCircle, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { HardDrive, RefreshCw, Cpu, MemoryStick, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
@@ -37,7 +36,7 @@ function NodesContent() {
     const [contexts, setContexts] = useState<ContextInfo[]>([]);
     const [nodes, setNodes] = useState<NodeInfo[]>([]);
     const [nodesLoading, setNodesLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const searchQuery = searchParams.get("q") || "";
     const [selectedNode, setSelectedNode] = useState<NodeInfo | null>(null);
 
     const filteredNodes = nodes.filter(node =>
@@ -140,17 +139,6 @@ function NodesContent() {
                                 Refresh
                             </Button>
                         </div>
-                        {nodes.length > 0 && (
-                            <div className="relative mt-4">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search nodes by name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                        )}
                     </CardHeader>
                     <CardContent className="p-8">
                         {nodesLoading ? (

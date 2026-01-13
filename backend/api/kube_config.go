@@ -45,6 +45,9 @@ func UpdateKubeConfig(c *gin.Context) {
 	}
 	os.Chmod(userConfigPath, 0666)
 
+	// Record Audit Log
+	RecordAuditLog(c, "UPDATE_KUBE_CONFIG", nil)
+
 	c.JSON(http.StatusOK, gin.H{"message": "kubeconfig saved successfully"})
 }
 
@@ -142,6 +145,9 @@ func SetCurrentContext(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save kubeconfig"})
 		return
 	}
+
+	// Record Audit Log
+	RecordAuditLog(c, "SET_CURRENT_CONTEXT", gin.H{"context": input.Context})
 
 	c.JSON(http.StatusOK, gin.H{"message": "current context updated", "context": input.Context})
 }

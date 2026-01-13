@@ -4,14 +4,12 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { RefreshCw, CheckCircle2, Search, Server } from "lucide-react";
+import { RefreshCw, CheckCircle2, Server, FileText } from "lucide-react";
 import { cn, formatAge } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 import { LogViewerModal } from "@/components/LogViewerModal";
-import { FileText } from "lucide-react";
 
 interface DaemonSet {
     name: string;
@@ -40,7 +38,7 @@ function DaemonSetsContent() {
 
     const [daemonsets, setDaemonSets] = useState<DaemonSet[]>([]);
     const [loading, setLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const searchQuery = searchParams.get("q") || "";
     const [selectedDaemonSet, setSelectedDaemonSet] = useState<DaemonSet | null>(null);
     const [logResource, setLogResource] = useState<{
         name: string,
@@ -101,27 +99,16 @@ function DaemonSetsContent() {
                                     {filteredDaemonSets.length} DaemonSets Found
                                 </CardTitle>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Search daemonsets..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-9 h-10 w-64 rounded-xl border-muted bg-muted/30"
-                                    />
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleRefresh}
-                                    disabled={loading || !selectedContext || !selectedNamespace}
-                                    className="h-10 px-4 rounded-xl"
-                                >
-                                    <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
-                                    Refresh
-                                </Button>
-                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleRefresh}
+                                disabled={loading || !selectedContext || !selectedNamespace}
+                                className="h-10 px-4 rounded-xl"
+                            >
+                                <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+                                Refresh
+                            </Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-6">
@@ -227,21 +214,23 @@ function DaemonSetsContent() {
                 name={selectedDaemonSet?.name || ""}
                 kind="DaemonSet"
             />
-            {logResource && (
-                <LogViewerModal
-                    isOpen={!!logResource}
-                    onClose={() => setLogResource(null)}
-                    context={selectedContext || ""}
-                    namespace={logResource.namespace}
-                    selector={logResource.selector}
-                    containers={logResource.containers}
-                    initContainers={logResource.initContainers}
-                    pods={logResource.pods}
-                    showPodSelector={true}
-                    title={logResource.name}
-                />
-            )}
-        </div>
+            {
+                logResource && (
+                    <LogViewerModal
+                        isOpen={!!logResource}
+                        onClose={() => setLogResource(null)}
+                        context={selectedContext || ""}
+                        namespace={logResource.namespace}
+                        selector={logResource.selector}
+                        containers={logResource.containers}
+                        initContainers={logResource.initContainers}
+                        pods={logResource.pods}
+                        showPodSelector={true}
+                        title={logResource.name}
+                    />
+                )
+            }
+        </div >
     );
 }
 
