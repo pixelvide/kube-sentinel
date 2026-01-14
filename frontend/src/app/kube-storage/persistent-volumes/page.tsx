@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { HardDrive, RefreshCw, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
 interface PVInfo {
@@ -46,15 +46,8 @@ function PVContent() {
         setLoading(true);
         setPvs([]);
         try {
-            const res = await fetch(`${API_URL}/kube/pvs?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setPvs(data.pvs || []);
-            }
+            const data = await api.get<any>(`/kube/pvs?context=${selectedContext}`);
+            setPvs(data.pvs || []);
         } catch (error) {
             console.error("Failed to fetch PVs:", error);
         } finally {

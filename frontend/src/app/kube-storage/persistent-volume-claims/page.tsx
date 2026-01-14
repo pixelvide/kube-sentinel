@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Database, RefreshCw, HardDrive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
@@ -47,15 +47,8 @@ function PVCContent() {
         setLoading(true);
         setPvcs([]);
         try {
-            const res = await fetch(`${API_URL}/kube/pvcs?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setPvcs(data.pvcs || []);
-            }
+            const data = await api.get<any>(`/kube/pvcs?context=${selectedContext}&namespace=${selectedNamespace}`);
+            setPvcs(data.pvcs || []);
         } catch (error) {
             console.error("Failed to fetch PVCs:", error);
         } finally {

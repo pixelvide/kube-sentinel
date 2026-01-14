@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ArrowUpCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
 interface PriorityClassInfo {
@@ -41,15 +41,8 @@ function PriorityClassesContent() {
         setLoading(true);
         setResources([]);
         try {
-            const res = await fetch(`${API_URL}/kube/priority-classes?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setResources(data.priorityclasses || []);
-            }
+            const data = await api.get<any>(`/kube/priority-classes?context=${selectedContext}`);
+            setResources(data.priorityclasses || []);
         } catch (error) {
             console.error("Failed to fetch PriorityClasses:", error);
         } finally {

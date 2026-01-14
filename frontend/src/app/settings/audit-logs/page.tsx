@@ -3,10 +3,10 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { History, RefreshCw, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { History as HistoryIcon, RefreshCw, ChevronLeft, ChevronRight, Info, Search, Filter, ArrowRight, Clock, ShieldCheck, Activity, Database, Key, Server, LayoutDashboard, Boxes, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -34,13 +34,10 @@ function AuditLogsContent() {
     const fetchLogs = async (p: number) => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/settings/audit-logs?page=${p}&pageSize=${pageSize}`, { credentials: "include" });
-            if (res.ok) {
-                const data = await res.json();
-                setLogs(data.logs || []);
-                setTotal(data.total || 0);
-                setPage(data.page || 1);
-            }
+            const data = await api.get<any>(`/settings/audit-logs?page=${p}&pageSize=${pageSize}`);
+            setLogs(data.logs || []);
+            setTotal(data.total || 0);
+            setPage(data.page || 1);
         } catch (error) {
             console.error("Failed to fetch audit logs:", error);
         } finally {
@@ -74,7 +71,7 @@ function AuditLogsContent() {
                     <CardHeader className="border-b bg-card/50 px-8 py-6">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <History className="h-5 w-5 text-primary" />
+                                <HistoryIcon className="h-5 w-5 text-primary" />
                                 <div>
                                     <CardTitle className="text-lg font-bold">Activity History</CardTitle>
                                     <CardDescription>Total {total} logs found</CardDescription>
@@ -191,7 +188,7 @@ function AuditLogsContent() {
                 <DialogContent className="max-w-2xl rounded-3xl border-none shadow-2xl bg-card/95 backdrop-blur-xl">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-3 text-xl">
-                            <History className="h-5 w-5 text-primary" />
+                            <HistoryIcon className="h-5 w-5 text-primary" />
                             Audit Log Details
                         </DialogTitle>
                         <DialogDescription>

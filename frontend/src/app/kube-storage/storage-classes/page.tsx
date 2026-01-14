@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Layers, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
 interface StorageClassInfo {
@@ -42,15 +42,8 @@ function StorageClassesContent() {
         setLoading(true);
         setClasses([]);
         try {
-            const res = await fetch(`${API_URL}/kube/storage-classes?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setClasses(data.storageclasses || []);
-            }
+            const data = await api.get<any>(`/kube/storage-classes?context=${selectedContext}`);
+            setClasses(data.storageclasses || []);
         } catch (error) {
             console.error("Failed to fetch storage classes:", error);
         } finally {

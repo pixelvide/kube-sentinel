@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Scale, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
@@ -43,15 +43,8 @@ function ResourceQuotasContent() {
         setLoading(true);
         setResources([]);
         try {
-            const res = await fetch(`${API_URL}/kube/resource-quotas?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setResources(data.resourcequotas || []);
-            }
+            const data = await api.get<any>(`/kube/resource-quotas?context=${selectedContext}&namespace=${selectedNamespace}`);
+            setResources(data.resourcequotas || []);
         } catch (error) {
             console.error("Failed to fetch ResourceQuotas:", error);
         } finally {

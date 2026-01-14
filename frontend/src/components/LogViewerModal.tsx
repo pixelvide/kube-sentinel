@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { Terminal as TerminalIcon, Loader2, WrapText, Clock, Tag } from "lucide-react";
 import { MultiSelect } from "@/components/ui/multi-select";
 
@@ -152,16 +152,8 @@ export function LogViewerModal({
                 wsRef.current = null;
             }
 
-            // Connect WebSocket
-            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-            let wsHost = window.location.host;
-            if (API_URL.startsWith("http")) {
-                const url = new URL(API_URL);
-                wsHost = url.host;
-            }
-
             const selectorParam = selector ? `&selector=${encodeURIComponent(selector)}` : "";
-            const wsUrl = `${protocol}//${wsHost}/api/v1/kube/logs?context=${context}&namespace=${namespace}&pod=${podParam}&container=${containerParam}&timestamps=${showTimestamps}&prefix=${showPrefix}${selectorParam}`;
+            const wsUrl = api.getWsUrl(`/api/v1/kube/logs?context=${context}&namespace=${namespace}&pod=${podParam}&container=${containerParam}&timestamps=${showTimestamps}&prefix=${showPrefix}${selectorParam}`);
 
             setStatus("connecting");
             const podDisplay = podParam === "__all__" ? "All Pods" : (selectedPods.length > 1 ? `${selectedPods.length} Pods` : podParam);

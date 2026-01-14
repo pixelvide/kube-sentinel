@@ -9,7 +9,7 @@ import {
   PlayCircle, Clock, AlertTriangle, CheckCircle, RefreshCw
 } from "lucide-react";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 
 interface DashboardSummary {
   nodes: number;
@@ -55,23 +55,13 @@ function DashboardContent() {
     setLoading(true);
     try {
       // Fetch summary
-      const summaryRes = await fetch(`${API_URL}/kube/dashboard?context=${selectedContext}`, { credentials: "include" });
-      if (summaryRes.status === 401) {
-        window.location.href = "/login";
-        return;
-      }
-      if (summaryRes.ok) {
-        const data = await summaryRes.json();
-        setSummary(data);
-      }
+      const data = await api.get<DashboardSummary>(`/kube/dashboard?context=${selectedContext}`);
+      setSummary(data);
 
       // Fetch events (if namespace selected)
       if (selectedNamespace) {
-        const eventsRes = await fetch(`${API_URL}/kube/events?context=${selectedContext}&namespace=${selectedNamespace}&limit=10`, { credentials: "include" });
-        if (eventsRes.ok) {
-          const data = await eventsRes.json();
-          setEvents(data.events || []);
-        }
+        const eventsData = await api.get<any>(`/kube/events?context=${selectedContext}&namespace=${selectedNamespace}&limit=10`);
+        setEvents(eventsData.events || []);
       } else {
         setEvents([]);
       }

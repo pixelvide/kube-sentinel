@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Box, RefreshCw, CheckCircle2, XCircle, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 import { LogViewerModal } from "@/components/LogViewerModal";
+import { api } from "@/lib/api";
 import { FileText } from "lucide-react";
 
 interface PodInfo {
@@ -50,15 +50,8 @@ function PodsContent() {
         setPodsLoading(true);
         setPods([]);
         try {
-            const res = await fetch(`${API_URL}/kube/pods?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setPods(data.pods || []);
-            }
+            const data = await api.get<any>(`/kube/pods?context=${selectedContext}&namespace=${selectedNamespace}`);
+            setPods(data.pods || []);
         } catch (error) {
             console.error("Failed to fetch pods:", error);
         } finally {

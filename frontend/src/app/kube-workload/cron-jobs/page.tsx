@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Clock, RefreshCw, PauseCircle, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
+import { api } from "@/lib/api";
 
 interface CronJobInfo {
     name: string;
@@ -46,15 +46,8 @@ function CronJobsContent() {
         setLoading(true);
         setCronjobs([]);
         try {
-            const res = await fetch(`${API_URL}/kube/cron-jobs?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setCronjobs(data.cronjobs || []);
-            }
+            const data = await api.get<any>(`/kube/cron-jobs?context=${selectedContext}&namespace=${selectedNamespace}`);
+            setCronjobs(data.cronjobs || []);
         } catch (error) {
             console.error("Failed to fetch cronjobs:", error);
         } finally {

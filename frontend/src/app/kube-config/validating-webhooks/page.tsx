@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Zap, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
 interface WebhookInfo {
@@ -41,15 +41,8 @@ function ValidatingWebhooksContent() {
         setLoading(true);
         setResources([]);
         try {
-            const res = await fetch(`${API_URL}/kube/validating-webhooks?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setResources(data.validatingwebhooks || []);
-            }
+            const data = await api.get<any>(`/kube/validating-webhooks?context=${selectedContext}`);
+            setResources(data.validatingwebhooks || []);
         } catch (error) {
             console.error("Failed to fetch ValidatingWebhooks:", error);
         } finally {

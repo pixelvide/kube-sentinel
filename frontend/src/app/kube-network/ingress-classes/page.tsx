@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Globe, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
 interface IngressClassInfo {
@@ -40,15 +40,8 @@ function IngressClassesContent() {
         setLoading(true);
         setClasses([]);
         try {
-            const res = await fetch(`${API_URL}/kube/ingress-classes?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setClasses(data.ingressclasses || []);
-            }
+            const data = await api.get<any>(`/kube/ingress-classes?context=${selectedContext}`);
+            setClasses(data.ingressclasses || []);
         } catch (error) {
             console.error("Failed to fetch ingress classes:", error);
         } finally {

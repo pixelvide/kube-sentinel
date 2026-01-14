@@ -7,8 +7,7 @@ import { HardDrive, RefreshCw, Cpu, MemoryStick, CheckCircle2, XCircle } from "l
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
-
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 
 interface ContextInfo {
     name: string;
@@ -47,11 +46,8 @@ function NodesContent() {
     useEffect(() => {
         const fetchContexts = async () => {
             try {
-                const res = await fetch(`${API_URL}/kube/contexts`, { credentials: "include" });
-                if (res.ok) {
-                    const data = await res.json();
-                    setContexts(data.contexts || []);
-                }
+                const data = await api.get<any>("/kube/contexts");
+                setContexts(data.contexts || []);
             } catch (error) {
                 console.error("Failed to fetch contexts:", error);
             }
@@ -70,15 +66,8 @@ function NodesContent() {
         setNodesLoading(true);
         setNodes([]);
         try {
-            const res = await fetch(`${API_URL}/kube/nodes?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setNodes(data.nodes || []);
-            }
+            const data = await api.get<any>(`/kube/nodes?context=${selectedContext}`);
+            setNodes(data.nodes || []);
         } catch (error) {
             console.error("Failed to fetch nodes:", error);
         } finally {

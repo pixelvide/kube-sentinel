@@ -9,8 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Cloud, ShieldCheck, Edit2, Check, X, Server, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 
 interface ContextInfo {
     name: string;
@@ -35,13 +34,7 @@ export default function ClusterSettingsPage() {
     const fetchKubeConfig = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/settings/kube`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (!res.ok) throw new Error("Failed to fetch kubeconfig");
-            const data = await res.json();
+            const data = await api.get<any>("/settings/kube");
             setKubeConfig(data.config || "");
         } catch (error) {
             console.error(error);
@@ -52,13 +45,10 @@ export default function ClusterSettingsPage() {
 
     const fetchContexts = async () => {
         try {
-            const res = await fetch(`${API_URL}/kube/contexts`, { credentials: "include" });
-            if (res.ok) {
-                const data = await res.json();
-                setContexts(data.contexts || []);
-                if (data.current) setSelectedContext(data.current);
-                else if (data.contexts && data.contexts.length > 0) setSelectedContext(data.contexts[0].name);
-            }
+            const data = await api.get<any>("/kube/contexts");
+            setContexts(data.contexts || []);
+            if (data.current) setSelectedContext(data.current);
+            else if (data.contexts && data.contexts.length > 0) setSelectedContext(data.contexts[0].name);
         } catch (error) {
             console.error(error);
         }
@@ -67,12 +57,7 @@ export default function ClusterSettingsPage() {
     const handleContextChange = async (value: string) => {
         setSelectedContext(value);
         try {
-            await fetch(`${API_URL}/settings/kube/context`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ context: value }),
-                credentials: "include",
-            });
+            await api.post("/settings/kube/context", { context: value });
         } catch (error) {
             console.error("Failed to update context:", error);
         }
@@ -82,13 +67,9 @@ export default function ClusterSettingsPage() {
         setIsValidating(true);
         setValidationStatus(null);
         try {
-            const res = await fetch(`${API_URL}/settings/kube/validate`, {
-                method: "POST",
-                credentials: "include"
-            });
-            const data = await res.json();
+            const data = await api.post<any>("/settings/kube/validate");
             setValidationStatus({
-                success: res.ok && data.valid,
+                success: data.valid,
                 message: data.valid ? data.message : (data.error || "Validation failed")
             });
         } catch (error) {
@@ -105,12 +86,7 @@ export default function ClusterSettingsPage() {
 
     const handleSaveMapping = async (contextName: string) => {
         try {
-            await fetch(`${API_URL}/settings/context-mappings`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ context_name: contextName, display_name: editDisplayName }),
-                credentials: "include",
-            });
+            await api.post("/settings/context-mappings", { context_name: contextName, display_name: editDisplayName });
             setEditingContext(null);
             fetchContexts();
         } catch (error) {

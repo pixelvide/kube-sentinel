@@ -7,8 +7,7 @@ import { Layers, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
-
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 
 interface ContextInfo {
     name: string;
@@ -33,11 +32,8 @@ function NamespacesContent() {
     useEffect(() => {
         const fetchContexts = async () => {
             try {
-                const res = await fetch(`${API_URL}/kube/contexts`, { credentials: "include" });
-                if (res.ok) {
-                    const data = await res.json();
-                    setContexts(data.contexts || []);
-                }
+                const data = await api.get<any>("/kube/contexts");
+                setContexts(data.contexts || []);
             } catch (error) {
                 console.error("Failed to fetch contexts:", error);
             }
@@ -53,15 +49,8 @@ function NamespacesContent() {
             setNamespacesLoading(true);
             setNamespaces([]);
             try {
-                const res = await fetch(`${API_URL}/kube/namespaces?context=${selectedContext}`, { credentials: "include" });
-                if (res.status === 401) {
-                    window.location.href = "/login";
-                    return;
-                }
-                if (res.ok) {
-                    const data = await res.json();
-                    setNamespaces(data.namespaces || []);
-                }
+                const data = await api.get<any>(`/kube/namespaces?context=${selectedContext}`);
+                setNamespaces(data.namespaces || []);
             } catch (error) {
                 console.error("Failed to fetch namespaces:", error);
             } finally {
@@ -77,11 +66,8 @@ function NamespacesContent() {
             const fetchNamespaces = async () => {
                 setNamespacesLoading(true);
                 try {
-                    const res = await fetch(`${API_URL}/kube/namespaces?context=${selectedContext}`, { credentials: "include" });
-                    if (res.ok) {
-                        const data = await res.json();
-                        setNamespaces(data.namespaces || []);
-                    }
+                    const data = await api.get<any>(`/kube/namespaces?context=${selectedContext}`);
+                    setNamespaces(data.namespaces || []);
                 } catch (error) {
                     console.error("Failed to fetch namespaces:", error);
                 } finally {

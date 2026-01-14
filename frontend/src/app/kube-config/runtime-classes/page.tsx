@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Cpu, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
 interface RuntimeClassInfo {
@@ -41,15 +41,8 @@ function RuntimeClassesContent() {
         setLoading(true);
         setResources([]);
         try {
-            const res = await fetch(`${API_URL}/kube/runtime-classes?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setResources(data.runtimeclasses || []);
-            }
+            const data = await api.get<any>(`/kube/runtime-classes?context=${selectedContext}`);
+            setResources(data.runtimeclasses || []);
         } catch (error) {
             console.error("Failed to fetch RuntimeClasses:", error);
         } finally {

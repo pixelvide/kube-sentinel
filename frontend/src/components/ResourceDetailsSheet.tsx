@@ -11,6 +11,10 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { KubeProperties } from "@/components/KubeProperties";
+import { Button } from "@/components/ui/button";
+import { Terminal as TerminalIcon, FileText } from "lucide-react";
+import { LogViewerModal } from "@/components/LogViewerModal";
+import { api } from "@/lib/api";
 
 interface ResourceDetailsSheetProps {
     isOpen: boolean;
@@ -49,11 +53,18 @@ export function ResourceDetailsSheet({
     const [error, setError] = useState("");
 
     const [scopes, setScopes] = useState<Record<string, string>>({});
+    const [logResource, setLogResource] = useState<{
+        name: string,
+        namespace: string,
+        selector?: string,
+        pods: Array<{ name: string, status: string }>,
+        containers: string[],
+        initContainers: string[]
+    } | null>(null);
 
     useEffect(() => {
         // Fetch scopes once
-        fetch("/api/v1/kube/scopes")
-            .then(res => res.json())
+        api.get<any>("/kube/scopes")
             .then(data => setScopes(data.scopes || {}))
             .catch(err => console.error("Failed to fetch scopes:", err));
     }, []);
@@ -76,13 +87,9 @@ export function ResourceDetailsSheet({
             setError("");
             setDetails(null);
 
-            fetch(
-                `/api/v1/kube/resource?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`
+            api.get<ResourceDetails>(
+                `/kube/resource?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`
             )
-                .then((res) => {
-                    if (!res.ok) throw new Error("Failed to fetch details");
-                    return res.json();
-                })
                 .then((data) => setDetails(data))
                 .catch((err) => setError(err.message))
                 .finally(() => setLoading(false));
@@ -99,6 +106,69 @@ export function ResourceDetailsSheet({
                     <SheetDescription className="text-zinc-500 font-mono text-xs">
                         {namespace} @ {context}
                     </SheetDescription>
+
+                    {details && (
+                        <div className="flex items-center gap-2 mt-4">
+                            {kind === "Pod" && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-lg gap-2 text-xs font-semibold bg-white shadow-sm border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                                    disabled={details.raw?.status?.phase !== "Running"}
+                                    onClick={() => {
+                                        const pod = details.raw;
+                                        const container = pod.spec?.containers?.[0]?.name || "";
+                                        window.open(`/exec?context=${context}&namespace=${namespace}&pod=${name}&container=${container}`, "_blank");
+                                    }}
+                                >
+                                    <TerminalIcon className="h-3.5 w-3.5 text-zinc-500" />
+                                    Terminal
+                                </Button>
+                            )}
+
+                            {["Pod", "Deployment", "ReplicaSet", "StatefulSet", "DaemonSet", "Job", "ReplicationController"].includes(kind) && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-lg gap-2 text-xs font-semibold bg-white shadow-sm border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                                    onClick={async () => {
+                                        const resource = details.raw;
+                                        if (kind === "Pod") {
+                                            setLogResource({
+                                                name: resource.metadata.name,
+                                                namespace: resource.metadata.namespace,
+                                                pods: [{ name: resource.metadata.name, status: resource.status?.phase }],
+                                                containers: resource.spec?.containers?.map((c: any) => c.name) || [],
+                                                initContainers: resource.spec?.initContainers?.map((c: any) => c.name) || [],
+                                            });
+                                        } else {
+                                            const matchLabels = resource.spec?.selector?.matchLabels;
+                                            if (matchLabels) {
+                                                const selector = Object.entries(matchLabels).map(([k, v]) => `${k}=${v}`).join(",");
+                                                try {
+                                                    const data = await api.get<any>(`/kube/pods?context=${context}&namespace=${namespace}&selector=${encodeURIComponent(selector)}`);
+                                                    const pods = data.pods || [];
+                                                    setLogResource({
+                                                        name: name,
+                                                        namespace: namespace,
+                                                        selector: selector,
+                                                        pods: pods.map((p: any) => ({ name: p.name, status: p.status })),
+                                                        containers: (pods.length > 0 && pods[0].containers) ? pods[0].containers : ["__all__"],
+                                                        initContainers: (pods.length > 0 && pods[0].init_containers) ? pods[0].init_containers : []
+                                                    });
+                                                } catch (error) {
+                                                    console.error("Failed to fetch pods:", error);
+                                                }
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <FileText className="h-3.5 w-3.5 text-zinc-500" />
+                                    Logs
+                                </Button>
+                            )}
+                        </div>
+                    )}
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto">
@@ -183,6 +253,21 @@ export function ResourceDetailsSheet({
                     )}
                 </div>
             </SheetContent>
+
+            {logResource && (
+                <LogViewerModal
+                    isOpen={!!logResource}
+                    onClose={() => setLogResource(null)}
+                    context={context}
+                    namespace={logResource.namespace}
+                    selector={logResource.selector}
+                    containers={logResource.containers}
+                    initContainers={logResource.initContainers}
+                    pods={logResource.pods}
+                    showPodSelector={kind !== "Pod"}
+                    title={logResource.name}
+                />
+            )}
         </Sheet>
     );
 }

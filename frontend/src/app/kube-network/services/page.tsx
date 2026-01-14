@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Grid, RefreshCw, Radio, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
@@ -46,15 +46,8 @@ function ServicesContent() {
         setServicesLoading(true);
         setServices([]);
         try {
-            const res = await fetch(`${API_URL}/kube/services?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setServices(data.services || []);
-            }
+            const data = await api.get<any>(`/kube/services?context=${selectedContext}&namespace=${selectedNamespace}`);
+            setServices(data.services || []);
         } catch (error) {
             console.error("Failed to fetch services:", error);
         } finally {

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Boxes, RefreshCw, CheckCircle2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 import { LogViewerModal } from "@/components/LogViewerModal";
@@ -55,15 +55,8 @@ function ReplicationControllersContent() {
         setLoading(true);
         setRcs([]);
         try {
-            const res = await fetch(`${API_URL}/kube/replication-controllers?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setRcs(data.replicationcontrollers || []);
-            }
+            const data = await api.get<any>(`/kube/replication-controllers?context=${selectedContext}&namespace=${selectedNamespace}`);
+            setRcs(data.replicationcontrollers || []);
         } catch (error) {
             console.error("Failed to fetch replicationcontrollers:", error);
         } finally {
@@ -186,19 +179,16 @@ function ReplicationControllersContent() {
                                                         e.stopPropagation();
                                                         if (rc.selector) {
                                                             try {
-                                                                const res = await fetch(`${API_URL}/kube/pods?context=${selectedContext}&namespace=${rc.namespace}&selector=${encodeURIComponent(rc.selector)}`, { credentials: "include" });
-                                                                if (res.ok) {
-                                                                    const data = await res.json();
-                                                                    const pods = data.pods || [];
-                                                                    setLogResource({
-                                                                        name: rc.name,
-                                                                        namespace: rc.namespace,
-                                                                        selector: rc.selector,
-                                                                        pods: pods.map((p: any) => ({ name: p.name, status: p.status })),
-                                                                        containers: (pods.length > 0 && pods[0].containers) ? pods[0].containers : ["__all__"],
-                                                                        initContainers: (pods.length > 0 && pods[0].init_containers) ? pods[0].init_containers : []
-                                                                    });
-                                                                }
+                                                                const data = await api.get<any>(`/kube/pods?context=${selectedContext}&namespace=${rc.namespace}&selector=${encodeURIComponent(rc.selector)}`);
+                                                                const pods = data.pods || [];
+                                                                setLogResource({
+                                                                    name: rc.name,
+                                                                    namespace: rc.namespace,
+                                                                    selector: rc.selector,
+                                                                    pods: pods.map((p: any) => ({ name: p.name, status: p.status })),
+                                                                    containers: (pods.length > 0 && pods[0].containers) ? pods[0].containers : ["__all__"],
+                                                                    initContainers: (pods.length > 0 && pods[0].init_containers) ? pods[0].init_containers : []
+                                                                });
                                                             } catch (error) {
                                                                 console.error("Failed to fetch pods:", error);
                                                             }

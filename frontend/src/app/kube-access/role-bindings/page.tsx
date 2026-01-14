@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Link2, RefreshCw, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
@@ -43,15 +43,8 @@ function RoleBindingsContent() {
         setLoading(true);
         setBindings([]);
         try {
-            const res = await fetch(`${API_URL}/kube/role-bindings?context=${selectedContext}&namespace=${selectedNamespace}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setBindings(data.rolebindings || []);
-            }
+            const data = await api.get<any>(`/kube/role-bindings?context=${selectedContext}&namespace=${selectedNamespace}`);
+            setBindings(data.rolebindings || []);
         } catch (error) {
             console.error("Failed to fetch Role Bindings:", error);
         } finally {

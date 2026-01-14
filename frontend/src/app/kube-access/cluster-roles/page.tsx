@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ShieldCheck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
-import { API_URL } from "@/lib/config";
+import { api } from "@/lib/api";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 
 interface RoleInfo {
@@ -39,15 +39,8 @@ function ClusterRolesContent() {
         setLoading(true);
         setRoles([]);
         try {
-            const res = await fetch(`${API_URL}/kube/cluster-roles?context=${selectedContext}`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setRoles(data.clusterroles || []);
-            }
+            const data = await api.get<any>(`/kube/cluster-roles?context=${selectedContext}`);
+            setRoles(data.clusterroles || []);
         } catch (error) {
             console.error("Failed to fetch Cluster Roles:", error);
         } finally {

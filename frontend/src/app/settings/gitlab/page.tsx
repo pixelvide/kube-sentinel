@@ -25,6 +25,7 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "@/components/ui/dialog";
+import { api } from "@/lib/api";
 
 interface GitlabConfig {
     id: number;
@@ -42,8 +43,6 @@ interface GitlabK8sAgentConfig {
     is_configured: boolean;
     gitlab_config: GitlabConfig;
 }
-
-import { API_URL } from "@/lib/config";
 
 export default function SettingsPage() {
     const [configs, setConfigs] = useState<GitlabConfig[]>([]);
@@ -71,11 +70,8 @@ export default function SettingsPage() {
 
     const fetchAgentConfigs = async () => {
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab/agents`, { credentials: "include" });
-            if (res.ok) {
-                const data = await res.json();
-                setAgentConfigs(data.configs || []);
-            }
+            const data = await api.get<any>("/settings/gitlab/agents");
+            setAgentConfigs(data.configs || []);
         } catch (error) {
             console.error(error);
         }
@@ -83,13 +79,7 @@ export default function SettingsPage() {
 
     const fetchConfigs = async () => {
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab`, { credentials: "include" });
-            if (res.status === 401) {
-                window.location.href = "/login";
-                return;
-            }
-            if (!res.ok) throw new Error("Failed to fetch configs");
-            const data = await res.json();
+            const data = await api.get<any>("/settings/gitlab");
             setConfigs(data.configs || []);
         } catch (error) {
             console.error(error);
@@ -99,22 +89,16 @@ export default function SettingsPage() {
     const handleValidate = async (id: number) => {
         setIsValidatingId(id);
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab/${id}/validate`, {
-                method: "POST",
-                credentials: "include"
-            });
-            const data = await res.json();
+            const data = await api.post<any>(`/settings/gitlab/${id}/validate`);
             setValidationStatuses(prev => ({
                 ...prev,
-                [id]: { success: res.ok && data.valid, message: data.valid ? data.message : (data.error || "Validation failed") }
+                [id]: { success: true, message: data.message }
             }));
-            if (res.ok && data.valid) {
-                fetchConfigs(); // Refresh to show updated validation status from DB
-            }
-        } catch (error) {
+            fetchConfigs(); // Refresh to show updated validation status from DB
+        } catch (error: any) {
             setValidationStatuses(prev => ({
                 ...prev,
-                [id]: { success: false, message: "Network error during validation" }
+                [id]: { success: false, message: error.message || "Validation failed" }
             }));
         } finally {
             setIsValidatingId(null);
@@ -125,13 +109,7 @@ export default function SettingsPage() {
         if (!newHost || !newToken) return;
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ gitlab_host: newHost, token: newToken, is_https: newIsHttps }),
-                credentials: "include",
-            });
-            if (!res.ok) throw new Error("Failed to add config");
+            await api.post("/settings/gitlab", { gitlab_host: newHost, token: newToken, is_https: newIsHttps });
             setNewHost("");
             setNewToken("");
             setNewIsHttps(true);
@@ -151,13 +129,7 @@ export default function SettingsPage() {
         if (!editToken) return;
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: editToken }),
-                credentials: "include",
-            });
-            if (!res.ok) throw new Error("Failed to update token");
+            await api.put(`/settings/gitlab/${id}`, { token: editToken });
             setEditingId(null);
             setEditToken("");
             fetchConfigs();
@@ -171,11 +143,7 @@ export default function SettingsPage() {
     const handleDelete = async (id: number) => {
         if (!confirm("Are you sure you want to delete this configuration?")) return;
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab/${id}`, {
-                method: "DELETE",
-                credentials: "include",
-            });
-            if (!res.ok) throw new Error("Failed to delete config");
+            await api.del(`/settings/gitlab/${id}`);
             fetchConfigs();
         } catch (error) {
             console.error(error);
@@ -186,25 +154,16 @@ export default function SettingsPage() {
         if (!selectedGitlabId || !agentId || !agentRepo) return;
         setIsAgentLoading(true);
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab/agents`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    gitlab_config_id: parseInt(selectedGitlabId),
-                    agent_id: agentId,
-                    agent_repo: agentRepo,
-                }),
-                credentials: "include",
+            await api.post("/settings/gitlab/agents", {
+                gitlab_config_id: parseInt(selectedGitlabId),
+                agent_id: agentId,
+                agent_repo: agentRepo,
             });
-            if (res.ok) {
-                setAgentId("");
-                setAgentRepo("");
-                setSelectedGitlabId("");
-                setIsAgentModalOpen(false);
-                fetchAgentConfigs();
-            } else {
-                throw new Error("Failed to add agent config");
-            }
+            setAgentId("");
+            setAgentRepo("");
+            setSelectedGitlabId("");
+            setIsAgentModalOpen(false);
+            fetchAgentConfigs();
         } catch (error) {
             console.error(error);
         } finally {
@@ -215,11 +174,7 @@ export default function SettingsPage() {
     const handleDeleteAgent = async (id: number) => {
         if (!confirm("Are you sure you want to delete this agent configuration?")) return;
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab/agents/${id}`, {
-                method: "DELETE",
-                credentials: "include",
-            });
-            if (!res.ok) throw new Error("Failed to delete agent config");
+            await api.del(`/settings/gitlab/agents/${id}`);
             fetchAgentConfigs();
         } catch (error) {
             console.error(error);
@@ -230,28 +185,17 @@ export default function SettingsPage() {
         setConfiguringId(id);
         setAgentConfigStatuses(prev => ({ ...prev, [id]: undefined as any })); // Clear previous status
         try {
-            const res = await fetch(`${API_URL}/settings/gitlab/agents/${id}/configure`, {
-                method: "POST",
-                credentials: "include",
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setAgentConfigStatuses(prev => ({
-                    ...prev,
-                    [id]: { success: true, message: "Agent configured successfully! Use context: " + data.host }
-                }));
-                fetchAgentConfigs();
-            } else {
-                setAgentConfigStatuses(prev => ({
-                    ...prev,
-                    [id]: { success: false, message: data.error }
-                }));
-            }
-        } catch (error) {
+            const data = await api.post<any>(`/settings/gitlab/agents/${id}/configure`);
+            setAgentConfigStatuses(prev => ({
+                ...prev,
+                [id]: { success: true, message: "Agent configured successfully! Use context: " + data.host }
+            }));
+            fetchAgentConfigs();
+        } catch (error: any) {
             console.error(error);
             setAgentConfigStatuses(prev => ({
                 ...prev,
-                [id]: { success: false, message: "An error occurred during configuration" }
+                [id]: { success: false, message: error.message || "An error occurred during configuration" }
             }));
         } finally {
             setConfiguringId(null);

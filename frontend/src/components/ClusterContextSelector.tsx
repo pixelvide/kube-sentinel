@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Server, Layers } from "lucide-react";
 import { NAVIGATION_CONFIG } from "@/config/navigation";
+import { api } from "@/lib/api";
 
 interface ContextInfo {
     name: string;
@@ -38,23 +39,17 @@ function ClusterContextSelectorContent() {
             setLoading(true);
             try {
                 // Fetch contexts
-                const ctxRes = await fetch("/api/v1/kube/contexts", { credentials: "include" });
-                if (ctxRes.ok) {
-                    const data = await ctxRes.json();
-                    setContexts(data.contexts || []);
-                    if (data.current) {
-                        setDefaultContext(data.current);
-                    } else if (data.contexts && data.contexts.length > 0) {
-                        setDefaultContext(data.contexts[0].name);
-                    }
+                const data = await api.get<any>("/kube/contexts");
+                setContexts(data.contexts || []);
+                if (data.current) {
+                    setDefaultContext(data.current);
+                } else if (data.contexts && data.contexts.length > 0) {
+                    setDefaultContext(data.contexts[0].name);
                 }
 
                 // Fetch scopes
-                const scopeRes = await fetch("/api/v1/kube/scopes", { credentials: "include" });
-                if (scopeRes.ok) {
-                    const scopeData = await scopeRes.json();
-                    setScopes(scopeData.scopes || {});
-                }
+                const scopeData = await api.get<any>("/kube/scopes");
+                setScopes(scopeData.scopes || {});
             } catch (error) {
                 console.error("Failed to fetch cluster data:", error);
             } finally {
@@ -81,18 +76,15 @@ function ClusterContextSelectorContent() {
         const fetchNamespaces = async () => {
             setNsLoading(true);
             try {
-                const res = await fetch(`/api/v1/kube/namespaces?context=${currentContext}`, { credentials: "include" });
-                if (res.ok) {
-                    const data = await res.json();
-                    const nsList = data.namespaces || [];
-                    setNamespaces(nsList);
+                const data = await api.get<any>(`/kube/namespaces?context=${currentContext}`);
+                const nsList = data.namespaces || [];
+                setNamespaces(nsList);
 
-                    // Logic: Default to 'All Namespaces' if not set
-                    if (!searchParams.get("namespace")) {
-                        const params = new URLSearchParams(searchParams.toString());
-                        params.set("namespace", "__all__");
-                        router.replace(`${pathname}?${params.toString()}`);
-                    }
+                // Logic: Default to 'All Namespaces' if not set
+                if (!searchParams.get("namespace")) {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set("namespace", "__all__");
+                    router.replace(`${pathname}?${params.toString()}`);
                 }
             } catch (error) {
                 console.error("Failed to fetch namespaces:", error);
