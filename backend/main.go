@@ -93,6 +93,8 @@ func main() {
 
 			kubeGroup.GET("/namespaces", api.GetNamespaces)
 			kubeGroup.GET("/nodes", api.GetNodes)
+			kubeGroup.POST("/nodes/cordon", api.ToggleCordon)
+			kubeGroup.POST("/nodes/drain", api.DrainNode)
 			kubeGroup.GET("/events", api.GetEvents)
 
 			kubeGroup.GET("/pods", api.GetPods)

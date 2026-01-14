@@ -8,13 +8,23 @@ import {
     SheetTitle,
     SheetDescription,
 } from "@/components/ui/sheet";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { KubeProperties } from "@/components/KubeProperties";
 import { Button } from "@/components/ui/button";
-import { Terminal as TerminalIcon, FileText } from "lucide-react";
+import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2 } from "lucide-react";
 import { LogViewerModal } from "@/components/LogViewerModal";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface ResourceDetailsSheetProps {
     isOpen: boolean;
@@ -50,6 +60,22 @@ export function ResourceDetailsSheet({
 }: ResourceDetailsSheetProps) {
     const [details, setDetails] = useState<ResourceDetails | null>(null);
     const [loading, setLoading] = useState(false);
+    const [actioning, setActioning] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        description: React.ReactNode;
+        confirmText: string;
+        confirmVariant: "default" | "destructive";
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: "",
+        description: null,
+        confirmText: "Confirm",
+        confirmVariant: "default",
+        onConfirm: () => { },
+    });
     const [error, setError] = useState("");
 
     const [scopes, setScopes] = useState<Record<string, string>>({});
@@ -69,30 +95,28 @@ export function ResourceDetailsSheet({
             .catch(err => console.error("Failed to fetch scopes:", err));
     }, []);
 
-    useEffect(() => {
-        let shouldFetch = false;
-
+    const fetchDetails = () => {
         if (isOpen && context && name && kind && Object.keys(scopes).length > 0) {
-            const scope = scopes[kind]; // Use 'kind' directly (TitleCase)
+            const scope = scopes[kind];
             const isClusterScoped = scope === "Cluster";
 
-            // Valid if cluster scoped OR (namespaced and namespace provided)
             if (isClusterScoped || namespace) {
-                shouldFetch = true;
+                setLoading(true);
+                setError("");
+
+                api.get<ResourceDetails>(
+                    `/kube/resource?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`
+                )
+                    .then((data) => setDetails(data))
+                    .catch((err) => setError(err.message))
+                    .finally(() => setLoading(false));
             }
         }
+    };
 
-        if (shouldFetch) {
-            setLoading(true);
-            setError("");
-            setDetails(null);
-
-            api.get<ResourceDetails>(
-                `/kube/resource?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`
-            )
-                .then((data) => setDetails(data))
-                .catch((err) => setError(err.message))
-                .finally(() => setLoading(false));
+    useEffect(() => {
+        if (isOpen) {
+            fetchDetails();
         }
     }, [isOpen, context, namespace, name, kind, scopes]);
 
@@ -166,6 +190,95 @@ export function ResourceDetailsSheet({
                                     <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                                     Logs
                                 </Button>
+                            )}
+
+                            {kind === "Node" && (
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 rounded-lg gap-2 text-xs font-semibold bg-background shadow-sm border-border text-foreground hover:bg-accent"
+                                        disabled={actioning || !details}
+                                        onClick={async () => {
+                                            const isUnschedulable = details?.raw?.spec?.unschedulable;
+                                            setConfirmConfig({
+                                                isOpen: true,
+                                                title: isUnschedulable ? "Uncordon Node" : "Cordon Node",
+                                                description: (
+                                                    <>
+                                                        Are you sure you want to {isUnschedulable ? "uncordon" : "cordon"} node <span className="font-mono font-bold text-foreground">{name}</span>?
+                                                    </>
+                                                ),
+                                                confirmText: isUnschedulable ? "Uncordon" : "Cordon",
+                                                confirmVariant: "default",
+                                                onConfirm: async () => {
+                                                    setActioning(true);
+                                                    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                                                    try {
+                                                        await api.post(`/kube/nodes/cordon?context=${context}&name=${name}`, {
+                                                            unschedulable: !isUnschedulable
+                                                        });
+                                                        toast.success(`Node ${name} ${isUnschedulable ? "uncordoned" : "cordoned"}`);
+                                                        fetchDetails();
+                                                    } catch (err: any) {
+                                                        toast.error(err.message || "Action failed");
+                                                    } finally {
+                                                        setActioning(false);
+                                                    }
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        {details?.raw?.spec?.unschedulable ? (
+                                            <>
+                                                <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                                                Uncordon
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Ban className="h-3.5 w-3.5 text-destructive" />
+                                                Cordon
+                                            </>
+                                        )}
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 rounded-lg gap-2 text-xs font-semibold bg-background shadow-sm border-border text-foreground hover:bg-accent"
+                                        disabled={actioning || !details}
+                                        onClick={() => {
+                                            setConfirmConfig({
+                                                isOpen: true,
+                                                title: `Drain Node: ${name}`,
+                                                description: (
+                                                    <>
+                                                        Are you sure you want to drain node <span className="font-mono font-bold text-foreground">{name}</span>?
+                                                        This will cordon the node and evict all pods. This action cannot be undone.
+                                                    </>
+                                                ),
+                                                confirmText: "Confirm Drain",
+                                                confirmVariant: "destructive",
+                                                onConfirm: async () => {
+                                                    setActioning(true);
+                                                    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                                                    try {
+                                                        const res = await api.post<any>(`/kube/nodes/drain?context=${context}&name=${name}`, {});
+                                                        toast.success(`Drain started: ${res.evicted} pods evicted, ${res.skipped} skipped.`);
+                                                        fetchDetails();
+                                                    } catch (err: any) {
+                                                        toast.error(err.message || "Drain failed");
+                                                    } finally {
+                                                        setActioning(false);
+                                                    }
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                        Drain
+                                    </Button>
+                                </>
                             )}
                         </div>
                     )}
@@ -254,20 +367,33 @@ export function ResourceDetailsSheet({
                 </div>
             </SheetContent>
 
-            {logResource && (
-                <LogViewerModal
-                    isOpen={!!logResource}
-                    onClose={() => setLogResource(null)}
-                    context={context}
-                    namespace={logResource.namespace}
-                    selector={logResource.selector}
-                    containers={logResource.containers}
-                    initContainers={logResource.initContainers}
-                    pods={logResource.pods}
-                    showPodSelector={kind !== "Pod"}
-                    title={logResource.name}
-                />
-            )}
+            {
+                logResource && (
+                    <LogViewerModal
+                        isOpen={!!logResource}
+                        onClose={() => setLogResource(null)}
+                        context={context}
+                        namespace={logResource.namespace}
+                        selector={logResource.selector}
+                        containers={logResource.containers}
+                        initContainers={logResource.initContainers}
+                        pods={logResource.pods}
+                        showPodSelector={kind !== "Pod"}
+                        title={logResource.name}
+                    />
+                )
+            }
+
+            <ConfirmDialog
+                isOpen={confirmConfig.isOpen}
+                onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmConfig.onConfirm}
+                title={confirmConfig.title}
+                description={confirmConfig.description}
+                confirmText={confirmConfig.confirmText}
+                confirmVariant={confirmConfig.confirmVariant}
+                loading={actioning}
+            />
         </Sheet>
     );
 }

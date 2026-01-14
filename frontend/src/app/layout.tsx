@@ -32,6 +32,8 @@ export const viewport: Viewport = {
   themeColor: "#09090b",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -47,6 +49,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientLayout>{children}</ClientLayout>
+        <Toaster position="bottom-left" richColors />
       </body>
     </html>
   );

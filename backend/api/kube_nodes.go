@@ -1,13 +1,16 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"cloud-sentinel-k8s/models"
 
 	"github.com/gin-gonic/gin"
+	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // GetNodes lists nodes for a given context
@@ -87,4 +90,124 @@ func GetNodes(c *gin.Context) {
 		})
 	}
 	c.JSON(http.StatusOK, gin.H{"nodes": nodes})
+}
+
+// ToggleCordon toggles the unschedulable state of a node
+func ToggleCordon(c *gin.Context) {
+	user := c.MustGet("user").(*models.User)
+	ctxName := c.Query("context")
+	nodeName := c.Query("name")
+
+	var input struct {
+		Unschedulable bool `json:"unschedulable"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config: " + err.Error()})
+		return
+	}
+
+	patch := []byte(fmt.Sprintf(`{"spec":{"unschedulable":%t}}`, input.Unschedulable))
+	_, err = clientset.CoreV1().Nodes().Patch(c.Request.Context(), nodeName, types.MergePatchType, patch, metav1.PatchOptions{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to patch node: " + err.Error()})
+		return
+	}
+
+	// Record audit log
+	action := "Cordon Node"
+	if !input.Unschedulable {
+		action = "Uncordon Node"
+	}
+	RecordAuditLog(c, action, gin.H{
+		"context":       ctxName,
+		"node":          nodeName,
+		"unschedulable": input.Unschedulable,
+	})
+
+	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Node %s updated", nodeName)})
+}
+
+// DrainNode cordons and evicts pods from a node
+func DrainNode(c *gin.Context) {
+	user := c.MustGet("user").(*models.User)
+	ctxName := c.Query("context")
+	nodeName := c.Query("name")
+
+	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config: " + err.Error()})
+		return
+	}
+
+	// 1. Cordon the node first
+	patch := []byte(`{"spec":{"unschedulable":true}}`)
+	_, err = clientset.CoreV1().Nodes().Patch(c.Request.Context(), nodeName, types.MergePatchType, patch, metav1.PatchOptions{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cordon node: " + err.Error()})
+		return
+	}
+
+	// 2. List pods on this node
+	podList, err := clientset.CoreV1().Pods("").List(c.Request.Context(), metav1.ListOptions{
+		FieldSelector: "spec.nodeName=" + nodeName,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list pods: " + err.Error()})
+		return
+	}
+
+	evictedCount := 0
+	skippedCount := 0
+	var errors []string
+
+	for _, pod := range podList.Items {
+		// Skip DaemonSet pods
+		isDaemonSet := false
+		for _, owner := range pod.OwnerReferences {
+			if owner.Kind == "DaemonSet" {
+				isDaemonSet = true
+				break
+			}
+		}
+		if isDaemonSet {
+			skippedCount++
+			continue
+		}
+
+		// Evict pod
+		eviction := &policyv1.Eviction{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      pod.Name,
+				Namespace: pod.Namespace,
+			},
+		}
+		err := clientset.PolicyV1().Evictions(pod.Namespace).Evict(c.Request.Context(), eviction)
+		if err != nil {
+			errors = append(errors, fmt.Sprintf("Failed to evict pod %s/%s: %v", pod.Namespace, pod.Name, err))
+		} else {
+			evictedCount++
+		}
+	}
+
+	// Record audit log
+	RecordAuditLog(c, "Drain Node", gin.H{
+		"context": ctxName,
+		"node":    nodeName,
+		"evicted": evictedCount,
+		"skipped": skippedCount,
+		"errors":  errors,
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Node %s draining started", nodeName),
+		"evicted": evictedCount,
+		"skipped": skippedCount,
+		"errors":  errors,
+	})
 }
