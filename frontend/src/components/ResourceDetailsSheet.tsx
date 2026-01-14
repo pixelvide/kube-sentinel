@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LogViewerModal } from "@/components/LogViewerModal";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { RelatedPodsTable } from "@/components/RelatedPodsTable";
 
 interface ResourceDetailsSheetProps {
     isOpen: boolean;
@@ -413,6 +414,8 @@ export function ResourceDetailsSheet({
                         <div className="flex flex-col gap-6 p-6">
                             {/* Properties Section */}
                             <KubeProperties resource={details.raw} />
+
+                            <RelatedPodsTable resource={details.raw} context={context} />
 
                             {/* Events Section */}
                             <div className="space-y-3">

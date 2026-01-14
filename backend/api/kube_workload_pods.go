@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -35,17 +36,26 @@ func GetPods(c *gin.Context) {
 		Namespace      string   `json:"namespace"`
 		Age            string   `json:"age"`
 		QoS            string   `json:"qos"`
+		Ready          string   `json:"ready"`
+		Restarts       int32    `json:"restarts"`
+		Node           string   `json:"node"`
+		IP             string   `json:"ip"`
+		ControlledBy   string   `json:"controlled_by,omitempty"`
 	}
 
 	var pods []PodInfo
 
 	selector := c.Query("selector")
+	fieldSelector := c.Query("fieldSelector")
 
 	for _, singleNs := range namespaces {
 		// Note: singleNs can be empty if searchAll is true
 		listOpts := metav1.ListOptions{}
 		if selector != "" {
 			listOpts.LabelSelector = selector
+		}
+		if fieldSelector != "" {
+			listOpts.FieldSelector = fieldSelector
 		}
 
 		list, err := clientset.CoreV1().Pods(singleNs).List(c.Request.Context(), listOpts)
@@ -67,6 +77,24 @@ func GetPods(c *gin.Context) {
 			for _, cn := range p.Spec.Containers {
 				containers = append(containers, cn.Name)
 			}
+
+			// Calculate ready/restarts
+			readyCount := 0
+			totalCount := len(p.Spec.Containers)
+			var restarts int32 = 0
+
+			for _, cs := range p.Status.ContainerStatuses {
+				if cs.Ready {
+					readyCount++
+				}
+				restarts += cs.RestartCount
+			}
+
+			controlledBy := ""
+			if len(p.OwnerReferences) > 0 {
+				controlledBy = fmt.Sprintf("%s/%s", p.OwnerReferences[0].Kind, p.OwnerReferences[0].Name)
+			}
+
 			pods = append(pods, PodInfo{
 				Name:           p.Name,
 				Containers:     containers,
@@ -75,6 +103,11 @@ func GetPods(c *gin.Context) {
 				Namespace:      p.Namespace,
 				Age:            p.CreationTimestamp.Time.Format(time.RFC3339),
 				QoS:            string(p.Status.QOSClass),
+				Ready:          fmt.Sprintf("%d/%d", readyCount, totalCount),
+				Restarts:       restarts,
+				Node:           p.Spec.NodeName,
+				IP:             p.Status.PodIP,
+				ControlledBy:   controlledBy,
 			})
 		}
 	}

@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 
 interface KubePropertiesProps {
     resource: any;
+    customProperties?: Record<string, string | string[]>;
 }
 
-export function KubeProperties({ resource }: KubePropertiesProps) {
+export function KubeProperties({ resource, customProperties }: KubePropertiesProps) {
     const [showLabels, setShowLabels] = useState(false);
     const [showAnnotations, setShowAnnotations] = useState(false);
     const [showTaints, setShowTaints] = useState(false);
@@ -23,7 +24,7 @@ export function KubeProperties({ resource }: KubePropertiesProps) {
 
     if (!resource || !resource.metadata) return null;
 
-    const { metadata } = resource;
+    const { metadata, kind } = resource;
     const {
         name,
         namespace,
@@ -70,6 +71,63 @@ export function KubeProperties({ resource }: KubePropertiesProps) {
     };
 
     const statusValue = getResourceStatus(resource);
+
+    const getExtraProperties = (res: any) => {
+        const extra: Record<string, string | string[]> = {};
+        const { kind, spec, status } = res;
+
+        if (kind === "CronJob") {
+            extra["Suspended"] = spec?.suspend ? "Yes" : "No";
+        } else if (kind === "Deployment") {
+            if (spec?.selector?.matchLabels) {
+                extra["Selector"] = Object.entries(spec.selector.matchLabels).map(([k, v]) => `${k}=${v}`);
+            }
+            if (spec?.strategy?.type) {
+                extra["Strategy Type"] = spec.strategy.type;
+            }
+            if (status) {
+                const desired = spec?.replicas || 0;
+                const updated = status.updatedReplicas || 0;
+                const total = status.replicas || 0;
+                const available = status.availableReplicas || 0;
+                const unavailable = status.unavailableReplicas || 0;
+                extra["Replicas"] = `${desired} desired, ${updated} updated, ${total} total, ${available} available, ${unavailable} unavailable`;
+            }
+        } else if (kind === "DaemonSet") {
+            if (spec?.selector?.matchLabels) {
+                extra["Selector"] = Object.entries(spec.selector.matchLabels).map(([k, v]) => `${k}=${v}`);
+            }
+            if (spec?.updateStrategy?.type) {
+                extra["Strategy Type"] = spec.updateStrategy.type;
+            }
+        } else if (kind === "Pod") {
+            if (metadata?.ownerReferences) {
+                extra["Controlled by"] = metadata.ownerReferences.map((ref: any) => `${ref.kind}/${ref.name}`);
+            }
+            if (spec?.nodeName) extra["Node"] = spec.nodeName;
+            if (status?.podIP) extra["Pod IP"] = status.podIP;
+            if (status?.podIPs) {
+                extra["Pod IPs"] = status.podIPs.map((ip: any) => ip.ip);
+            }
+            if (spec?.serviceAccountName) extra["Service Account"] = spec.serviceAccountName;
+            if (status?.qosClass) extra["QOS"] = status.qosClass;
+        } else if (kind === "Node") {
+            if (status?.nodeInfo) {
+                extra["OS"] = `${status.nodeInfo.operatingSystem} (${status.nodeInfo.architecture})`;
+                extra["OS Image"] = status.nodeInfo.osImage;
+                extra["Kernel Version"] = status.nodeInfo.kernelVersion;
+                extra["Kubelet Version"] = status.nodeInfo.kubeletVersion;
+                extra["Container Runtime"] = status.nodeInfo.containerRuntimeVersion;
+            }
+            if (status?.addresses) {
+                extra["Addresses"] = status.addresses.map((addr: any) => `${addr.type}: ${addr.address}`);
+            }
+        }
+
+        return { ...extra, ...customProperties };
+    };
+
+    const extraProperties = getExtraProperties(resource);
 
     const properties = [
         { label: "Name", value: name },
@@ -221,6 +279,29 @@ export function KubeProperties({ resource }: KubePropertiesProps) {
                                 ))}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {Object.keys(extraProperties).length > 0 && (
+                    <div className="pt-3 border-t border-border/50 space-y-3">
+                        {Object.entries(extraProperties).map(([label, value]) => (
+                            value && (
+                                <div key={label} className="grid grid-cols-3 gap-2 items-start">
+                                    <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">{label}</span>
+                                    <div className="col-span-2 flex flex-wrap gap-1">
+                                        {Array.isArray(value) ? (
+                                            value.map((v, i) => (
+                                                <Badge key={i} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0 px-1.5 h-auto">
+                                                    {v}
+                                                </Badge>
+                                            ))
+                                        ) : (
+                                            <span className="text-foreground break-all font-bold text-xs">{value}</span>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        ))}
                     </div>
                 )}
 
