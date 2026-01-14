@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -8,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // GetCronJobs lists cronjobs for a given namespace and context
@@ -75,4 +77,47 @@ func GetCronJobs(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{"cronjobs": cronjobs})
+}
+
+// ToggleCronJobSuspend toggles the suspend state of a CronJob
+func ToggleCronJobSuspend(c *gin.Context) {
+	user := c.MustGet("user").(*models.User)
+	ctxName := c.Query("context")
+	namespace := c.Query("namespace")
+	name := c.Query("name")
+
+	var input struct {
+		Suspend bool `json:"suspend"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config: " + err.Error()})
+		return
+	}
+
+	patch := []byte(fmt.Sprintf(`{"spec":{"suspend":%t}}`, input.Suspend))
+	_, err = clientset.BatchV1().CronJobs(namespace).Patch(c.Request.Context(), name, types.MergePatchType, patch, metav1.PatchOptions{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to patch cronjob: " + err.Error()})
+		return
+	}
+
+	// Record audit log
+	action := "Suspend CronJob"
+	if !input.Suspend {
+		action = "Resume CronJob"
+	}
+	RecordAuditLog(c, action, gin.H{
+		"context":   ctxName,
+		"namespace": namespace,
+		"name":      name,
+		"suspend":   input.Suspend,
+	})
+
+	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("CronJob %s updated", name)})
 }

@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { KubeProperties } from "@/components/KubeProperties";
 import { Button } from "@/components/ui/button";
-import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit } from "lucide-react";
+import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit, PauseCircle, PlayCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { LogViewerModal } from "@/components/LogViewerModal";
 import { api } from "@/lib/api";
@@ -43,6 +43,14 @@ interface EventSimple {
     count: number;
     last_seen: string;
     age: string;
+}
+
+interface ResourceInfo {
+    group: string;
+    version: string;
+    resource: string;
+    scope: string;
+    kind: string;
 }
 
 interface ResourceDetails {
@@ -81,7 +89,7 @@ export function ResourceDetailsSheet({
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editManifest, setEditManifest] = useState("");
 
-    const [scopes, setScopes] = useState<Record<string, string>>({});
+    const [scopes, setScopes] = useState<Record<string, ResourceInfo>>({});
     const [logResource, setLogResource] = useState<{
         name: string,
         namespace: string,
@@ -100,8 +108,8 @@ export function ResourceDetailsSheet({
 
     const fetchDetails = () => {
         if (isOpen && context && name && kind && Object.keys(scopes).length > 0) {
-            const scope = scopes[kind];
-            const isClusterScoped = scope === "Cluster";
+            const resourceInfo = scopes[kind];
+            const isClusterScoped = resourceInfo?.scope === "Cluster";
 
             if (isClusterScoped || namespace) {
                 setLoading(true);
@@ -282,6 +290,56 @@ export function ResourceDetailsSheet({
                                         Drain
                                     </Button>
                                 </>
+                            )}
+
+                            {kind === "CronJob" && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-lg gap-2 text-xs font-semibold bg-background shadow-sm border-border text-foreground hover:bg-accent"
+                                    disabled={actioning || !details}
+                                    onClick={async () => {
+                                        const isSuspended = details?.raw?.spec?.suspend;
+                                        setConfirmConfig({
+                                            isOpen: true,
+                                            title: isSuspended ? "Resume CronJob" : "Suspend CronJob",
+                                            description: (
+                                                <>
+                                                    Are you sure you want to {isSuspended ? "resume" : "suspend"} CronJob <span className="font-mono font-bold text-foreground">{name}</span>?
+                                                </>
+                                            ),
+                                            confirmText: isSuspended ? "Resume" : "Suspend",
+                                            confirmVariant: "default",
+                                            onConfirm: async () => {
+                                                setActioning(true);
+                                                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                                                try {
+                                                    await api.post(`/kube/cron-jobs/suspend?context=${context}&namespace=${namespace}&name=${name}`, {
+                                                        suspend: !isSuspended
+                                                    });
+                                                    toast.success(`CronJob ${name} ${isSuspended ? "resumed" : "suspended"}`);
+                                                    fetchDetails();
+                                                } catch (err: any) {
+                                                    toast.error(err.message || "Action failed");
+                                                } finally {
+                                                    setActioning(false);
+                                                }
+                                            }
+                                        });
+                                    }}
+                                >
+                                    {details?.raw?.spec?.suspend ? (
+                                        <>
+                                            <PlayCircle className="h-3.5 w-3.5 text-teal-500" />
+                                            Resume
+                                        </>
+                                    ) : (
+                                        <>
+                                            <PauseCircle className="h-3.5 w-3.5 text-orange-500" />
+                                            Suspend
+                                        </>
+                                    )}
+                                </Button>
                             )}
 
                             <Button
