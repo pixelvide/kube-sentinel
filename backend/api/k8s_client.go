@@ -15,10 +15,11 @@ import (
 
 // Cache structure
 type cachedClient struct {
-	Clientset  *kubernetes.Clientset
-	Config     *rest.Config
-	LastMod    time.Time
-	KubeConfig string
+	Clientset    *kubernetes.Clientset
+	Config       *rest.Config
+	ClientConfig clientcmd.ClientConfig
+	LastMod      time.Time
+	KubeConfig   string
 }
 
 var (
@@ -28,14 +29,31 @@ var (
 
 // GetClientInfo returns a kubernetes clientset and rest config for a specific context and user storage namespace
 func GetClientInfo(storageNamespace string, contextName string) (*kubernetes.Clientset, *rest.Config, error) {
+	client, err := getCachedClient(storageNamespace, contextName)
+	if err != nil {
+		return nil, nil, err
+	}
+	return client.Clientset, client.Config, nil
+}
+
+// GetClientConfig returns the raw ClientConfig interface for use with other tools (like Helm)
+func GetClientConfig(storageNamespace string, contextName string) (clientcmd.ClientConfig, error) {
+	client, err := getCachedClient(storageNamespace, contextName)
+	if err != nil {
+		return nil, err
+	}
+	return client.ClientConfig, nil
+}
+
+func getCachedClient(storageNamespace string, contextName string) (*cachedClient, error) {
 	if storageNamespace == "" {
-		return nil, nil, os.ErrNotExist // Enforce isolation
+		return nil, os.ErrNotExist // Enforce isolation
 	}
 
 	kubeconfig := GetUserKubeConfigPath(storageNamespace)
 	fileInfo, err := os.Stat(kubeconfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	modTime := fileInfo.ModTime()
 
@@ -46,8 +64,7 @@ func GetClientInfo(storageNamespace string, contextName string) (*kubernetes.Cli
 	if cached, ok := clientCache[cacheKey]; ok {
 		if cached.LastMod.Equal(modTime) && cached.KubeConfig == kubeconfig {
 			cacheMutex.RUnlock()
-			// log.Printf("Cache Hit for %s", cacheKey)
-			return cached.Clientset, cached.Config, nil
+			return cached, nil
 		}
 	}
 	cacheMutex.RUnlock()
@@ -61,14 +78,14 @@ func GetClientInfo(storageNamespace string, contextName string) (*kubernetes.Cli
 	// Double check inside lock
 	if cached, ok := clientCache[cacheKey]; ok {
 		if cached.LastMod.Equal(modTime) && cached.KubeConfig == kubeconfig {
-			return cached.Clientset, cached.Config, nil
+			return cached, nil
 		}
 	}
 
 	// Load raw config to process contexts
 	config, err := clientcmd.LoadFromFile(kubeconfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// If no context provided, use current
@@ -98,21 +115,23 @@ func GetClientInfo(storageNamespace string, contextName string) (*kubernetes.Cli
 	clientConfig := clientcmd.NewNonInteractiveClientConfig(*config, contextName, &clientcmd.ConfigOverrides{}, nil)
 	restConfig, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Update Cache
-	clientCache[cacheKey] = &cachedClient{
-		Clientset:  clientset,
-		Config:     restConfig,
-		LastMod:    modTime,
-		KubeConfig: kubeconfig,
+	cached := &cachedClient{
+		Clientset:    clientset,
+		Config:       restConfig,
+		ClientConfig: clientConfig,
+		LastMod:      modTime,
+		KubeConfig:   kubeconfig,
 	}
+	clientCache[cacheKey] = cached
 
-	return clientset, restConfig, nil
+	return cached, nil
 }

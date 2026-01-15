@@ -27,7 +27,9 @@ import {
     AlertCircle,
     Settings,
     Cloud,
-    History
+    History,
+    Anchor,
+    CircleDashed
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -35,7 +37,7 @@ export interface NavigationItem {
     title: string;
     description: string;
     icon: any;
-    category?: 'Workloads' | 'Config' | 'Network' | 'Storage' | 'Access Control' | 'Settings';
+    category?: 'Workloads' | 'Config' | 'Network' | 'Storage' | 'Access Control' | 'Settings' | 'Helm';
     kind?: string; // Standard K8s Kind
     searchPlaceholder?: string;
     isClusterWide?: boolean;
@@ -445,5 +447,22 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         icon: History,
         category: 'Settings',
         showHeader: false
+    },
+    // Helm
+    {
+        path: "/kube-helm/releases",
+        title: "Helm Releases",
+        description: "Manage Helm releases",
+        icon: Anchor,
+        category: 'Helm',
+        showHeader: true
+    },
+    {
+        path: "/kube-helm/charts",
+        title: "Helm Charts",
+        description: "Browse Helm charts",
+        icon: CircleDashed,
+        category: 'Helm',
+        showHeader: true
     }
 ];

@@ -141,6 +141,7 @@ func main() {
 			kubeGroup.PUT("/resource", api.UpdateResource)
 			kubeGroup.DELETE("/resource", api.DeleteResource)
 			kubeGroup.GET("/dashboard", api.GetDashboardSummary)
+			kubeGroup.GET("/helm/releases", api.ListHelmReleases)
 
 			// WS Handler
 			kubeGroup.GET("/exec", api.HandleExec)

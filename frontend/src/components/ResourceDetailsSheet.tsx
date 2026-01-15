@@ -28,6 +28,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { RelatedPodsTable } from "@/components/RelatedPodsTable";
 
+
 interface ResourceDetailsSheetProps {
     isOpen: boolean;
     onClose: () => void;
@@ -416,6 +417,8 @@ export function ResourceDetailsSheet({
                             <KubeProperties resource={details.raw} />
 
                             <RelatedPodsTable resource={details.raw} context={context} />
+
+
 
                             {/* Events Section */}
                             <div className="space-y-3">

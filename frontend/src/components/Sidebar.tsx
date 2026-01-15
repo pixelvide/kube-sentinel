@@ -119,6 +119,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                             { type: 'category', value: 'Storage' },
                             { type: 'path', value: '/kube-namespaces' },
                             { type: 'path', value: '/kube-events' },
+                            { type: 'category', value: 'Helm' },
                             { type: 'category', value: 'Access Control' },
                             { type: 'category', value: 'Settings' }
                         ];
