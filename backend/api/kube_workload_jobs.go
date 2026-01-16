@@ -16,11 +16,6 @@ func GetJobs(c *gin.Context) {
 	ns := c.Query("namespace")
 	ctxName := c.Query("context")
 
-	if ns == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "namespace required"})
-		return
-	}
-
 	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config: " + err.Error()})
@@ -43,10 +38,21 @@ func GetJobs(c *gin.Context) {
 
 	var jobs []JobInfo
 
+	selector := c.Query("selector")
+	fieldSelector := c.Query("fieldSelector")
+	ownerUid := c.Query("ownerUid")
+
 	for _, singleNs := range namespaces {
 		// Note: singleNs can be empty if searchAll is true
+		listOpts := metav1.ListOptions{}
+		if selector != "" {
+			listOpts.LabelSelector = selector
+		}
+		if fieldSelector != "" {
+			listOpts.FieldSelector = fieldSelector
+		}
 
-		list, err := clientset.BatchV1().Jobs(singleNs).List(c.Request.Context(), metav1.ListOptions{})
+		list, err := clientset.BatchV1().Jobs(singleNs).List(c.Request.Context(), listOpts)
 		if err != nil {
 			if len(namespaces) == 1 {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -56,6 +62,19 @@ func GetJobs(c *gin.Context) {
 		}
 
 		for _, j := range list.Items {
+			if ownerUid != "" {
+				isOwned := false
+				for _, owner := range j.OwnerReferences {
+					if string(owner.UID) == ownerUid {
+						isOwned = true
+						break
+					}
+				}
+				if !isOwned {
+					continue
+				}
+			}
+
 			completions := int32(1)
 			if j.Spec.Completions != nil {
 				completions = *j.Spec.Completions

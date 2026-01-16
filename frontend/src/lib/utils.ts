@@ -11,10 +11,7 @@ export function formatAge(timestamp: string): string {
   if (isNaN(date.getTime())) return "-";
 
   const now = new Date();
-  const diff = now.getTime() - date.getTime();
-
-  // Handle future dates or negligible differences
-  if (diff < 0) return "0s";
+  const diff = Math.abs(now.getTime() - date.getTime());
 
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);

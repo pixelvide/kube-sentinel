@@ -28,6 +28,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { RelatedPodsTable } from "@/components/RelatedPodsTable";
 import { RelatedPVsTable } from "@/components/RelatedPVsTable";
+import { RelatedJobsTable } from "@/components/RelatedJobsTable";
 
 
 interface ResourceDetailsSheetProps {
@@ -460,6 +461,7 @@ export function ResourceDetailsSheet({
 
                             <RelatedPodsTable resource={details.raw} context={context} />
                             <RelatedPVsTable resource={details.raw} context={context} />
+                            <RelatedJobsTable resource={details.raw} context={context} />
 
                             {/* Events Section */}
                             <div className="space-y-3">

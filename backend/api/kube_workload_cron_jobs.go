@@ -37,6 +37,7 @@ func GetCronJobs(c *gin.Context) {
 		Name         string `json:"name"`
 		Namespace    string `json:"namespace"`
 		Schedule     string `json:"schedule"`
+		TimeZone     string `json:"timezone,omitempty"`
 		Suspend      bool   `json:"suspend"`
 		Active       int    `json:"active"`
 		LastSchedule string `json:"last_schedule"`
@@ -66,10 +67,15 @@ func GetCronJobs(c *gin.Context) {
 			if cj.Status.LastScheduleTime != nil {
 				lastSchedule = cj.Status.LastScheduleTime.Time.Format(time.RFC3339)
 			}
+			timezone := ""
+			if cj.Spec.TimeZone != nil {
+				timezone = *cj.Spec.TimeZone
+			}
 			cronjobs = append(cronjobs, CronJobInfo{
 				Name:         cj.Name,
 				Namespace:    cj.Namespace,
 				Schedule:     cj.Spec.Schedule,
+				TimeZone:     timezone,
 				Suspend:      suspend,
 				Active:       len(cj.Status.Active),
 				LastSchedule: lastSchedule,

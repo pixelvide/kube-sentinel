@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatAge, toYaml } from "@/lib/utils";
 import { ChevronDown, ChevronRight, Tags, StickyNote, Anchor, MapPin, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import cronParser from "cron-parser";
 
 interface KubePropertiesProps {
     resource: any;
@@ -53,7 +54,7 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
             if (status.active > 0) return "Active";
         }
         if (kind === "CronJob") {
-            return status.lastScheduleTime ? "Scheduled" : "Never Scheduled";
+            return null;
         }
 
         // Generic fallback for workloads with replicas
@@ -80,7 +81,34 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
         const { kind, spec, status } = res;
 
         if (kind === "CronJob") {
-            extra["Suspended"] = spec?.suspend ? "Yes" : "No";
+            const isSuspended = spec?.suspend;
+            extra["Suspended"] = isSuspended ? "Yes" : "No";
+            if (spec?.timeZone) extra["Timezone"] = spec.timeZone;
+            if (spec?.schedule) {
+                extra["Schedule"] = spec.schedule;
+                if (isSuspended) {
+                    extra["Next execution"] = "N/A";
+                } else {
+                    try {
+                        const parser = (cronParser as any).parse || (cronParser as any).default?.parse;
+                        if (parser) {
+                            const tz = spec?.timeZone || "UTC";
+                            const interval = parser(spec.schedule, { tz });
+                            // Convert to user local timezone for display
+                            const nextDate = interval.next().toDate();
+                            extra["Next execution"] = `${nextDate.toLocaleString()} (${formatAge(nextDate.toISOString())} from now)`;
+                        } else {
+                            extra["Next execution"] = "Parser Error";
+                        }
+                    } catch (e) {
+                        console.error("Failed to parse cron schedule:", e, "Schedule:", spec.schedule);
+                        extra["Next execution"] = "Invalid Schedule";
+                    }
+                }
+            }
+            if (status?.lastScheduleTime) {
+                extra["Last schedule"] = `${new Date(status.lastScheduleTime).toLocaleString()} (${formatAge(status.lastScheduleTime)} ago)`;
+            }
         } else if (kind === "Deployment") {
             if (spec?.selector?.matchLabels) {
                 extra["Selector"] = Object.entries(spec.selector.matchLabels).map(([k, v]) => `${k}=${v}`);

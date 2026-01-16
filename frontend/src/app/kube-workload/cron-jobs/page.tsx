@@ -9,11 +9,13 @@ import { cn, formatAge } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 import { api } from "@/lib/api";
+import cronParser from "cron-parser";
 
 interface CronJobInfo {
     name: string;
     namespace: string;
     schedule: string;
+    timezone?: string;
     suspend: boolean;
     active: number;
     last_schedule: string;
@@ -140,6 +142,11 @@ function CronJobsContent() {
                                                         <code className="text-[10px] font-mono bg-muted px-2 py-0.5 rounded">
                                                             {cj.schedule}
                                                         </code>
+                                                        {cj.timezone && (
+                                                            <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded">
+                                                                {cj.timezone}
+                                                            </span>
+                                                        )}
                                                         {cj.suspend && (
                                                             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gray-500/10 text-gray-600">
                                                                 Suspended
@@ -150,6 +157,19 @@ function CronJobsContent() {
                                                                 Last: {formatAge(cj.last_schedule)}
                                                             </span>
                                                         )}
+                                                        <span className="text-xs text-muted-foreground">
+                                                            Next: {cj.suspend ? "N/A" : (() => {
+                                                                try {
+                                                                    const parser = (cronParser as any).parse || (cronParser as any).default?.parse;
+                                                                    if (!parser) return "Parser Error";
+                                                                    const tz = cj.timezone || "UTC";
+                                                                    const nextDate = parser(cj.schedule, { tz }).next().toDate();
+                                                                    return nextDate.toLocaleString();
+                                                                } catch (e) {
+                                                                    return "Invalid Schedule";
+                                                                }
+                                                            })()}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
