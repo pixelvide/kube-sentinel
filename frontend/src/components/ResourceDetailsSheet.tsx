@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { KubeProperties } from "@/components/KubeProperties";
 import { Button } from "@/components/ui/button";
-import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit, PauseCircle, PlayCircle, Play } from "lucide-react";
+import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit, PauseCircle, PlayCircle, Play, Maximize2, Minus, Plus } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { LogViewerModal } from "@/components/LogViewerModal";
 import { api } from "@/lib/api";
@@ -98,6 +98,8 @@ export function ResourceDetailsSheet({
     const [editManifest, setEditManifest] = useState("");
     const [isRunDialogOpen, setIsRunDialogOpen] = useState(false);
     const [runJobName, setRunJobName] = useState("");
+    const [isScaleDialogOpen, setIsScaleDialogOpen] = useState(false);
+    const [scaleReplicas, setScaleReplicas] = useState(0);
 
     const [scopes, setScopes] = useState<Record<string, ResourceInfo>>({});
     const [logResource, setLogResource] = useState<{
@@ -386,6 +388,23 @@ export function ResourceDetailsSheet({
                                 </Button>
                             )}
 
+                            {["Deployment", "StatefulSet", "ReplicaSet"].includes(kind) && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-lg gap-2 text-xs font-semibold bg-background shadow-sm border-border text-foreground hover:bg-accent"
+                                    disabled={actioning || !details}
+                                    onClick={() => {
+                                        const replicas = details?.raw?.spec?.replicas || 0;
+                                        setScaleReplicas(replicas);
+                                        setIsScaleDialogOpen(true);
+                                    }}
+                                >
+                                    <Maximize2 className="h-3.5 w-3.5 text-blue-500" />
+                                    Scale
+                                </Button>
+                            )}
+
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -660,6 +679,80 @@ export function ResourceDetailsSheet({
                             disabled={actioning || !runJobName}
                         >
                             {actioning ? "Triggering..." : "Trigger"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isScaleDialogOpen} onOpenChange={setIsScaleDialogOpen}>
+                <DialogContent className="sm:max-w-[425px] bg-background border-border">
+                    <DialogHeader>
+                        <DialogTitle className="font-mono flex items-center gap-2">
+                            <Maximize2 className="h-5 w-5 text-blue-500" />
+                            Scale {kind}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Set the number of replicas for <span className="font-mono font-bold text-foreground">{name}</span>.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center justify-center gap-6 py-10">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-12 w-12 rounded-full border-2 hover:bg-accent transition-colors"
+                            onClick={() => setScaleReplicas(Math.max(0, scaleReplicas - 1))}
+                            disabled={scaleReplicas <= 0}
+                        >
+                            <Minus className="h-6 w-6" />
+                        </Button>
+                        <div className="flex flex-col items-center gap-1">
+                            <input
+                                type="number"
+                                value={scaleReplicas}
+                                onChange={(e) => setScaleReplicas(parseInt(e.target.value) || 0)}
+                                className="text-5xl font-black font-mono w-24 text-center bg-transparent border-none focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Replicas</span>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-12 w-12 rounded-full border-2 hover:bg-accent transition-colors"
+                            onClick={() => setScaleReplicas(scaleReplicas + 1)}
+                        >
+                            <Plus className="h-6 w-6" />
+                        </Button>
+                    </div>
+                    <DialogFooter className="bg-muted/30 -mx-6 -mb-6 p-6 mt-4 border-t border-border">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsScaleDialogOpen(false)}
+                            disabled={actioning}
+                            className="rounded-lg"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                setActioning(true);
+                                try {
+                                    await api.post(`/kube/resource/scale?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`, {
+                                        replicas: scaleReplicas
+                                    });
+                                    toast.success(`${kind} ${name} scaled to ${scaleReplicas}`);
+                                    setIsScaleDialogOpen(false);
+                                    fetchDetails();
+                                    onUpdate?.();
+                                } catch (err: any) {
+                                    toast.error(err.message || "Scale failed");
+                                } finally {
+                                    setActioning(false);
+                                }
+                            }}
+                            disabled={actioning}
+                            className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md"
+                        >
+                            {actioning ? "Scaling..." : "Scale Replicas"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

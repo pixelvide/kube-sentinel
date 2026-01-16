@@ -148,6 +148,7 @@ func main() {
 			kubeGroup.GET("/resource", api.GetResourceDetails)
 			kubeGroup.PUT("/resource", api.UpdateResource)
 			kubeGroup.DELETE("/resource", api.DeleteResource)
+			kubeGroup.POST("/resource/scale", api.ScaleResource)
 			kubeGroup.GET("/dashboard", api.GetDashboardSummary)
 			kubeGroup.GET("/helm/releases", api.ListHelmReleases)
 
