@@ -81,14 +81,14 @@ function DashboardContent() {
   };
 
   const statCards = [
-    { label: "Nodes", value: summary?.nodes ?? "-", icon: HardDrive, color: "text-emerald-500", bg: "bg-emerald-500/10", href: "/nodes" },
-    { label: "Namespaces", value: summary?.namespaces ?? "-", icon: Layers, color: "text-purple-500", bg: "bg-purple-500/10", href: "/namespaces" },
-    { label: "Pods", value: summary?.pods ?? "-", icon: Box, color: "text-blue-500", bg: "bg-blue-500/10", href: "/pods" },
-    { label: "Deployments", value: summary?.deployments ?? "-", icon: Layers, color: "text-indigo-500", bg: "bg-indigo-500/10", href: "/deployments" },
-    { label: "Services", value: summary?.services ?? "-", icon: Grid, color: "text-cyan-500", bg: "bg-cyan-500/10", href: "/services" },
-    { label: "Ingresses", value: summary?.ingresses ?? "-", icon: Globe, color: "text-pink-500", bg: "bg-pink-500/10", href: "/ingresses" },
-    { label: "Jobs", value: summary?.jobs ?? "-", icon: PlayCircle, color: "text-orange-500", bg: "bg-orange-500/10", href: "/jobs" },
-    { label: "CronJobs", value: summary?.cronjobs ?? "-", icon: Clock, color: "text-teal-500", bg: "bg-teal-500/10", href: "/cronjobs" },
+    { label: "Nodes", value: summary?.nodes ?? "-", icon: HardDrive, color: "text-emerald-500", bg: "bg-emerald-500/10", href: "/kube-nodes" },
+    { label: "Namespaces", value: summary?.namespaces ?? "-", icon: Layers, color: "text-purple-500", bg: "bg-purple-500/10", href: "/kube-namespaces" },
+    { label: "Pods", value: summary?.pods ?? "-", icon: Box, color: "text-blue-500", bg: "bg-blue-500/10", href: "/kube-workload/pods" },
+    { label: "Deployments", value: summary?.deployments ?? "-", icon: Layers, color: "text-indigo-500", bg: "bg-indigo-500/10", href: "/kube-workload/deployments" },
+    { label: "Services", value: summary?.services ?? "-", icon: Grid, color: "text-cyan-500", bg: "bg-cyan-500/10", href: "/kube-network/services" },
+    { label: "Ingresses", value: summary?.ingresses ?? "-", icon: Globe, color: "text-pink-500", bg: "bg-pink-500/10", href: "/kube-network/ingresses" },
+    { label: "Jobs", value: summary?.jobs ?? "-", icon: PlayCircle, color: "text-orange-500", bg: "bg-orange-500/10", href: "/kube-workload/jobs" },
+    { label: "CronJobs", value: summary?.cronjobs ?? "-", icon: Clock, color: "text-teal-500", bg: "bg-teal-500/10", href: "/kube-workload/cron-jobs" },
   ];
 
   return (
@@ -140,7 +140,7 @@ function DashboardContent() {
                     Recent Events
                   </CardTitle>
                   {selectedNamespace && (
-                    <Link href={getLinkHref("/events")} className="text-xs text-primary hover:underline">
+                    <Link href={getLinkHref("/kube-events")} className="text-xs text-primary hover:underline">
                       View all →
                     </Link>
                   )}

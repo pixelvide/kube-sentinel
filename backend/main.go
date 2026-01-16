@@ -143,6 +143,11 @@ func main() {
 			kubeGroup.GET("/dashboard", api.GetDashboardSummary)
 			kubeGroup.GET("/helm/releases", api.ListHelmReleases)
 
+			// CRDs
+			kubeGroup.GET("/crds", api.GetCustomResourceDefinitions)
+			kubeGroup.GET("/crds/:crd_name/resources", api.GetCustomResources)
+			kubeGroup.GET("/crds/:crd_name/resources/:name", api.GetCustomResourceDetails)
+
 			// WS Handler
 			kubeGroup.GET("/exec", api.HandleExec)
 			kubeGroup.GET("/logs", api.HandleLogs)

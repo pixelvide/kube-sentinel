@@ -219,7 +219,7 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                                         </Badge>
                                     </div>
                                 ) : (
-                                    <span className="text-foreground col-span-2 break-all font-bold text-xs">{prop.value}</span>
+                                    <span className="text-foreground col-span-2 break-all font-bold text-xs whitespace-normal">{prop.value}</span>
                                 )}
                             </div>
                         )
@@ -296,7 +296,7 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                                                 </Badge>
                                             ))
                                         ) : (
-                                            <span className="text-foreground break-all font-bold text-xs">{value}</span>
+                                            <span className="text-foreground break-all font-bold text-xs whitespace-normal">{value}</span>
                                         )}
                                     </div>
                                 </div>

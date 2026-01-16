@@ -36,6 +36,7 @@ interface ResourceDetailsSheetProps {
     namespace: string;
     name: string;
     kind: string;
+    crdName?: string;
 }
 
 interface EventSimple {
@@ -68,6 +69,7 @@ export function ResourceDetailsSheet({
     namespace,
     name,
     kind,
+    crdName,
 }: ResourceDetailsSheetProps) {
     const [details, setDetails] = useState<ResourceDetails | null>(null);
     const [loading, setLoading] = useState(false);
@@ -109,7 +111,21 @@ export function ResourceDetailsSheet({
     }, []);
 
     const fetchDetails = () => {
-        if (isOpen && context && name && kind && Object.keys(scopes).length > 0) {
+        if (!isOpen || !context || !name) return;
+
+        if (crdName) {
+            setLoading(true);
+            setError("");
+            api.get<ResourceDetails>(
+                `/kube/crds/${crdName}/resources/${name}?context=${context}&namespace=${namespace}`
+            )
+                .then((data) => setDetails(data))
+                .catch((err) => setError(err.message))
+                .finally(() => setLoading(false));
+            return;
+        }
+
+        if (kind && Object.keys(scopes).length > 0) {
             const resourceInfo = scopes[kind];
             const isClusterScoped = resourceInfo?.scope === "Cluster";
 
@@ -131,7 +147,7 @@ export function ResourceDetailsSheet({
         if (isOpen) {
             fetchDetails();
         }
-    }, [isOpen, context, namespace, name, kind, scopes]);
+    }, [isOpen, context, namespace, name, kind, scopes, crdName]);
 
     return (
         <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>

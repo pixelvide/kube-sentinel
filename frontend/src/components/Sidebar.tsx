@@ -121,6 +121,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                             { type: 'path', value: '/kube-events' },
                             { type: 'category', value: 'Helm' },
                             { type: 'category', value: 'Access Control' },
+                            { type: 'category', value: 'Custom Resources' },
                             { type: 'category', value: 'Settings' }
                         ];
 

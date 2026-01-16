@@ -37,7 +37,7 @@ export interface NavigationItem {
     title: string;
     description: string;
     icon: any;
-    category?: 'Workloads' | 'Config' | 'Network' | 'Storage' | 'Access Control' | 'Settings' | 'Helm';
+    category?: 'Workloads' | 'Config' | 'Network' | 'Storage' | 'Access Control' | 'Settings' | 'Helm' | 'Custom Resources';
     kind?: string; // Standard K8s Kind
     searchPlaceholder?: string;
     isClusterWide?: boolean;
@@ -154,8 +154,17 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     },
     // Config
     {
+        path: "/kube-crds",
+        title: "Custom Resources",
+        description: "Manage Custom Resource Definitions",
+        icon: FileCode,
+        category: 'Custom Resources',
+        searchPlaceholder: "Search CRDs...",
+        showHeader: true
+    },
+    {
         path: "/kube-config/config-maps",
-        title: "Config Maps",
+        title: "Config Map",
         description: "Manage configuration data",
         icon: FileCode,
         kind: "ConfigMap",
