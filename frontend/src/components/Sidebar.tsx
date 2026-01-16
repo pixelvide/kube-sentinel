@@ -22,7 +22,10 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
     const [user, setUser] = useState<UserProfile | null>(null);
     const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({
         'Workloads': true,
+        'Custom Resources': true,
     });
+    const [crds, setCrds] = useState<any[]>([]);
+    const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -37,7 +40,30 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
             }
         };
         fetchUser();
-    }, []);
+
+        // Fetch CRDs for sidebar
+        const fetchCRDs = async () => {
+            if (!currentContext) return;
+            try {
+                const res = await fetch(`/api/v1/kube/crds?context=${currentContext}`, { credentials: "include" });
+                if (res.ok) {
+                    const data = await res.json();
+                    setCrds(data.items || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch CRDs:", err);
+            }
+        };
+        fetchCRDs();
+    }, [currentContext]);
+
+    // Group CRDs
+    const groupedCrds = crds.reduce((acc, crd) => {
+        const group = crd.group || 'Other';
+        if (!acc[group]) acc[group] = [];
+        acc[group].push(crd);
+        return acc;
+    }, {} as Record<string, any[]>);
 
 
 
@@ -63,6 +89,10 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
 
     const toggleCategory = (category: string) => {
         setOpenCategories(prev => ({ ...prev, [category]: !prev[category] }));
+    };
+
+    const toggleGroup = (group: string) => {
+        setOpenGroups(prev => ({ ...prev, [group]: !prev[group] }));
     };
 
     const getInitials = (name: string) => {
@@ -146,7 +176,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                 );
                             } else {
                                 const categoryName = orderItem.value;
-                                const items = NAVIGATION_CONFIG.filter(i => i.category === categoryName);
+                                const items = NAVIGATION_CONFIG.filter(i => i.category === categoryName && !i.hideFromSidebar);
                                 if (items.length === 0) return null;
 
                                 // Find an icon for the category (use first item's icon)
@@ -185,6 +215,39 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                                         </Link>
                                                     );
                                                 })}
+                                                {/* Dynamic CRD Groups */}
+                                                {categoryName === 'Custom Resources' && (Object.entries(groupedCrds) as [string, any[]][]).sort().map(([group, groupCrds]) => (
+                                                    <div key={group} className="space-y-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="w-full justify-between gap-3 h-10 px-4 hover:bg-white/10 hover:text-white"
+                                                            onClick={() => toggleGroup(group)}
+                                                        >
+                                                            <div className="flex items-center gap-3 pl-2">
+                                                                <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                                                <span className="font-medium text-xs truncate max-w-[140px]" title={group}>{group}</span>
+                                                            </div>
+                                                            <ChevronDown className={cn("h-3 w-3 opacity-40 transition-transform", openGroups[group] && "rotate-180")} />
+                                                        </Button>
+                                                        {openGroups[group] && (
+                                                            <div className="ml-4 space-y-1 border-l border-white/5 pl-2">
+                                                                {groupCrds.map((crd: any) => (
+                                                                    <Link key={crd.name} href={getLinkHref(`/kube-crds/${crd.name}`)} className="block" onClick={onClose}>
+                                                                        <Button
+                                                                            variant={isActive(`/kube-crds/${crd.name}`) ? "secondary" : "ghost"}
+                                                                            className={cn(
+                                                                                "w-full justify-start gap-3 h-9 px-3 transition-all duration-200",
+                                                                                isActive(`/kube-crds/${crd.name}`) ? "bg-sidebar-accent text-white shadow-sm" : "hover:bg-white/10 hover:text-white"
+                                                                            )}
+                                                                        >
+                                                                            <span className="font-medium text-xs truncate" title={crd.kind}>{crd.kind}</span>
+                                                                        </Button>
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
                                             </div>
                                         )}
                                     </div>

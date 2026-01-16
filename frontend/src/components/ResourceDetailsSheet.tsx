@@ -117,7 +117,7 @@ export function ResourceDetailsSheet({
             setLoading(true);
             setError("");
             api.get<ResourceDetails>(
-                `/kube/crds/${crdName}/resources/${name}?context=${context}&namespace=${namespace}`
+                `/kube/crds/${encodeURIComponent(crdName)}/resources/${encodeURIComponent(name)}?context=${encodeURIComponent(context)}&namespace=${encodeURIComponent(namespace)}`
             )
                 .then((data) => setDetails(data))
                 .catch((err) => setError(err.message))

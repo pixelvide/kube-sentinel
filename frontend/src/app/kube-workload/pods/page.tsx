@@ -172,26 +172,6 @@ function PodsContent() {
                                                 <span className="text-xs font-mono text-muted-foreground uppercase">{pod.qos}</span>
                                             </div>
 
-                                            {/* Action Buttons */}
-                                            <div
-                                                className="flex flex-row items-center gap-2 min-w-[200px] justify-end"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="h-8 rounded-lg gap-2 text-xs font-semibold"
-                                                    disabled={pod.status !== "Running" || pod.containers.length === 0}
-                                                    onClick={() => {
-                                                        const container = pod.containers.length > 0 ? pod.containers[0] : "";
-                                                        window.open(`/exec?context=${selectedContext}&namespace=${pod.namespace}&pod=${pod.name}&container=${container}`, "_blank");
-                                                    }}
-                                                >
-                                                    <Box className="h-3.5 w-3.5" />
-                                                    Terminal
-                                                </Button>
-                                            </div>
-
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
                                                 <span className="text-xs text-muted-foreground">{formatAge(pod.age)}</span>

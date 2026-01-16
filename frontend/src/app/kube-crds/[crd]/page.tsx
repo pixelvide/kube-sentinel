@@ -59,7 +59,7 @@ function CustomResourcesContent() {
         setResources([]);
         try {
             const data = await api.get<{ items: CRResource[], crd: CRDMeta }>(
-                `/kube/crds/${crdName}/resources?context=${selectedContext}&namespace=${selectedNamespace}`
+                `/kube/crds/${encodeURIComponent(crdName)}/resources?context=${encodeURIComponent(selectedContext)}&namespace=${encodeURIComponent(selectedNamespace)}`
             );
             setResources(data.items || []);
             setCrdMeta(data.crd);
@@ -81,12 +81,6 @@ function CustomResourcesContent() {
             <div className="w-full max-w-6xl space-y-8">
                 {/* Header Back Button */}
                 <div className="flex items-center gap-2">
-                    <Link href={`/kube-crds?context=${selectedContext}`}>
-                        <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to CRDs
-                        </Button>
-                    </Link>
                 </div>
 
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
@@ -103,7 +97,7 @@ function CustomResourcesContent() {
                                     )}
                                 </CardTitle>
                                 <CardDescription>
-                                    {crdMeta?.scope === "Namespace" && (!selectedNamespace)
+                                    {(crdMeta?.scope === "Namespace" || crdMeta?.scope === "Namespaced") && (!selectedNamespace || selectedNamespace === '__all__')
                                         ? "Select a namespace to view resources"
                                         : `${resources.length} items found`
                                     }

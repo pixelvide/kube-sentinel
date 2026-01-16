@@ -48,29 +48,14 @@ export default function CRDsPage() {
         c.kind.toLowerCase().includes(search.toLowerCase())
     );
 
+    useEffect(() => {
+        const query = searchParams.get("q") || "";
+        setSearch(query);
+    }, [searchParams]);
+
+
     return (
         <div className="h-full flex flex-col">
-            <div className="p-4 border-b flex items-center justify-between bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <FileCode className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-semibold tracking-tight">Custom Resource Definitions</h1>
-                        <p className="text-xs text-muted-foreground">{crds.length} definitions found</p>
-                    </div>
-                </div>
-                <div className="w-64 relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search CRDs..."
-                        className="pl-9 bg-background/50"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-            </div>
-
             <div className="flex-1 overflow-auto p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filtered.map(crd => (

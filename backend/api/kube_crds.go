@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log"
 	"sort"
 	"time"
 
@@ -149,10 +150,14 @@ func GetCustomResources(c *gin.Context) {
 	gvr := schema.GroupVersionResource{Group: group, Version: version, Resource: plural}
 	var list *unstructured.UnstructuredList
 
-	if scope == "Namespace" && ns != "" {
+	if ns == "__all__" {
+		ns = ""
+	}
+
+	if scope == "Namespaced" && ns != "" {
 		list, err = dynamicClient.Resource(gvr).Namespace(ns).List(c.Request.Context(), metav1.ListOptions{})
 	} else {
-		// If scope is Cluster, ns is ignored. If scope is Namespace and ns is empty, list all namespaces
+		// If scope is Cluster, ns is ignored. If scope is Namespaced and ns is empty, list all namespaces
 		list, err = dynamicClient.Resource(gvr).List(c.Request.Context(), metav1.ListOptions{})
 	}
 
@@ -211,6 +216,8 @@ func GetCustomResourceDetails(c *gin.Context) {
 		return
 	}
 
+	log.Printf("[DEBUG] Fetching CRD details. CRD: %s, Name: %s, Namespace: %s, Context: %s", crdName, name, ns, ctxName)
+
 	dynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create dynamic client: " + err.Error()})
@@ -246,8 +253,11 @@ func GetCustomResourceDetails(c *gin.Context) {
 	}
 
 	gvr := schema.GroupVersionResource{Group: group, Version: version, Resource: plural}
+
+	log.Printf("[DEBUG] Resolved GVR: %+v, Scope: %s", gvr, scope)
+
 	var dr dynamic.ResourceInterface
-	if scope == "Namespace" {
+	if scope == "Namespaced" {
 		dr = dynamicClient.Resource(gvr).Namespace(ns)
 	} else {
 		dr = dynamicClient.Resource(gvr)

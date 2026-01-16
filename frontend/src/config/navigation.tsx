@@ -42,6 +42,7 @@ export interface NavigationItem {
     searchPlaceholder?: string;
     isClusterWide?: boolean;
     showHeader?: boolean;
+    hideFromSidebar?: boolean;
 }
 
 export const NAVIGATION_CONFIG: NavigationItem[] = [
@@ -155,12 +156,22 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     // Config
     {
         path: "/kube-crds",
-        title: "Custom Resources",
+        title: "Definitions",
         description: "Manage Custom Resource Definitions",
         icon: FileCode,
         category: 'Custom Resources',
         searchPlaceholder: "Search CRDs...",
         showHeader: true
+    },
+    {
+        path: "/kube-crds/[crd]",
+        title: "Custom Resources",
+        description: "Manage Custom Resource Definitions",
+        icon: FileCode,
+        category: 'Custom Resources',
+        searchPlaceholder: "Search resources...",
+        showHeader: true,
+        hideFromSidebar: true
     },
     {
         path: "/kube-config/config-maps",

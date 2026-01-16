@@ -25,8 +25,8 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
     // Auth check for protected pages
     useEffect(() => {
-        // Skip auth check for login and exec pages
-        if (isLoginPage || isExecPage) {
+        // Skip auth check for login page
+        if (isLoginPage) {
             setIsAuthChecking(false);
             return;
         }
@@ -46,7 +46,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             setIsAuthChecking(false);
         };
         checkAuth();
-    }, [pathname, isLoginPage, isExecPage, router]);
+    }, [pathname, isLoginPage, router]);
 
     // Close sidebar on path change
     useEffect(() => {
@@ -66,8 +66,27 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         );
     }
 
-    const isContextPage = Object.keys(PAGE_CONFIG).includes(pathname);
-    const currentPage = PAGE_CONFIG[pathname];
+    // Helper to find configuration for current path
+    const getCurrentPageConfig = (currentPath: string) => {
+        // Try exact match first
+        if (PAGE_CONFIG[currentPath]) {
+            return PAGE_CONFIG[currentPath];
+        }
+
+        // Try to find a matching dynamic route
+        // We look for navigation items with brackets like /kube-crds/[crd]
+        return NAVIGATION_CONFIG.find(item => {
+            if (!item.path.includes('[')) return false;
+
+            // Convert pattern to regex
+            // e.g. /kube-crds/[crd] -> /kube-crds/[^/]+
+            const pattern = item.path.replace(/\[[^\]]+\]/g, '[^/]+');
+            const regex = new RegExp(`^${pattern}$`);
+            return regex.test(currentPath);
+        });
+    };
+
+    const currentPage = getCurrentPageConfig(pathname);
 
     return (
         <div className="flex min-h-screen md:h-screen md:overflow-hidden bg-background">
