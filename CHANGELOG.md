@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v1.0.0...v1.1.0) (2026-01-16)
+
+
+### Features
+
+* allow manual triggering of cronjobs from sidebar ([9048f3d](https://github.com/pixelvide/cloud-sentinel-k8s/commit/9048f3d8290bffe8aa3fa0e6c689578c3a7642d9))
+* auto-refresh resource lists on update and ignore swe-worker files ([095ee16](https://github.com/pixelvide/cloud-sentinel-k8s/commit/095ee1691018ff29a78cabe48ba23b8940513bdc))
+
 ## 1.0.0 (2026-01-16)
 
 
