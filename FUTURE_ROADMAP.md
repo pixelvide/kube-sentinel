@@ -1,28 +1,16 @@
 # Future Roadmap & Project Improvements
 
-This document outlines potential files, documentation, and feature enhancements that can be added to the `Cloud Sentinel` project to improve its maintainability, developer experience, and functional capabilities.
+This document outlines potential feature enhancements and project improvements planned for `Cloud Sentinel`.
 
-## 1. Operations & Automation (GitLab)
-- **`Makefile`**: Entry point for common commands (`make run`, `make build`, `make docker`).
-- **`.gitlab-ci.yml`**: GitLab CI/CD configuration.
-    - Stages: `build`, `test`, `deploy`.
-    - Automated linting and testing.
-    - Container registry integration.
-    - Helm/Kustomize deployment steps.
-
-## 2. Testing & Quality
+## 1. Testing & Quality
 - **`TESTING.md`**: Strategies for unit, integration, and E2E testing.
 - **`e2e/`**: Directory for End-to-End tests (e.g., Playwright/Cypress).
 
-## 3. Deployment
+## 2. Deployment & IaC
 - **`k8s/`**: Manifests or Helm charts for deploying Cloud Sentinel.
 - **`terraform/`**: IaC for provisioning required cloud resources.
 
-## 4. Documentation Improvements
-- **`CHANGELOG.md`**: Log of notable changes for each release.
-- **`SECURITY.md`**: Vulnerability reporting instructions.
-
-## 5. Proposed Feature Enhancements
+## 3. Proposed Feature Enhancements
 
 ### Compute & Orchestration
 - **Metrics Dashboard**: Integration with Prometheus/Grafana to show real-time CPU/Memory usage graphs for Pods and Nodes.
