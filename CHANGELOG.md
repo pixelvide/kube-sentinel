@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v1.5.0...v1.6.0) (2026-01-16)
+
+
+### Features
+
+* add resource anomaly detection engine and UI insights ([ad079ba](https://github.com/pixelvide/cloud-sentinel-k8s/commit/ad079ba3dbf71d4b52e8dd343c657fc6956414e1))
+
 ## [1.5.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v1.4.0...v1.5.0) (2026-01-16)
 
 
