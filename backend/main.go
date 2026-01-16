@@ -104,6 +104,7 @@ func main() {
 			kubeGroup.GET("/jobs", api.GetJobs)
 			kubeGroup.GET("/cron-jobs", api.GetCronJobs)
 			kubeGroup.POST("/cron-jobs/suspend", api.ToggleCronJobSuspend)
+			kubeGroup.POST("/cron-jobs/trigger", api.TriggerCronJob)
 			kubeGroup.GET("/daemon-sets", api.GetDaemonSets)
 			kubeGroup.GET("/stateful-sets", api.GetStatefulSets)
 

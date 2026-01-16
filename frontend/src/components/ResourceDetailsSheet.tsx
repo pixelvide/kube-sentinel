@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { KubeProperties } from "@/components/KubeProperties";
 import { Button } from "@/components/ui/button";
-import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit, PauseCircle, PlayCircle } from "lucide-react";
+import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit, PauseCircle, PlayCircle, Play } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { LogViewerModal } from "@/components/LogViewerModal";
 import { api } from "@/lib/api";
@@ -92,6 +92,8 @@ export function ResourceDetailsSheet({
     const [error, setError] = useState("");
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editManifest, setEditManifest] = useState("");
+    const [isRunDialogOpen, setIsRunDialogOpen] = useState(false);
+    const [runJobName, setRunJobName] = useState("");
 
     const [scopes, setScopes] = useState<Record<string, ResourceInfo>>({});
     const [logResource, setLogResource] = useState<{
@@ -360,6 +362,23 @@ export function ResourceDetailsSheet({
                                 </Button>
                             )}
 
+                            {kind === "CronJob" && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-lg gap-2 text-xs font-semibold bg-background shadow-sm border-border text-foreground hover:bg-accent"
+                                    disabled={actioning || !details}
+                                    onClick={() => {
+                                        const timestamp = Math.floor(Date.now() / 1000);
+                                        setRunJobName(`${name}-manual-${timestamp}`);
+                                        setIsRunDialogOpen(true);
+                                    }}
+                                >
+                                    <Play className="h-3.5 w-3.5 text-blue-500" />
+                                    Run
+                                </Button>
+                            )}
+
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -434,8 +453,6 @@ export function ResourceDetailsSheet({
 
                             <RelatedPodsTable resource={details.raw} context={context} />
 
-
-
                             {/* Events Section */}
                             <div className="space-y-3">
                                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -499,7 +516,7 @@ export function ResourceDetailsSheet({
                         </div>
                     )}
                 </div>
-            </SheetContent>
+            </SheetContent >
 
             {
                 logResource && (
@@ -575,6 +592,63 @@ export function ResourceDetailsSheet({
                             disabled={actioning}
                         >
                             {actioning ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isRunDialogOpen} onOpenChange={setIsRunDialogOpen}>
+                <DialogContent className="sm:max-w-[425px] bg-background border-border">
+                    <DialogHeader>
+                        <DialogTitle className="font-mono flex items-center gap-2">
+                            <Play className="h-5 w-5 text-blue-500" />
+                            Trigger CronJob
+                        </DialogTitle>
+                        <DialogDescription>
+                            Manually trigger a job from <span className="font-mono font-bold text-foreground">{name}</span>.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <label htmlFor="jobName" className="text-right text-sm font-medium">
+                                Job Name
+                            </label>
+                            <input
+                                id="jobName"
+                                value={runJobName}
+                                onChange={(e) => setRunJobName(e.target.value)}
+                                className="col-span-3 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsRunDialogOpen(false)}
+                            disabled={actioning}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                setActioning(true);
+                                try {
+                                    const res = await api.post<{ jobName: string }>(`/kube/cron-jobs/trigger?context=${context}&namespace=${namespace}&name=${name}`, {
+                                        jobName: runJobName
+                                    });
+                                    toast.success(`Job ${res.jobName} created successfully`);
+                                    setIsRunDialogOpen(false);
+                                    // Optionally refresh to show the new job in related lists if any? 
+                                    // For now just closing.
+                                } catch (err: any) {
+                                    toast.error(err.message || "Trigger failed");
+                                } finally {
+                                    setActioning(false);
+                                }
+                            }}
+                            disabled={actioning || !runJobName}
+                        >
+                            {actioning ? "Triggering..." : "Trigger"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
