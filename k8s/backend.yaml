@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-sentinel-backend
+  labels:
+    app: cloud-sentinel
+    component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-sentinel
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: cloud-sentinel
+        component: backend
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/pixcorp/cloud-sentinel-k8s-backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: GIN_MODE
+          value: "release"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: DB_HOST
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: DB_USER
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: DB_NAME
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: DB_PORT
+        - name: DB_SSLMODE
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: DB_SSLMODE
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cloud-sentinel-secrets
+              key: DB_PASSWORD
+        - name: OIDC_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: OIDC_ISSUER
+        - name: OIDC_CLIENT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: OIDC_CLIENT_ID
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cloud-sentinel-secrets
+              key: OIDC_CLIENT_SECRET
+        - name: FRONTEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: cloud-sentinel-config
+              key: FRONTEND_URL
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-sentinel-backend
+spec:
+  selector:
+    app: cloud-sentinel
+    component: backend
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP

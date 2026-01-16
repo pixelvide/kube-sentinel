@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-sentinel-frontend
+  labels:
+    app: cloud-sentinel
+    component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-sentinel
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: cloud-sentinel
+        component: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/pixcorp/cloud-sentinel-k8s-frontend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NEXT_PUBLIC_API_URL
+          value: "http://cloud-sentinel-backend:8080"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-sentinel-frontend
+spec:
+  selector:
+    app: cloud-sentinel
+    component: frontend
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: LoadBalancer

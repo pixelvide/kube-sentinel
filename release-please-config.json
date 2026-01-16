@@ -1,7 +1,17 @@
 {
     "packages": {
         ".": {
-            "release-type": "simple"
+            "release-type": "simple",
+            "extra-files": [
+                {
+                    "type": "json",
+                    "path": "release-please-config.json"
+                },
+                {
+                    "type": "yaml",
+                    "path": "k8s/kustomization.yaml"
+                }
+            ]
         }
     }
 }

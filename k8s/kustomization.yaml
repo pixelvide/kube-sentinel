@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - backend.yaml
+  - frontend.yaml
+
+images:
+  - name: ghcr.io/pixcorp/cloud-sentinel-k8s-backend
+    newName: ghcr.io/pixcorp/cloud-sentinel-k8s-backend
+    newTag: 1.1.0
+  - name: ghcr.io/pixcorp/cloud-sentinel-k8s-frontend
+    newName: ghcr.io/pixcorp/cloud-sentinel-k8s-frontend
+    newTag: 1.1.0
