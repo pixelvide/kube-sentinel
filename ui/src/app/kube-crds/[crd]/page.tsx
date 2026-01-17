@@ -42,9 +42,7 @@ function CustomResourcesContent() {
     const [loading, setLoading] = useState(false);
     const [selectedResource, setSelectedResource] = useState<CRResource | null>(null);
 
-    const filteredResources = resources.filter(res =>
-        res.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredResources = resources.filter((res) => res.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext) {
@@ -59,8 +57,8 @@ function CustomResourcesContent() {
         setResources([]);
         try {
             const url = `/kube/crds/${encodeURIComponent(crdName)}/resources?namespace=${encodeURIComponent(selectedNamespace)}`;
-            const data = await api.get<{ items: CRResource[], crd: CRDMeta }>(url, {
-                headers: { "x-kube-context": selectedContext || "" }
+            const data = await api.get<{ items: CRResource[]; crd: CRDMeta }>(url, {
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setResources(data.items || []);
             setCrdMeta(data.crd);
@@ -81,8 +79,7 @@ function CustomResourcesContent() {
         <div className="flex flex-col items-center w-full min-h-screen bg-background/50 p-4 md:p-0">
             <div className="w-full max-w-6xl space-y-8">
                 {/* Header Back Button */}
-                <div className="flex items-center gap-2">
-                </div>
+                <div className="flex items-center gap-2"></div>
 
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
                     <CardHeader className="border-b bg-card/50 px-8 py-6">
@@ -98,10 +95,10 @@ function CustomResourcesContent() {
                                     )}
                                 </CardTitle>
                                 <CardDescription>
-                                    {(crdMeta?.scope === "Namespace" || crdMeta?.scope === "Namespaced") && (!selectedNamespace || selectedNamespace === '__all__')
+                                    {(crdMeta?.scope === "Namespace" || crdMeta?.scope === "Namespaced") &&
+                                    (!selectedNamespace || selectedNamespace === "__all__")
                                         ? "Select a namespace to view resources"
-                                        : `${resources.length} items found`
-                                    }
+                                        : `${resources.length} items found`}
                                 </CardDescription>
                             </div>
                             <Button
@@ -124,20 +121,16 @@ function CustomResourcesContent() {
                         ) : !selectedContext ? (
                             <div className="text-center py-12">
                                 <Box className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    Select a cluster from the top bar.
-                                </p>
+                                <p className="text-muted-foreground text-sm">Select a cluster from the top bar.</p>
                             </div>
                         ) : resources.length === 0 ? (
                             <div className="text-center py-12">
                                 <Box className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No resources found.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No resources found.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredResources.map(res => (
+                                {filteredResources.map((res) => (
                                     <div
                                         key={res.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -149,13 +142,21 @@ function CustomResourcesContent() {
                                                 <p className="font-semibold text-base truncate">{res.name}</p>
                                                 {/* Labels */}
                                                 <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                                    {res.labels && Object.entries(res.labels).slice(0, 3).map(([k, v]) => (
-                                                        <span key={k} className="text-[10px] bg-background border px-2 py-0.5 rounded-full text-muted-foreground truncate max-w-[200px]">
-                                                            {k}={v}
-                                                        </span>
-                                                    ))}
+                                                    {res.labels &&
+                                                        Object.entries(res.labels)
+                                                            .slice(0, 3)
+                                                            .map(([k, v]) => (
+                                                                <span
+                                                                    key={k}
+                                                                    className="text-[10px] bg-background border px-2 py-0.5 rounded-full text-muted-foreground truncate max-w-[200px]"
+                                                                >
+                                                                    {k}={v}
+                                                                </span>
+                                                            ))}
                                                     {res.labels && Object.keys(res.labels).length > 3 && (
-                                                        <span className="text-[10px] text-muted-foreground">+{Object.keys(res.labels).length - 3} more</span>
+                                                        <span className="text-[10px] text-muted-foreground">
+                                                            +{Object.keys(res.labels).length - 3} more
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
@@ -170,7 +171,9 @@ function CustomResourcesContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(res.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(res.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -197,7 +200,13 @@ function CustomResourcesContent() {
 
 export default function CRDResourcesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <CustomResourcesContent />
         </Suspense>
     );

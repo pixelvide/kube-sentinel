@@ -39,9 +39,7 @@ function JobsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedJob, setSelectedJob] = useState<JobInfo | null>(null);
 
-    const filteredJobs = jobs.filter(j =>
-        j.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredJobs = jobs.filter((j) => j.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -56,7 +54,7 @@ function JobsContent() {
         setJobs([]);
         try {
             const data = await api.get<any>(`/kube/jobs?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setJobs(data.jobs || []);
         } catch (error) {
@@ -91,7 +89,9 @@ function JobsContent() {
                                     {jobs.length} Jobs Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view jobs" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view jobs"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -128,13 +128,11 @@ function JobsContent() {
                         ) : jobs.length === 0 ? (
                             <div className="text-center py-12">
                                 <PlayCircle className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No jobs found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No jobs found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredJobs.map(j => {
+                                {filteredJobs.map((j) => {
                                     const status = getJobStatus(j);
                                     return (
                                         <div
@@ -144,12 +142,18 @@ function JobsContent() {
                                         >
                                             <div className="flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
                                                 <div className="flex items-center gap-4 min-w-0">
-                                                    <div className={cn(
-                                                        "p-3 rounded-xl",
-                                                        status === "Complete" ? "bg-green-500/10" :
-                                                            status === "Failed" ? "bg-red-500/10" :
-                                                                status === "Running" ? "bg-amber-500/10" : "bg-gray-500/10"
-                                                    )}>
+                                                    <div
+                                                        className={cn(
+                                                            "p-3 rounded-xl",
+                                                            status === "Complete"
+                                                                ? "bg-green-500/10"
+                                                                : status === "Failed"
+                                                                  ? "bg-red-500/10"
+                                                                  : status === "Running"
+                                                                    ? "bg-amber-500/10"
+                                                                    : "bg-gray-500/10"
+                                                        )}
+                                                    >
                                                         {status === "Complete" ? (
                                                             <CheckCircle2 className="h-6 w-6 text-green-500" />
                                                         ) : status === "Failed" ? (
@@ -161,12 +165,16 @@ function JobsContent() {
                                                     <div className="min-w-0">
                                                         <p className="font-semibold text-base truncate">{j.name}</p>
                                                         <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                            <span className={cn(
-                                                                "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
-                                                                status === "Complete" ? "bg-green-500/10 text-green-600" :
-                                                                    status === "Failed" ? "bg-red-500/10 text-red-600" :
-                                                                        "bg-amber-500/10 text-amber-600"
-                                                            )}>
+                                                            <span
+                                                                className={cn(
+                                                                    "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
+                                                                    status === "Complete"
+                                                                        ? "bg-green-500/10 text-green-600"
+                                                                        : status === "Failed"
+                                                                          ? "bg-red-500/10 text-red-600"
+                                                                          : "bg-amber-500/10 text-amber-600"
+                                                                )}
+                                                            >
                                                                 {j.succeeded}/{j.completions} completed
                                                             </span>
                                                         </div>
@@ -183,7 +191,9 @@ function JobsContent() {
 
                                                 {/* Age */}
                                                 <div className="flex flex-col items-end min-w-[80px]">
-                                                    <span className="text-xs text-muted-foreground">{formatAge(j.age)}</span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {formatAge(j.age)}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -210,7 +220,13 @@ function JobsContent() {
 
 export default function JobsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <JobsContent />
         </Suspense>
     );

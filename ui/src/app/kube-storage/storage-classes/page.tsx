@@ -28,9 +28,7 @@ function StorageClassesContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedItem, setSelectedItem] = useState<StorageClassInfo | null>(null);
 
-    const filteredItems = classes.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = classes.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext) {
@@ -45,7 +43,7 @@ function StorageClassesContent() {
         setClasses([]);
         try {
             const data = await api.get<any>(`/kube/storage-classes`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setClasses(data.storageclasses || []);
         } catch (error) {
@@ -73,7 +71,9 @@ function StorageClassesContent() {
                                     {classes.length} Storage Classes Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext ? "Select a cluster from the top bar to view storage classes" : "Cluster-wide storage provisioning configs"}
+                                    {!selectedContext
+                                        ? "Select a cluster from the top bar to view storage classes"
+                                        : "Cluster-wide storage provisioning configs"}
                                 </CardDescription>
                             </div>
                             <Button
@@ -109,7 +109,7 @@ function StorageClassesContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredItems.map(item => (
+                                {filteredItems.map((item) => (
                                     <div
                                         key={item.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -120,7 +120,10 @@ function StorageClassesContent() {
                                                 <div className="flex items-center gap-2">
                                                     <p className="font-semibold text-base truncate">{item.name}</p>
                                                     {item.is_default && (
-                                                        <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-indigo-200 text-[10px] font-bold px-1.5 h-4">
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="bg-indigo-50 text-indigo-700 border-indigo-200 text-[10px] font-bold px-1.5 h-4"
+                                                        >
                                                             default
                                                         </Badge>
                                                     )}
@@ -140,7 +143,9 @@ function StorageClassesContent() {
                                             </div>
 
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(item.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(item.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -160,13 +165,19 @@ function StorageClassesContent() {
                 kind="StorageClass"
                 onUpdate={handleRefresh}
             />
-        </div >
+        </div>
     );
 }
 
 export default function StorageClassesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <StorageClassesContent />
         </Suspense>
     );

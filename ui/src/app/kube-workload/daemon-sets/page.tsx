@@ -51,7 +51,7 @@ function DaemonSetsContent() {
         setDaemonSets([]);
         try {
             const data = await api.get<any>(`/kube/daemon-sets?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setDaemonSets(data.daemonsets || []);
         } catch (error) {
@@ -67,15 +67,15 @@ function DaemonSetsContent() {
         }
     };
 
-    const filteredDaemonSets = daemonsets.filter(ds =>
-        ds.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ds.namespace.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredDaemonSets = daemonsets.filter(
+        (ds) =>
+            ds.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            ds.namespace.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-background/50 p-4 md:p-0">
             <div className="w-full max-w-6xl space-y-8">
-
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
                     <CardHeader className="border-b bg-card/50 px-8 py-6">
                         <div className="flex items-center justify-between">
@@ -104,7 +104,9 @@ function DaemonSetsContent() {
                             </div>
                         ) : filteredDaemonSets.length === 0 ? (
                             <div className="text-center py-20 text-muted-foreground">
-                                {selectedContext && selectedNamespace ? "No daemonsets found in selected namespace(s)." : "Select a context and namespace to view daemonsets."}
+                                {selectedContext && selectedNamespace
+                                    ? "No daemonsets found in selected namespace(s)."
+                                    : "Select a context and namespace to view daemonsets."}
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-3">
@@ -115,10 +117,14 @@ function DaemonSetsContent() {
                                         onClick={() => setSelectedDaemonSet(ds)}
                                     >
                                         <div className="flex items-center gap-4 min-w-0">
-                                            <div className={cn(
-                                                "p-3 rounded-xl",
-                                                ds.ready === ds.desired_scheduled ? "bg-green-500/10" : "bg-amber-500/10"
-                                            )}>
+                                            <div
+                                                className={cn(
+                                                    "p-3 rounded-xl",
+                                                    ds.ready === ds.desired_scheduled
+                                                        ? "bg-green-500/10"
+                                                        : "bg-amber-500/10"
+                                                )}
+                                            >
                                                 {ds.ready === ds.desired_scheduled ? (
                                                     <CheckCircle2 className="h-6 w-6 text-green-500" />
                                                 ) : (
@@ -170,7 +176,13 @@ function DaemonSetsContent() {
 
 export default function DaemonSetsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <DaemonSetsContent />
         </Suspense>
     );

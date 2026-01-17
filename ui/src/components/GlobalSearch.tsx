@@ -58,7 +58,9 @@ function GlobalSearchContent({ placeholder = "Search..." }: { placeholder?: stri
 
 export function GlobalSearch({ placeholder }: { placeholder?: string }) {
     return (
-        <Suspense fallback={<div className="w-full md:w-[300px] lg:w-[400px] h-9 bg-muted/20 animate-pulse rounded-md" />}>
+        <Suspense
+            fallback={<div className="w-full md:w-[300px] lg:w-[400px] h-9 bg-muted/20 animate-pulse rounded-md" />}
+        >
             <GlobalSearchContent placeholder={placeholder} />
         </Suspense>
     );

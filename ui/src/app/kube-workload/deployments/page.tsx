@@ -38,9 +38,7 @@ function DeploymentsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedDeployment, setSelectedDeployment] = useState<DeploymentInfo | null>(null);
 
-    const filteredDeployments = deployments.filter(d =>
-        d.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredDeployments = deployments.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -55,7 +53,7 @@ function DeploymentsContent() {
         setDeployments([]);
         try {
             const data = await api.get<any>(`/kube/deployments?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setDeployments(data.deployments || []);
         } catch (error) {
@@ -83,7 +81,9 @@ function DeploymentsContent() {
                                     {deployments.length} Deployments Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view deployments" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view deployments"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -120,13 +120,11 @@ function DeploymentsContent() {
                         ) : deployments.length === 0 ? (
                             <div className="text-center py-12">
                                 <Layers className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No deployments found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No deployments found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredDeployments.map(d => (
+                                {filteredDeployments.map((d) => (
                                     <div
                                         key={d.name + d.namespace}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -134,10 +132,14 @@ function DeploymentsContent() {
                                     >
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
                                             <div className="flex items-center gap-4 min-w-0">
-                                                <div className={cn(
-                                                    "p-3 rounded-xl",
-                                                    d.ready_replicas === d.replicas ? "bg-green-500/10" : "bg-amber-500/10"
-                                                )}>
+                                                <div
+                                                    className={cn(
+                                                        "p-3 rounded-xl",
+                                                        d.ready_replicas === d.replicas
+                                                            ? "bg-green-500/10"
+                                                            : "bg-amber-500/10"
+                                                    )}
+                                                >
                                                     {d.ready_replicas === d.replicas ? (
                                                         <CheckCircle2 className="h-6 w-6 text-green-500" />
                                                     ) : (
@@ -164,7 +166,9 @@ function DeploymentsContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(d.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(d.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -190,7 +194,13 @@ function DeploymentsContent() {
 
 export default function DeploymentsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <DeploymentsContent />
         </Suspense>
     );

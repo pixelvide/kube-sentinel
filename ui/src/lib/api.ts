@@ -2,9 +2,10 @@ import { API_URL } from "./config";
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
     // If it's a relative path, prepend API_URL
-    const url = path.startsWith("http") || path.startsWith("/") && path.startsWith(API_URL)
-        ? path
-        : `${API_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    const url =
+        path.startsWith("http") || (path.startsWith("/") && path.startsWith(API_URL))
+            ? path
+            : `${API_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 
     const defaultOptions: RequestInit = {
         credentials: "include",
@@ -108,8 +109,8 @@ export const api = {
             fallback: boolean;
         }>(`/kube/metrics/pods?namespace=${encodeURIComponent(namespace)}&podName=${encodeURIComponent(podName)}`, {
             headers: {
-                "x-kube-context": context
-            }
+                "x-kube-context": context,
+            },
         });
-    }
+    },
 };

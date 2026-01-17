@@ -1,7 +1,5 @@
 "use client";
 
-
-
 export default function HelmChartsPage() {
     return (
         <div className="flex flex-col h-full bg-background/50 backdrop-blur-sm">
@@ -14,8 +12,8 @@ export default function HelmChartsPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-foreground">Coming Soon</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                        The Helm Charts repository browser and installer is currently under development.
-                        Check back soon for updates!
+                        The Helm Charts repository browser and installer is currently under development. Check back soon
+                        for updates!
                     </p>
                 </div>
             </div>

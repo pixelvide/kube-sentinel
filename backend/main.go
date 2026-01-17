@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -46,15 +47,25 @@ func main() {
 
 	// Serve static files from the "static" directory
 	r.Static("/assets", "./static/assets")
-	r.StaticFile("/favicon.ico", "./static/favicon.ico")
-	r.StaticFile("/logo192.png", "./static/logo192.png")
-	r.StaticFile("/manifest.json", "./static/manifest.json")
 
-	// SPA Handler: Serve index.html for unknown routes (excluding /api)
+	// SPA Handler: Serve static files if they exist, otherwise serve index.html
 	r.NoRoute(func(c *gin.Context) {
-		if !strings.HasPrefix(c.Request.URL.Path, "/api") {
-			c.File("./static/index.html")
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/api") {
+			c.JSON(404, gin.H{"error": "API route not found"})
+			return
 		}
+
+		// Check if file exists in static folder (e.g. /sw.js, /favicon.ico)
+		// filepath.Join handles path sanitization
+		filePath := filepath.Join("./static", filepath.Clean(path))
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			c.File(filePath)
+			return
+		}
+
+		// Fallback to SPA index.html for all other non-API routes
+		c.File("./static/index.html")
 	})
 
 	r.GET("/health", func(c *gin.Context) {

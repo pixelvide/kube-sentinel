@@ -17,16 +17,9 @@ function PortForwardingContent() {
                                     <Share2 className="h-5 w-5 text-indigo-500" />
                                     Port Forwarding
                                 </CardTitle>
-                                <CardDescription>
-                                    Manage active port forwards to cluster resources
-                                </CardDescription>
+                                <CardDescription>Manage active port forwards to cluster resources</CardDescription>
                             </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={true}
-                                className="rounded-xl"
-                            >
+                            <Button variant="outline" size="sm" disabled={true} className="rounded-xl">
                                 <RefreshCw className="h-4 w-4 mr-2" />
                                 Refresh
                             </Button>
@@ -36,19 +29,26 @@ function PortForwardingContent() {
                         <div className="text-center py-12">
                             <Share2 className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
                             <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                                Port forwarding management is coming soon. This page will eventually allow you to list, create, and terminate active port forwards to your cluster pods and services.
+                                Port forwarding management is coming soon. This page will eventually allow you to list,
+                                create, and terminate active port forwards to your cluster pods and services.
                             </p>
                         </div>
                     </CardContent>
                 </Card>
             </div>
-        </div >
+        </div>
     );
 }
 
 export default function PortForwardingPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <PortForwardingContent />
         </Suspense>
     );

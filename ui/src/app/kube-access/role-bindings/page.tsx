@@ -27,9 +27,7 @@ function RoleBindingsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedItem, setSelectedItem] = useState<BindingInfo | null>(null);
 
-    const filteredItems = bindings.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = bindings.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -44,7 +42,7 @@ function RoleBindingsContent() {
         setBindings([]);
         try {
             const data = await api.get<any>(`/kube/role-bindings?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setBindings(data.rolebindings || []);
         } catch (error) {
@@ -72,7 +70,9 @@ function RoleBindingsContent() {
                                     {bindings.length} Role Bindings Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view Role Bindings" : "Manage namespace role assignments"}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view Role Bindings"
+                                        : "Manage namespace role assignments"}
                                 </CardDescription>
                             </div>
                             <Button
@@ -115,7 +115,7 @@ function RoleBindingsContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredItems.map(item => (
+                                {filteredItems.map((item) => (
                                     <div
                                         key={item.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -140,7 +140,9 @@ function RoleBindingsContent() {
                                             </div>
 
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(item.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(item.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -160,13 +162,19 @@ function RoleBindingsContent() {
                 kind="RoleBinding"
                 onUpdate={handleRefresh}
             />
-        </div >
+        </div>
     );
 }
 
 export default function RoleBindingsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <RoleBindingsContent />
         </Suspense>
     );

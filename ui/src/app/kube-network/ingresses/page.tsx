@@ -28,9 +28,7 @@ function IngressesContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedIngress, setSelectedIngress] = useState<IngressInfo | null>(null);
 
-    const filteredIngresses = ingresses.filter(ing =>
-        ing.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredIngresses = ingresses.filter((ing) => ing.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -45,7 +43,7 @@ function IngressesContent() {
         setIngresses([]);
         try {
             const data = await api.get<any>(`/kube/ingresses?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setIngresses(data.ingresses || []);
         } catch (error) {
@@ -64,8 +62,6 @@ function IngressesContent() {
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-background/50 p-4 md:p-0">
             <div className="w-full max-w-6xl space-y-8">
-
-
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
                     <CardHeader className="border-b bg-card/50 px-8 py-6">
                         <div className="flex items-center justify-between">
@@ -75,7 +71,9 @@ function IngressesContent() {
                                     {ingresses.length} Ingresses Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view ingresses" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view ingresses"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -112,13 +110,11 @@ function IngressesContent() {
                         ) : ingresses.length === 0 ? (
                             <div className="text-center py-12">
                                 <Globe className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No ingresses found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No ingresses found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredIngresses.map(ing => (
+                                {filteredIngresses.map((ing) => (
                                     <div
                                         key={ing.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -128,7 +124,7 @@ function IngressesContent() {
                                             <div className="min-w-0 flex-1">
                                                 <p className="font-semibold text-base truncate">{ing.name}</p>
                                                 <div className="flex flex-col gap-1 mt-1">
-                                                    {(ing.hosts || []).map(host => (
+                                                    {(ing.hosts || []).map((host) => (
                                                         <a
                                                             key={host}
                                                             href={`http://${host}`}
@@ -152,8 +148,11 @@ function IngressesContent() {
                                                             <span>Load Balancer</span>
                                                         </div>
                                                         <div className="flex flex-wrap gap-2 justify-end">
-                                                            {ing.ips.map(ip => (
-                                                                <span key={ip} className="text-xs bg-muted border rounded-md px-2 py-1 font-mono">
+                                                            {ing.ips.map((ip) => (
+                                                                <span
+                                                                    key={ip}
+                                                                    className="text-xs bg-muted border rounded-md px-2 py-1 font-mono"
+                                                                >
                                                                     {ip}
                                                                 </span>
                                                             ))}
@@ -172,7 +171,9 @@ function IngressesContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(ing.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(ing.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -192,14 +193,19 @@ function IngressesContent() {
                 kind="Ingress"
                 onUpdate={handleRefresh}
             />
-        </div >
-
+        </div>
     );
 }
 
 export default function IngressesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <IngressesContent />
         </Suspense>
     );

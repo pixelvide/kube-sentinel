@@ -28,14 +28,7 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
     if (!resource || !resource.metadata) return null;
 
     const { metadata, kind } = resource;
-    const {
-        name,
-        namespace,
-        creationTimestamp,
-        labels,
-        annotations,
-        finalizers
-    } = metadata;
+    const { name, namespace, creationTimestamp, labels, annotations, finalizers } = metadata;
 
     const getResourceStatus = (res: any) => {
         if (!res.status) return null;
@@ -103,7 +96,8 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                             const interval = parser(spec.schedule, { tz });
                             // Convert to user local timezone for display
                             const nextDate = interval.next().toDate();
-                            extra["Next execution"] = `${nextDate.toLocaleString()} (${formatAge(nextDate.toISOString())} from now)`;
+                            extra["Next execution"] =
+                                `${nextDate.toLocaleString()} (${formatAge(nextDate.toISOString())} from now)`;
                         } else {
                             extra["Next execution"] = "Parser Error";
                         }
@@ -114,7 +108,8 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                 }
             }
             if (status?.lastScheduleTime) {
-                extra["Last schedule"] = `${new Date(status.lastScheduleTime).toLocaleString()} (${formatAge(status.lastScheduleTime)} ago)`;
+                extra["Last schedule"] =
+                    `${new Date(status.lastScheduleTime).toLocaleString()} (${formatAge(status.lastScheduleTime)} ago)`;
             }
         } else if (kind === "Job") {
             if (metadata?.ownerReferences) {
@@ -141,7 +136,8 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                 const total = status.replicas || 0;
                 const available = status.availableReplicas || 0;
                 const unavailable = status.unavailableReplicas || 0;
-                extra["Replicas"] = `${desired} desired, ${updated} updated, ${total} total, ${available} available, ${unavailable} unavailable`;
+                extra["Replicas"] =
+                    `${desired} desired, ${updated} updated, ${total} total, ${available} available, ${unavailable} unavailable`;
             }
 
             const images = getUniqueImages(spec?.template?.spec);
@@ -228,7 +224,9 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
         { label: "Namespace", value: namespace },
         {
             label: "Created",
-            value: creationTimestamp ? `${new Date(creationTimestamp).toLocaleString()} (${formatAge(creationTimestamp)} ago)` : null
+            value: creationTimestamp
+                ? `${new Date(creationTimestamp).toLocaleString()} (${formatAge(creationTimestamp)} ago)`
+                : null,
         },
         { label: "Status", value: statusValue },
     ];
@@ -242,7 +240,7 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
         ? resource.spec?.template?.spec
         : resource.spec;
 
-    const taints = (kind === "Node") ? (resource.spec?.taints || []) : [];
+    const taints = kind === "Node" ? resource.spec?.taints || [] : [];
     const conditions = resource.status?.conditions || [];
     const tolerations = podSpec?.tolerations || [];
     const nodeSelector = podSpec?.nodeSelector || {};
@@ -298,34 +296,41 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
             </h3>
             <div className="rounded-xl border border-border bg-card p-4 space-y-4 shadow-sm font-sans">
                 <div className="space-y-3">
-                    {properties.map((prop) => (
-                        prop.value && (
-                            <div key={prop.label} className="grid grid-cols-3 gap-2 items-start">
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">{prop.label}</span>
-                                {prop.label === "Status" ? (
-                                    <div className="col-span-2">
-                                        <Badge
-                                            variant="outline"
-                                            className={cn(
-                                                "text-[10px] font-bold px-2 py-0 h-auto",
-                                                prop.value === "Running" || prop.value === "Ready" || prop.value === "Succeeded"
-                                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                                    : prop.value === "Pending" || prop.value === "Active"
-                                                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                                                        : prop.value === "Failed" || prop.value === "NotReady"
+                    {properties.map(
+                        (prop) =>
+                            prop.value && (
+                                <div key={prop.label} className="grid grid-cols-3 gap-2 items-start">
+                                    <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                        {prop.label}
+                                    </span>
+                                    {prop.label === "Status" ? (
+                                        <div className="col-span-2">
+                                            <Badge
+                                                variant="outline"
+                                                className={cn(
+                                                    "text-[10px] font-bold px-2 py-0 h-auto",
+                                                    prop.value === "Running" ||
+                                                        prop.value === "Ready" ||
+                                                        prop.value === "Succeeded"
+                                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                                        : prop.value === "Pending" || prop.value === "Active"
+                                                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                                                          : prop.value === "Failed" || prop.value === "NotReady"
                                                             ? "bg-red-50 text-red-700 border-red-200"
                                                             : "bg-muted text-muted-foreground border-border"
-                                            )}
-                                        >
+                                                )}
+                                            >
+                                                {prop.value}
+                                            </Badge>
+                                        </div>
+                                    ) : (
+                                        <span className="text-foreground col-span-2 break-all font-bold text-xs whitespace-normal">
                                             {prop.value}
-                                        </Badge>
-                                    </div>
-                                ) : (
-                                    <span className="text-foreground col-span-2 break-all font-bold text-xs whitespace-normal">{prop.value}</span>
-                                )}
-                            </div>
-                        )
-                    ))}
+                                        </span>
+                                    )}
+                                </div>
+                            )
+                    )}
                 </div>
 
                 {labelCount > 0 && (
@@ -336,18 +341,31 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <Tags className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Labels</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Labels
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {labelCount}
                                 </Badge>
                             </div>
-                            {showLabels ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showLabels ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showLabels && (
                             <div className="mt-3 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {Object.entries(labels).map(([k, v]) => (
-                                    <Badge key={k} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all">
+                                    <Badge
+                                        key={k}
+                                        variant="outline"
+                                        className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all"
+                                    >
                                         {k}: {String(v)}
                                     </Badge>
                                 ))}
@@ -364,18 +382,31 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <StickyNote className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Annotations</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Annotations
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {annotationCount}
                                 </Badge>
                             </div>
-                            {showAnnotations ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showAnnotations ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showAnnotations && (
                             <div className="mt-3 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {Object.entries(annotations).map(([k, v]) => (
-                                    <Badge key={k} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 max-w-full h-auto whitespace-normal break-all">
+                                    <Badge
+                                        key={k}
+                                        variant="outline"
+                                        className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 max-w-full h-auto whitespace-normal break-all"
+                                    >
                                         {k}: {String(v)}
                                     </Badge>
                                 ))}
@@ -392,18 +423,31 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <StickyNote className="h-3.5 w-3.5 text-muted-foreground/60 rotate-180" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Finalizers</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Finalizers
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {finalizerCount}
                                 </Badge>
                             </div>
-                            {showFinalizers ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showFinalizers ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showFinalizers && (
                             <div className="mt-3 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {finalizers.map((f: string) => (
-                                    <Badge key={f} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all">
+                                    <Badge
+                                        key={f}
+                                        variant="outline"
+                                        className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all"
+                                    >
                                         {f}
                                     </Badge>
                                 ))}
@@ -414,24 +458,33 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
 
                 {Object.keys(extraProperties).length > 0 && (
                     <div className="pt-3 border-t border-border/50 space-y-3">
-                        {Object.entries(extraProperties).map(([label, value]) => (
-                            value && (
-                                <div key={label} className="grid grid-cols-3 gap-2 items-start">
-                                    <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">{label}</span>
-                                    <div className="col-span-2 flex flex-wrap gap-1">
-                                        {Array.isArray(value) ? (
-                                            value.map((v, i) => (
-                                                <Badge key={i} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0 px-1.5 h-auto whitespace-normal break-all">
-                                                    {v}
-                                                </Badge>
-                                            ))
-                                        ) : (
-                                            <span className="text-foreground break-all font-bold text-xs whitespace-normal">{value}</span>
-                                        )}
+                        {Object.entries(extraProperties).map(
+                            ([label, value]) =>
+                                value && (
+                                    <div key={label} className="grid grid-cols-3 gap-2 items-start">
+                                        <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                            {label}
+                                        </span>
+                                        <div className="col-span-2 flex flex-wrap gap-1">
+                                            {Array.isArray(value) ? (
+                                                value.map((v, i) => (
+                                                    <Badge
+                                                        key={i}
+                                                        variant="outline"
+                                                        className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0 px-1.5 h-auto whitespace-normal break-all"
+                                                    >
+                                                        {v}
+                                                    </Badge>
+                                                ))
+                                            ) : (
+                                                <span className="text-foreground break-all font-bold text-xs whitespace-normal">
+                                                    {value}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            )
-                        ))}
+                                )
+                        )}
                     </div>
                 )}
 
@@ -443,19 +496,33 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <Tags className="h-3.5 w-3.5 text-muted-foreground/60 rotate-90" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Taints</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Taints
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {taints.length}
                                 </Badge>
                             </div>
-                            {showTaints ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showTaints ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showTaints && (
                             <div className="mt-3 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {taints.map((taint: any, idx: number) => (
-                                    <Badge key={idx} variant="outline" className="text-[10px] font-bold border-amber-200 bg-amber-50 text-amber-700 py-0.5 px-2 h-auto whitespace-normal break-all">
-                                        {taint.key}{taint.value ? `=${taint.value}` : ""}:{taint.effect}
+                                    <Badge
+                                        key={idx}
+                                        variant="outline"
+                                        className="text-[10px] font-bold border-amber-200 bg-amber-50 text-amber-700 py-0.5 px-2 h-auto whitespace-normal break-all"
+                                    >
+                                        {taint.key}
+                                        {taint.value ? `=${taint.value}` : ""}:{taint.effect}
                                     </Badge>
                                 ))}
                             </div>
@@ -473,20 +540,34 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                                 <div className="h-3.5 w-3.5 flex items-center justify-center">
                                     <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />
                                 </div>
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Conditions</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Conditions
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {conditions.length}
                                 </Badge>
                             </div>
-                            {showConditions ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showConditions ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showConditions && (
                             <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {conditions.map((condition: any, idx: number) => (
-                                    <div key={idx} className="flex flex-col gap-1 p-2 rounded-lg border border-border/50 bg-muted/30">
+                                    <div
+                                        key={idx}
+                                        className="flex flex-col gap-1 p-2 rounded-lg border border-border/50 bg-muted/30"
+                                    >
                                         <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-bold text-foreground">{condition.type}</span>
+                                            <span className="text-[10px] font-bold text-foreground">
+                                                {condition.type}
+                                            </span>
                                             <Badge
                                                 variant="outline"
                                                 className={cn(
@@ -498,14 +579,20 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                                             </Badge>
                                         </div>
                                         {condition.reason && (
-                                            <span className="text-[9px] text-muted-foreground font-medium">Reason: {condition.reason}</span>
+                                            <span className="text-[9px] text-muted-foreground font-medium">
+                                                Reason: {condition.reason}
+                                            </span>
                                         )}
                                         {condition.message && (
-                                            <span className="text-[9px] text-foreground/80 leading-tight">{condition.message}</span>
+                                            <span className="text-[9px] text-foreground/80 leading-tight">
+                                                {condition.message}
+                                            </span>
                                         )}
                                         {condition.lastTransitionTime && (
                                             <span className="text-[9px] text-muted-foreground/60 font-medium mt-0.5">
-                                                Last Transition: {new Date(condition.lastTransitionTime).toLocaleString()} ({formatAge(condition.lastTransitionTime)} ago)
+                                                Last Transition:{" "}
+                                                {new Date(condition.lastTransitionTime).toLocaleString()} (
+                                                {formatAge(condition.lastTransitionTime)} ago)
                                             </span>
                                         )}
                                     </div>
@@ -523,19 +610,34 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <Anchor className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Tolerations</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Tolerations
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {tolerations.length}
                                 </Badge>
                             </div>
-                            {showTolerations ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showTolerations ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showTolerations && (
                             <div className="mt-3 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {tolerations.map((t: any, idx: number) => (
-                                    <Badge key={idx} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all">
-                                        {t.key}{t.operator === "Exists" ? " (Exists)" : t.value ? `=${t.value}` : ""}{t.effect ? `:${t.effect}` : ""}
+                                    <Badge
+                                        key={idx}
+                                        variant="outline"
+                                        className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all"
+                                    >
+                                        {t.key}
+                                        {t.operator === "Exists" ? " (Exists)" : t.value ? `=${t.value}` : ""}
+                                        {t.effect ? `:${t.effect}` : ""}
                                     </Badge>
                                 ))}
                             </div>
@@ -551,18 +653,31 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <MapPin className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Node Selector</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Node Selector
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {Object.keys(nodeSelector).length}
                                 </Badge>
                             </div>
-                            {showNodeSelector ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showNodeSelector ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showNodeSelector && (
                             <div className="mt-3 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {Object.entries(nodeSelector).map(([k, v]) => (
-                                    <Badge key={k} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all">
+                                    <Badge
+                                        key={k}
+                                        variant="outline"
+                                        className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all"
+                                    >
                                         {k}: {String(v)}
                                     </Badge>
                                 ))}
@@ -579,18 +694,31 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <Share2 className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Parameters</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Parameters
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {Object.keys(parameters).length}
                                 </Badge>
                             </div>
-                            {showParameters ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showParameters ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showParameters && (
                             <div className="mt-3 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 {Object.entries(parameters).map(([k, v]) => (
-                                    <Badge key={k} variant="outline" className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all">
+                                    <Badge
+                                        key={k}
+                                        variant="outline"
+                                        className="text-[10px] font-bold border-border bg-muted/50 text-foreground/80 py-0.5 px-2 h-auto whitespace-normal break-all"
+                                    >
                                         {k}: {String(v)}
                                     </Badge>
                                 ))}
@@ -607,12 +735,21 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <Share2 className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Node Affinity</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Node Affinity
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {nodeAffinityCount}
                                 </Badge>
                             </div>
-                            {showNodeAffinity ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showNodeAffinity ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showNodeAffinity && (
@@ -633,12 +770,21 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <Share2 className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Pod Affinity</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Pod Affinity
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {podAffinityCount}
                                 </Badge>
                             </div>
-                            {showPodAffinity ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showPodAffinity ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showPodAffinity && (
@@ -659,12 +805,21 @@ export function KubeProperties({ resource, customProperties }: KubePropertiesPro
                         >
                             <div className="flex items-center gap-2">
                                 <Share2 className="h-3.5 w-3.5 text-muted-foreground/60" />
-                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">Pod Anti-Affinity</span>
-                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                                <span className="text-muted-foreground text-xs font-semibold uppercase tracking-tight">
+                                    Pod Anti-Affinity
+                                </span>
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                                >
                                     {podAntiAffinityCount}
                                 </Badge>
                             </div>
-                            {showPodAntiAffinity ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                            {showPodAntiAffinity ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            )}
                         </button>
 
                         {showPodAntiAffinity && (

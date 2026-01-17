@@ -30,9 +30,7 @@ function ServicesContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedService, setSelectedService] = useState<ServiceInfo | null>(null);
 
-    const filteredServices = services.filter(svc =>
-        svc.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredServices = services.filter((svc) => svc.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -47,7 +45,7 @@ function ServicesContent() {
         setServices([]);
         try {
             const data = await api.get<any>(`/kube/services?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setServices(data.services || []);
         } catch (error) {
@@ -66,8 +64,6 @@ function ServicesContent() {
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-background/50 p-4 md:p-0">
             <div className="w-full max-w-6xl space-y-8">
-
-
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
                     <CardHeader className="border-b bg-card/50 px-8 py-6">
                         <div className="flex items-center justify-between">
@@ -77,7 +73,9 @@ function ServicesContent() {
                                     {services.length} Services Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view services" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view services"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -114,13 +112,11 @@ function ServicesContent() {
                         ) : services.length === 0 ? (
                             <div className="text-center py-12">
                                 <Grid className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No services found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No services found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredServices.map(svc => (
+                                {filteredServices.map((svc) => (
                                     <div
                                         key={svc.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -152,8 +148,11 @@ function ServicesContent() {
                                                     <span>Ports</span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2 justify-end">
-                                                    {svc.ports.map(p => (
-                                                        <span key={p} className="text-xs bg-muted border rounded-md px-2 py-1 font-mono">
+                                                    {svc.ports.map((p) => (
+                                                        <span
+                                                            key={p}
+                                                            className="text-xs bg-muted border rounded-md px-2 py-1 font-mono"
+                                                        >
                                                             {p}
                                                         </span>
                                                     ))}
@@ -170,7 +169,9 @@ function ServicesContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(svc.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(svc.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -190,14 +191,19 @@ function ServicesContent() {
                 kind="Service"
                 onUpdate={handleRefresh}
             />
-        </div >
-
+        </div>
     );
 }
 
 export default function ServicesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <ServicesContent />
         </Suspense>
     );

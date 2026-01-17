@@ -24,9 +24,7 @@ function ClusterRoleBindingsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedItem, setSelectedItem] = useState<BindingInfo | null>(null);
 
-    const filteredItems = bindings.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = bindings.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext) {
@@ -41,7 +39,7 @@ function ClusterRoleBindingsContent() {
         setBindings([]);
         try {
             const data = await api.get<any>(`/kube/cluster-role-bindings`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setBindings(data.clusterrolebindings || []);
         } catch (error) {
@@ -69,7 +67,9 @@ function ClusterRoleBindingsContent() {
                                     {bindings.length} Cluster Role Bindings Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext ? "Select a cluster from the top bar to view bindings" : "Manage cluster-wide role assignments"}
+                                    {!selectedContext
+                                        ? "Select a cluster from the top bar to view bindings"
+                                        : "Manage cluster-wide role assignments"}
                                 </CardDescription>
                             </div>
                             <Button
@@ -105,7 +105,7 @@ function ClusterRoleBindingsContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredItems.map(item => (
+                                {filteredItems.map((item) => (
                                     <div
                                         key={item.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -123,7 +123,9 @@ function ClusterRoleBindingsContent() {
                                             </div>
 
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(item.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(item.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -143,13 +145,19 @@ function ClusterRoleBindingsContent() {
                 kind="ClusterRoleBinding"
                 onUpdate={handleRefresh}
             />
-        </div >
+        </div>
     );
 }
 
 export default function ClusterRoleBindingsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <ClusterRoleBindingsContent />
         </Suspense>
     );

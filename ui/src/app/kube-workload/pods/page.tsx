@@ -30,9 +30,7 @@ function PodsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedPod, setSelectedPod] = useState<PodInfo | null>(null);
 
-    const filteredPods = pods.filter(pod =>
-        pod.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredPods = pods.filter((pod) => pod.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -48,7 +46,7 @@ function PodsContent() {
         setPods([]);
         try {
             const data = await api.get<any>(`/kube/pods?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext }
+                headers: { "x-kube-context": selectedContext },
             });
             setPods(data.pods || []);
         } catch (error) {
@@ -67,8 +65,6 @@ function PodsContent() {
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-background/50 p-4 md:p-0">
             <div className="w-full max-w-6xl space-y-8">
-
-
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
                     <CardHeader className="border-b bg-card/50 px-8 py-6">
                         <div className="flex items-center justify-between">
@@ -78,7 +74,9 @@ function PodsContent() {
                                     {pods.length} Pods Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view pods" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view pods"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -115,13 +113,11 @@ function PodsContent() {
                         ) : pods.length === 0 ? (
                             <div className="text-center py-12">
                                 <Box className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No pods found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No pods found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredPods.map(pod => (
+                                {filteredPods.map((pod) => (
                                     <div
                                         key={pod.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -132,12 +128,16 @@ function PodsContent() {
                                             <div className="min-w-0 flex-1">
                                                 <p className="font-semibold text-base truncate">{pod.name}</p>
                                                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                    <span className={cn(
-                                                        "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
-                                                        (pod.status === "Running" || pod.status === "Succeeded") ? "bg-green-500/10 text-green-600" :
-                                                            pod.status === "Pending" ? "bg-amber-500/10 text-amber-600" :
-                                                                "bg-red-500/10 text-red-600"
-                                                    )}>
+                                                    <span
+                                                        className={cn(
+                                                            "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
+                                                            pod.status === "Running" || pod.status === "Succeeded"
+                                                                ? "bg-green-500/10 text-green-600"
+                                                                : pod.status === "Pending"
+                                                                  ? "bg-amber-500/10 text-amber-600"
+                                                                  : "bg-red-500/10 text-red-600"
+                                                        )}
+                                                    >
                                                         {pod.status}
                                                     </span>
                                                 </div>
@@ -147,13 +147,19 @@ function PodsContent() {
                                             <div className="flex flex-col gap-3 items-start lg:items-end min-w-[200px]">
                                                 <div className="flex flex-col gap-1 items-end">
                                                     <div className="flex flex-wrap gap-2 justify-end">
-                                                        {pod.init_containers?.map(c => (
-                                                            <span key={c} className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-md px-2 py-1 font-mono">
+                                                        {pod.init_containers?.map((c) => (
+                                                            <span
+                                                                key={c}
+                                                                className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-md px-2 py-1 font-mono"
+                                                            >
                                                                 {c} (init)
                                                             </span>
                                                         ))}
-                                                        {pod.containers.map(c => (
-                                                            <span key={c} className="text-xs bg-muted border rounded-md px-2 py-1 font-mono">
+                                                        {pod.containers.map((c) => (
+                                                            <span
+                                                                key={c}
+                                                                className="text-xs bg-muted border rounded-md px-2 py-1 font-mono"
+                                                            >
                                                                 {c}
                                                             </span>
                                                         ))}
@@ -171,12 +177,16 @@ function PodsContent() {
 
                                             {/* QoS - NEW */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs font-mono text-muted-foreground uppercase">{pod.qos}</span>
+                                                <span className="text-xs font-mono text-muted-foreground uppercase">
+                                                    {pod.qos}
+                                                </span>
                                             </div>
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(pod.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(pod.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -202,7 +212,13 @@ function PodsContent() {
 
 export default function PodsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <PodsContent />
         </Suspense>
     );

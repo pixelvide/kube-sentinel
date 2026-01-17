@@ -26,9 +26,7 @@ function ResourceQuotasContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedResource, setSelectedResource] = useState<ResourceQuotaInfo | null>(null);
 
-    const filteredResources = resources.filter(res =>
-        res.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredResources = resources.filter((res) => res.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -44,7 +42,7 @@ function ResourceQuotasContent() {
         setResources([]);
         try {
             const data = await api.get<any>(`/kube/resource-quotas?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setResources(data.resourcequotas || []);
         } catch (error) {
@@ -72,7 +70,9 @@ function ResourceQuotasContent() {
                                     {resources.length} Resource Quotas Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view Resource Quotas" : "Resource limits for the namespace"}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view Resource Quotas"
+                                        : "Resource limits for the namespace"}
                                 </CardDescription>
                             </div>
                             <Button
@@ -109,7 +109,7 @@ function ResourceQuotasContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredResources.map(res => (
+                                {filteredResources.map((res) => (
                                     <div
                                         key={res.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -121,7 +121,9 @@ function ResourceQuotasContent() {
                                             </div>
                                             <div className="flex items-center gap-6">
                                                 <NamespaceBadge namespace={res.namespace} />
-                                                <span className="text-xs text-muted-foreground min-w-[80px] text-right">{formatAge(res.age)}</span>
+                                                <span className="text-xs text-muted-foreground min-w-[80px] text-right">
+                                                    {formatAge(res.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -147,7 +149,13 @@ function ResourceQuotasContent() {
 
 export default function ResourceQuotasPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <ResourceQuotasContent />
         </Suspense>
     );

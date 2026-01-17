@@ -13,11 +13,7 @@ import {
     CommandList,
     CommandSeparator,
 } from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -58,7 +54,7 @@ export function MultiSelect({
 
     const flatOptions = React.useMemo(() => {
         if (groups.length > 0) {
-            return groups.flatMap(g => g.options);
+            return groups.flatMap((g) => g.options);
         }
         return options;
     }, [groups, options]);
@@ -67,7 +63,11 @@ export function MultiSelect({
         onChange(selected.filter((item) => item !== value));
     };
 
-    const renderOption = (option: { label: string; value: string; icon?: React.ComponentType<{ className?: string }> }) => {
+    const renderOption = (option: {
+        label: string;
+        value: string;
+        icon?: React.ComponentType<{ className?: string }>;
+    }) => {
         const isSelected = selected.includes(option.value) || (allOption && selected.includes(allOption.value));
         const toggleOption = () => {
             if (allOption && selected.includes(allOption.value)) {
@@ -91,18 +91,9 @@ export function MultiSelect({
         };
 
         return (
-            <CommandItem
-                key={option.value}
-                onSelect={toggleOption}
-            >
-                <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={toggleOption}
-                    className="mr-2"
-                />
-                {option.icon && (
-                    <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                )}
+            <CommandItem key={option.value} onSelect={toggleOption}>
+                <Checkbox checked={isSelected} onCheckedChange={toggleOption} className="mr-2" />
+                {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
                 <span>{option.label}</span>
             </CommandItem>
         );
@@ -130,10 +121,7 @@ export function MultiSelect({
                         ) : (
                             <div className="flex gap-1 flex-wrap">
                                 {selected.length > 2 ? (
-                                    <Badge
-                                        variant="secondary"
-                                        className="rounded-sm px-1 font-normal"
-                                    >
+                                    <Badge variant="secondary" className="rounded-sm px-1 font-normal">
                                         {selected.length} selected
                                     </Badge>
                                 ) : (
@@ -242,18 +230,16 @@ export function MultiSelect({
                                 </>
                             )}
 
-                            {groups.length > 0 ? (
-                                groups.map((group) => (
-                                    <React.Fragment key={group.label}>
-                                        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground bg-muted/30">
-                                            {group.label}
-                                        </div>
-                                        {group.options.map(renderOption)}
-                                    </React.Fragment>
-                                ))
-                            ) : (
-                                options.map(renderOption)
-                            )}
+                            {groups.length > 0
+                                ? groups.map((group) => (
+                                      <React.Fragment key={group.label}>
+                                          <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground bg-muted/30">
+                                              {group.label}
+                                          </div>
+                                          {group.options.map(renderOption)}
+                                      </React.Fragment>
+                                  ))
+                                : options.map(renderOption)}
                         </CommandGroup>
                     </CommandList>
                 </Command>

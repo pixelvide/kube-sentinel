@@ -29,7 +29,7 @@ import {
     Cloud,
     History,
     Anchor,
-    CircleDashed
+    CircleDashed,
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -37,7 +37,15 @@ export interface NavigationItem {
     title: string;
     description: string;
     icon: any;
-    category?: 'Workloads' | 'Config' | 'Network' | 'Storage' | 'Access Control' | 'Settings' | 'Helm' | 'Custom Resources';
+    category?:
+        | "Workloads"
+        | "Config"
+        | "Network"
+        | "Storage"
+        | "Access Control"
+        | "Settings"
+        | "Helm"
+        | "Custom Resources";
     kind?: string; // Standard K8s Kind
     searchPlaceholder?: string;
     isClusterWide?: boolean;
@@ -51,7 +59,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Dashboard",
         description: "Cluster overview and health status",
         icon: Home,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-namespaces",
@@ -61,7 +69,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         kind: "Namespace",
         searchPlaceholder: "Search namespaces...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-nodes",
@@ -71,7 +79,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         kind: "Node",
         searchPlaceholder: "Search nodes...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/pods",
@@ -79,9 +87,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage workload instances",
         icon: Box,
         kind: "Pod",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search pods...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/deployments",
@@ -89,9 +97,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage application deployments",
         icon: Layers,
         kind: "Deployment",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search deployments...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/daemon-sets",
@@ -99,9 +107,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage daemon set workloads",
         icon: Server,
         kind: "DaemonSet",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search daemonsets...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/stateful-sets",
@@ -109,9 +117,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage stateful applications",
         icon: Database,
         kind: "StatefulSet",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search statefulsets...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/replica-sets",
@@ -119,9 +127,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage replica set workloads",
         icon: Layers,
         kind: "ReplicaSet",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search replicasets...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/replication-controllers",
@@ -129,9 +137,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Legacy workload management",
         icon: Boxes,
         kind: "ReplicationController",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search replication controllers...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/jobs",
@@ -139,9 +147,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage batch jobs",
         icon: PlayCircle,
         kind: "Job",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search jobs...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-workload/cron-jobs",
@@ -149,9 +157,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage scheduled jobs",
         icon: Clock,
         kind: "CronJob",
-        category: 'Workloads',
+        category: "Workloads",
         searchPlaceholder: "Search cronjobs...",
-        showHeader: true
+        showHeader: true,
     },
     // Config
     {
@@ -159,19 +167,19 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Definitions",
         description: "Manage Custom Resource Definitions",
         icon: FileCode,
-        category: 'Custom Resources',
+        category: "Custom Resources",
         searchPlaceholder: "Search CRDs...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-crds/[crd]",
         title: "Custom Resources",
         description: "Manage Custom Resource Definitions",
         icon: FileCode,
-        category: 'Custom Resources',
+        category: "Custom Resources",
         searchPlaceholder: "Search resources...",
         showHeader: true,
-        hideFromSidebar: true
+        hideFromSidebar: true,
     },
     {
         path: "/kube-config/config-maps",
@@ -179,9 +187,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage configuration data",
         icon: FileCode,
         kind: "ConfigMap",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search config maps...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/secrets",
@@ -189,9 +197,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage sensitive information",
         icon: Lock,
         kind: "Secret",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search secrets...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/resource-quotas",
@@ -199,9 +207,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage resource limits",
         icon: Scale,
         kind: "ResourceQuota",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search resource quotas...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/limit-ranges",
@@ -209,9 +217,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage container resource limits",
         icon: Zap,
         kind: "LimitRange",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search limit ranges...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/hpa",
@@ -219,9 +227,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Horizontal Pod Autoscalers",
         icon: Activity,
         kind: "HorizontalPodAutoscaler",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search HPA...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/pod-disruption-budgets",
@@ -229,9 +237,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Pod Disruption Budgets",
         icon: ShieldCheck,
         kind: "PodDisruptionBudget",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search PDBs...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/priority-classes",
@@ -239,10 +247,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Cluster-wide priority scheduling",
         icon: ArrowUpCircle,
         kind: "PriorityClass",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search priority classes...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/runtime-classes",
@@ -250,10 +258,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Cluster-wide container runtime configurations",
         icon: Cpu,
         kind: "RuntimeClass",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search runtime classes...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/leases",
@@ -261,9 +269,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Distributed coordination and locking",
         icon: Key,
         kind: "Lease",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search leases...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/mutating-webhooks",
@@ -271,10 +279,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Cluster-wide mutation configurations",
         icon: Zap,
         kind: "MutatingWebhookConfiguration",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search mutating webhooks...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-config/validating-webhooks",
@@ -282,10 +290,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Cluster-wide validation configurations",
         icon: Zap,
         kind: "ValidatingWebhookConfiguration",
-        category: 'Config',
+        category: "Config",
         searchPlaceholder: "Search validating webhooks...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     // Network
     {
@@ -294,9 +302,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage networking endpoints",
         icon: Grid,
         kind: "Service",
-        category: 'Network',
+        category: "Network",
         searchPlaceholder: "Search services...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-network/endpoints",
@@ -304,9 +312,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage service endpoints",
         icon: Network,
         kind: "Endpoints",
-        category: 'Network',
+        category: "Network",
         searchPlaceholder: "Search endpoints...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-network/ingresses",
@@ -314,9 +322,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage external access",
         icon: Globe,
         kind: "Ingress",
-        category: 'Network',
+        category: "Network",
         searchPlaceholder: "Search ingresses...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-network/ingress-classes",
@@ -324,10 +332,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage ingress controllers",
         icon: Globe,
         kind: "IngressClass",
-        category: 'Network',
+        category: "Network",
         searchPlaceholder: "Search ingress classes...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-network/network-policies",
@@ -335,18 +343,18 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage network security policies",
         icon: Shield,
         kind: "NetworkPolicy",
-        category: 'Network',
+        category: "Network",
         searchPlaceholder: "Search network policies...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-network/port-forwarding",
         title: "Port Forwarding",
         description: "Manage active port forwards",
         icon: Share2,
-        category: 'Network',
+        category: "Network",
         searchPlaceholder: "Search port forwards...",
-        showHeader: true
+        showHeader: true,
     },
     // Storage
     {
@@ -355,9 +363,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage storage requests",
         icon: Database,
         kind: "PersistentVolumeClaim",
-        category: 'Storage',
+        category: "Storage",
         searchPlaceholder: "Search PVCs...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-storage/persistent-volumes",
@@ -365,10 +373,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage cluster storage volumes",
         icon: HardDrive,
         kind: "PersistentVolume",
-        category: 'Storage',
+        category: "Storage",
         searchPlaceholder: "Search PVs...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-storage/storage-classes",
@@ -376,10 +384,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage storage provisioning",
         icon: Layers,
         kind: "StorageClass",
-        category: 'Storage',
+        category: "Storage",
         searchPlaceholder: "Search storage classes...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     // Access Control
     {
@@ -388,9 +396,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage identity for processes",
         icon: UserCheck,
         kind: "ServiceAccount",
-        category: 'Access Control',
+        category: "Access Control",
         searchPlaceholder: "Search service accounts...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-access/cluster-roles",
@@ -398,10 +406,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage cluster-wide permissions",
         icon: ShieldCheck,
         kind: "ClusterRole",
-        category: 'Access Control',
+        category: "Access Control",
         searchPlaceholder: "Search cluster roles...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-access/roles",
@@ -409,9 +417,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage namespace permissions",
         icon: Lock,
         kind: "Role",
-        category: 'Access Control',
+        category: "Access Control",
         searchPlaceholder: "Search roles...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-access/cluster-role-bindings",
@@ -419,10 +427,10 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage cluster-wide role assignments",
         icon: Link2,
         kind: "ClusterRoleBinding",
-        category: 'Access Control',
+        category: "Access Control",
         searchPlaceholder: "Search cluster role bindings...",
         isClusterWide: true,
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-access/role-bindings",
@@ -430,9 +438,9 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         description: "Manage namespace role assignments",
         icon: Link2,
         kind: "RoleBinding",
-        category: 'Access Control',
+        category: "Access Control",
         searchPlaceholder: "Search role bindings...",
-        showHeader: true
+        showHeader: true,
     },
     {
         path: "/kube-events",
@@ -441,7 +449,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         icon: AlertCircle,
         kind: "Event",
         searchPlaceholder: "Search events...",
-        showHeader: true
+        showHeader: true,
     },
     // Settings
     {
@@ -449,32 +457,32 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "GitLab Settings",
         description: "Configure GitLab integration",
         icon: Settings,
-        category: 'Settings',
-        showHeader: false
+        category: "Settings",
+        showHeader: false,
     },
     {
         path: "/settings/clusters",
         title: "Cluster Settings",
         description: "Manage connected clusters",
         icon: Cloud,
-        category: 'Settings',
-        showHeader: false
+        category: "Settings",
+        showHeader: false,
     },
     {
         path: "/settings/audit-logs",
         title: "Audit Logs",
         description: "View system audit logs",
         icon: History,
-        category: 'Settings',
-        showHeader: false
+        category: "Settings",
+        showHeader: false,
     },
     {
         path: "/settings/eks",
         title: "AWS EKS Settings",
         description: "Connect AWS EKS clusters",
         icon: Cloud,
-        category: 'Settings',
-        showHeader: false
+        category: "Settings",
+        showHeader: false,
     },
     // Helm
     {
@@ -482,15 +490,15 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         title: "Helm Releases",
         description: "Manage Helm releases",
         icon: Anchor,
-        category: 'Helm',
-        showHeader: true
+        category: "Helm",
+        showHeader: true,
     },
     {
         path: "/kube-helm/charts",
         title: "Helm Charts",
         description: "Browse Helm charts",
         icon: CircleDashed,
-        category: 'Helm',
-        showHeader: true
-    }
+        category: "Helm",
+        showHeader: true,
+    },
 ];

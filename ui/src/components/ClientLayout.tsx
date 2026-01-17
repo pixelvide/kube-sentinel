@@ -8,10 +8,13 @@ import { GlobalSearch } from "@/components/GlobalSearch";
 import { NAVIGATION_CONFIG } from "@/config/navigation";
 
 // Derive Page Configuration from Navigation Config
-const PAGE_CONFIG = NAVIGATION_CONFIG.reduce((acc, item) => {
-    acc[item.path] = item;
-    return acc;
-}, {} as Record<string, typeof NAVIGATION_CONFIG[0]>);
+const PAGE_CONFIG = NAVIGATION_CONFIG.reduce(
+    (acc, item) => {
+        acc[item.path] = item;
+        return acc;
+    },
+    {} as Record<string, (typeof NAVIGATION_CONFIG)[0]>
+);
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
     const location = useLocation();
@@ -74,12 +77,12 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
         // Try to find a matching dynamic route
         // We look for navigation items with brackets like /kube-crds/[crd]
-        return NAVIGATION_CONFIG.find(item => {
-            if (!item.path.includes('[')) return false;
+        return NAVIGATION_CONFIG.find((item) => {
+            if (!item.path.includes("[")) return false;
 
             // Convert pattern to regex
             // e.g. /kube-crds/[crd] -> /kube-crds/[^/]+
-            const pattern = item.path.replace(/\[[^\]]+\]/g, '[^/]+');
+            const pattern = item.path.replace(/\[[^\]]+\]/g, "[^/]+");
             const regex = new RegExp(`^${pattern}$`);
             return regex.test(currentPath);
         });
@@ -131,7 +134,9 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                     </header>
                 )}
 
-                <main className={`flex-1 md:overflow-y-auto overflow-x-hidden transition-all duration-500 ${pathname?.startsWith('/exec') ? 'p-0' : 'p-6 md:p-8 lg:p-12'}`}>
+                <main
+                    className={`flex-1 md:overflow-y-auto overflow-x-hidden transition-all duration-500 ${pathname?.startsWith("/exec") ? "p-0" : "p-6 md:p-8 lg:p-12"}`}
+                >
                     {children}
                 </main>
             </div>

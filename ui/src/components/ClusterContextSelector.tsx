@@ -32,7 +32,7 @@ function ClusterContextSelectorContent() {
     const currentNamespaces = searchParams.get("namespace") ? searchParams.get("namespace")!.split(",") : [];
 
     // Find current navigation item and determine if it's cluster-scoped
-    const currentItem = NAVIGATION_CONFIG.find(item => item.path === pathname);
+    const currentItem = NAVIGATION_CONFIG.find((item) => item.path === pathname);
     const isClusterScoped = currentItem?.isClusterWide || (currentItem?.kind && scopes[currentItem.kind] === "Cluster");
 
     useEffect(() => {
@@ -78,7 +78,7 @@ function ClusterContextSelectorContent() {
             setNsLoading(true);
             try {
                 const data = await api.get<any>(`/kube/namespaces`, {
-                    headers: { "x-kube-context": currentContext || "" }
+                    headers: { "x-kube-context": currentContext || "" },
                 });
                 const nsList = data.namespaces || [];
                 setNamespaces(nsList);
@@ -99,7 +99,6 @@ function ClusterContextSelectorContent() {
 
         fetchNamespaces();
     }, [currentContext, isClusterScoped]);
-
 
     const updateContext = (ctx: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -143,7 +142,7 @@ function ClusterContextSelectorContent() {
                 <div className="flex items-center gap-2 w-full md:w-[300px]">
                     <Layers className="h-4 w-4 text-muted-foreground shrink-0 hidden md:block" />
                     <MultiSelect
-                        options={namespaces.map(ns => ({ label: ns, value: ns }))}
+                        options={namespaces.map((ns) => ({ label: ns, value: ns }))}
                         selected={currentNamespaces}
                         onChange={updateNamespaces}
                         placeholder={nsLoading ? "Loading..." : "Select Namespaces"}
@@ -158,7 +157,14 @@ function ClusterContextSelectorContent() {
 
 export function ClusterContextSelector() {
     return (
-        <Suspense fallback={<div className="flex gap-4"><div className="w-[200px] h-9 bg-muted/20 animate-pulse rounded-md" /><div className="w-[200px] h-9 bg-muted/20 animate-pulse rounded-md" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex gap-4">
+                    <div className="w-[200px] h-9 bg-muted/20 animate-pulse rounded-md" />
+                    <div className="w-[200px] h-9 bg-muted/20 animate-pulse rounded-md" />
+                </div>
+            }
+        >
             <ClusterContextSelectorContent />
         </Suspense>
     );

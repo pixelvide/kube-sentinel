@@ -3,7 +3,25 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { History as HistoryIcon, RefreshCw, ChevronLeft, ChevronRight, Info, Search, Filter, ArrowRight, Clock, ShieldCheck, Activity, Database, Key, Server, LayoutDashboard, Boxes, GitBranch } from "lucide-react";
+import {
+    History as HistoryIcon,
+    RefreshCw,
+    ChevronLeft,
+    ChevronRight,
+    Info,
+    Search,
+    Filter,
+    ArrowRight,
+    Clock,
+    ShieldCheck,
+    Activity,
+    Database,
+    Key,
+    Server,
+    LayoutDashboard,
+    Boxes,
+    GitBranch,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatAge } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -54,7 +72,8 @@ function AuditLogsContent() {
     const getActionColor = (action: string) => {
         if (action.includes("LOGIN")) return "bg-green-500/10 text-green-500 border-green-500/20";
         if (action.includes("DELETE")) return "bg-red-500/10 text-red-500 border-red-500/20";
-        if (action.includes("UPDATE") || action.includes("SET") || action.includes("UPSERT")) return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+        if (action.includes("UPDATE") || action.includes("SET") || action.includes("UPSERT"))
+            return "bg-blue-500/10 text-blue-500 border-blue-500/20";
         if (action.includes("EXEC")) return "bg-amber-500/10 text-amber-500 border-amber-500/20";
         return "bg-slate-500/10 text-slate-500 border-slate-500/20";
     };
@@ -64,7 +83,9 @@ function AuditLogsContent() {
             <div className="w-full max-w-6xl space-y-6">
                 <div className="flex flex-col gap-1">
                     <h1 className="text-2xl font-bold tracking-tight">Audit Logs</h1>
-                    <p className="text-muted-foreground">Monitor and track all security and configuration actions performed by your account.</p>
+                    <p className="text-muted-foreground">
+                        Monitor and track all security and configuration actions performed by your account.
+                    </p>
                 </div>
 
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
@@ -120,7 +141,13 @@ function AuditLogsContent() {
                                             onClick={() => setSelectedLog(log)}
                                         >
                                             <TableCell className="px-8 py-4">
-                                                <Badge variant="outline" className={cn("rounded-lg font-bold text-[10px] uppercase tracking-wider px-2 py-0.5", getActionColor(log.action))}>
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "rounded-lg font-bold text-[10px] uppercase tracking-wider px-2 py-0.5",
+                                                        getActionColor(log.action)
+                                                    )}
+                                                >
                                                     {log.action.replace(/_/g, " ")}
                                                 </Badge>
                                             </TableCell>
@@ -141,8 +168,12 @@ function AuditLogsContent() {
                                             </TableCell>
                                             <TableCell className="text-right pr-8">
                                                 <div className="flex flex-col items-end">
-                                                    <span className="text-xs font-medium">{formatAge(log.created_at)}</span>
-                                                    <span className="text-[10px] opacity-40">{new Date(log.created_at).toLocaleString()}</span>
+                                                    <span className="text-xs font-medium">
+                                                        {formatAge(log.created_at)}
+                                                    </span>
+                                                    <span className="text-[10px] opacity-40">
+                                                        {new Date(log.created_at).toLocaleString()}
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -162,7 +193,7 @@ function AuditLogsContent() {
                                         variant="outline"
                                         size="icon"
                                         className="h-8 w-8 rounded-lg"
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
                                         disabled={page === 1 || loading}
                                     >
                                         <ChevronLeft className="h-4 w-4" />
@@ -171,7 +202,7 @@ function AuditLogsContent() {
                                         variant="outline"
                                         size="icon"
                                         className="h-8 w-8 rounded-lg"
-                                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={page === totalPages || loading}
                                     >
                                         <ChevronRight className="h-4 w-4" />
@@ -191,9 +222,7 @@ function AuditLogsContent() {
                             <HistoryIcon className="h-5 w-5 text-primary" />
                             Audit Log Details
                         </DialogTitle>
-                        <DialogDescription>
-                            Full trace of the recorded action and its context.
-                        </DialogDescription>
+                        <DialogDescription>Full trace of the recorded action and its context.</DialogDescription>
                     </DialogHeader>
 
                     {selectedLog && (
@@ -202,14 +231,22 @@ function AuditLogsContent() {
                                 <div className="space-y-1">
                                     <span className="text-[10px] uppercase font-bold opacity-40">Action</span>
                                     <div>
-                                        <Badge variant="outline" className={cn("rounded-lg font-bold text-[10px] uppercase tracking-wider px-2 py-0.5", getActionColor(selectedLog.action))}>
+                                        <Badge
+                                            variant="outline"
+                                            className={cn(
+                                                "rounded-lg font-bold text-[10px] uppercase tracking-wider px-2 py-0.5",
+                                                getActionColor(selectedLog.action)
+                                            )}
+                                        >
                                             {selectedLog.action.replace(/_/g, " ")}
                                         </Badge>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
                                     <span className="text-[10px] uppercase font-bold opacity-40">Time</span>
-                                    <div className="text-sm font-medium">{new Date(selectedLog.created_at).toLocaleString()}</div>
+                                    <div className="text-sm font-medium">
+                                        {new Date(selectedLog.created_at).toLocaleString()}
+                                    </div>
                                 </div>
                                 <div className="space-y-1">
                                     <span className="text-[10px] uppercase font-bold opacity-40">IP Address</span>
@@ -235,8 +272,7 @@ function AuditLogsContent() {
                                     <pre className="relative p-4 rounded-2xl bg-black/20 font-mono text-[10px] overflow-auto max-h-[400px] border border-white/5 shadow-inner whitespace-pre-wrap break-all leading-relaxed">
                                         {selectedLog.payload && selectedLog.payload !== "{}"
                                             ? JSON.stringify(JSON.parse(selectedLog.payload), null, 2)
-                                            : "No additional data recorded."
-                                        }
+                                            : "No additional data recorded."}
                                     </pre>
                                 </div>
                             </div>
@@ -250,7 +286,13 @@ function AuditLogsContent() {
 
 export default function AuditLogsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-transparent"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen bg-transparent">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <AuditLogsContent />
         </Suspense>
     );

@@ -30,9 +30,7 @@ function ReplicationControllersContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedRc, setSelectedRc] = useState<ReplicationControllerInfo | null>(null);
 
-    const filteredRcs = rcs.filter(rc =>
-        rc.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredRcs = rcs.filter((rc) => rc.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -47,7 +45,7 @@ function ReplicationControllersContent() {
         setRcs([]);
         try {
             const data = await api.get<any>(`/kube/replication-controllers?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setRcs(data.replicationcontrollers || []);
         } catch (error) {
@@ -75,7 +73,9 @@ function ReplicationControllersContent() {
                                     {rcs.length} Replication Controllers Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view replication controllers" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view replication controllers"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -118,7 +118,7 @@ function ReplicationControllersContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredRcs.map(rc => (
+                                {filteredRcs.map((rc) => (
                                     <div
                                         key={rc.name + rc.namespace}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -126,10 +126,14 @@ function ReplicationControllersContent() {
                                     >
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
                                             <div className="flex items-center gap-4 min-w-0">
-                                                <div className={cn(
-                                                    "p-3 rounded-xl",
-                                                    rc.ready_replicas === rc.replicas ? "bg-green-500/10" : "bg-amber-500/10"
-                                                )}>
+                                                <div
+                                                    className={cn(
+                                                        "p-3 rounded-xl",
+                                                        rc.ready_replicas === rc.replicas
+                                                            ? "bg-green-500/10"
+                                                            : "bg-amber-500/10"
+                                                    )}
+                                                >
                                                     {rc.ready_replicas === rc.replicas ? (
                                                         <CheckCircle2 className="h-6 w-6 text-green-500" />
                                                     ) : (
@@ -156,7 +160,9 @@ function ReplicationControllersContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(rc.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(rc.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -182,7 +188,13 @@ function ReplicationControllersContent() {
 
 export default function ReplicationControllersPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <ReplicationControllersContent />
         </Suspense>
     );

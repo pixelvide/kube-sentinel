@@ -100,7 +100,10 @@ export function KubeConfigUpload() {
                         border-2 border-dashed rounded-2xl p-8 transition-all duration-200 text-center
                         ${dragging ? "border-primary bg-primary/5" : "border-muted-foreground/20 hover:border-primary/50 hover:bg-muted/30"}
                     `}
-                    onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                    onDragOver={(e) => {
+                        e.preventDefault();
+                        setDragging(true);
+                    }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={handleDrop}
                 >
@@ -119,13 +122,7 @@ export function KubeConfigUpload() {
                             onChange={handleFileUpload}
                             disabled={uploading}
                         />
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2 rounded-xl"
-                            disabled={uploading}
-                            asChild
-                        >
+                        <Button variant="outline" size="sm" className="mt-2 rounded-xl" disabled={uploading} asChild>
                             <label htmlFor="kubeconfig-upload" className="cursor-pointer">
                                 {uploading ? "Uploading..." : "Select File"}
                             </label>
@@ -147,7 +144,9 @@ export function KubeConfigUpload() {
                                     className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-muted/20 group hover:border-primary/20 transition-all"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${config.is_default ? "bg-amber-500/10 text-amber-500" : "bg-blue-500/10 text-blue-500"}`}>
+                                        <div
+                                            className={`h-10 w-10 rounded-xl flex items-center justify-center ${config.is_default ? "bg-amber-500/10 text-amber-500" : "bg-blue-500/10 text-blue-500"}`}
+                                        >
                                             <FileCode className="h-5 w-5" />
                                         </div>
                                         <div>

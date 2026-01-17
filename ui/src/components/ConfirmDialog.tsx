@@ -40,25 +40,13 @@ export function ConfirmDialog({
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription className="pt-2">
-                        {description}
-                    </DialogDescription>
+                    <DialogDescription className="pt-2">{description}</DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                    <Button
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={loading}
-                        className="rounded-xl"
-                    >
+                    <Button variant="outline" onClick={onClose} disabled={loading} className="rounded-xl">
                         {cancelText}
                     </Button>
-                    <Button
-                        variant={confirmVariant}
-                        disabled={loading}
-                        onClick={onConfirm}
-                        className="rounded-xl"
-                    >
+                    <Button variant={confirmVariant} disabled={loading} onClick={onConfirm} className="rounded-xl">
                         {loading ? "Processing..." : confirmText}
                     </Button>
                 </DialogFooter>

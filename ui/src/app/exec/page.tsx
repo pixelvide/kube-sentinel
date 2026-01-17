@@ -42,8 +42,9 @@ function MobileKeyboard({ onKeyPress }: { onKeyPress: (key: string) => void }) {
                     key={i}
                     variant={key.variant === "default" ? "default" : "secondary"}
                     size="sm"
-                    className={`h-10 text-xs font-mono font-bold ${key.width || "col-span-2"} ${key.variant === "secondary" ? "bg-white/10 hover:bg-white/20 text-zinc-300" : ""
-                        }`}
+                    className={`h-10 text-xs font-mono font-bold ${key.width || "col-span-2"} ${
+                        key.variant === "secondary" ? "bg-white/10 hover:bg-white/20 text-zinc-300" : ""
+                    }`}
                     onClick={() => onKeyPress(key.value)}
                     onMouseDown={(e) => e.preventDefault()} // Prevent focus loss from terminal
                 >
@@ -112,12 +113,12 @@ function ExecContent() {
             ws.onopen = () => {
                 setStatus("connected");
                 term.write("\r\n\x1b[32mConnected to terminal.\x1b[0m\r\n");
-                // Note: Backend does not currently support resize via JSON on stdin, 
+                // Note: Backend does not currently support resize via JSON on stdin,
                 // so we do not send initial resize here to avoid it being treated as input.
             };
 
             ws.onmessage = async (event) => {
-                if (typeof event.data === 'string') {
+                if (typeof event.data === "string") {
                     // Try to parse as JSON if the backend sends structured data mixed with stdout
                     // However, based on working page.tsx, backend sends raw.
                     // We'll write directly if string.
@@ -188,10 +189,15 @@ function ExecContent() {
 
                 {/* Right Controls */}
                 <div className="flex items-center gap-3">
-                    <div className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${status === "connected" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" :
-                        status === "connecting" ? "bg-amber-500 animate-pulse" :
-                            "bg-red-500"
-                        }`} />
+                    <div
+                        className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                            status === "connected"
+                                ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                                : status === "connecting"
+                                  ? "bg-amber-500 animate-pulse"
+                                  : "bg-red-500"
+                        }`}
+                    />
                     <Button
                         variant="ghost"
                         size="sm"
@@ -211,27 +217,31 @@ function ExecContent() {
                 <div ref={terminalRef} className="h-full w-full p-4 overflow-hidden" />
             </div>
 
-            <MobileKeyboard onKeyPress={(key) => {
-                if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-                    wsRef.current.send(key);
-                    // Also focus terminal to keep cursor active
-                    xtermRef.current?.focus();
-                }
-            }} />
+            <MobileKeyboard
+                onKeyPress={(key) => {
+                    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                        wsRef.current.send(key);
+                        // Also focus terminal to keep cursor active
+                        xtermRef.current?.focus();
+                    }
+                }}
+            />
         </div>
     );
 }
 
 export default function ExecPage() {
     return (
-        <Suspense fallback={
-            <div className="flex items-center justify-center min-h-screen bg-[#020817] text-white">
-                <div className="animate-pulse flex flex-col items-center gap-2">
-                    <div className="h-2 w-24 bg-white/10 rounded"></div>
-                    <span className="text-xs text-zinc-500 font-mono">INITIALIZING...</span>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen bg-[#020817] text-white">
+                    <div className="animate-pulse flex flex-col items-center gap-2">
+                        <div className="h-2 w-24 bg-white/10 rounded"></div>
+                        <span className="text-xs text-zinc-500 font-mono">INITIALIZING...</span>
+                    </div>
                 </div>
-            </div>
-        }>
+            }
+        >
             <ExecContent />
         </Suspense>
     );

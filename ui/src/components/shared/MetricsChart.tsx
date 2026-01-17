@@ -1,17 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    Area,
-    AreaChart,
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -53,9 +43,7 @@ export function MetricsChart({
         return (
             <Card className={cn("flex flex-col", className)}>
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                        {title}
-                    </CardTitle>
+                    <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
                     No data available
@@ -69,20 +57,19 @@ export function MetricsChart({
     return (
         <Card className={cn("flex flex-col", className)}>
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {title}
-                </CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
                 <div className="flex items-center gap-2">
                     {fallback && (
-                        <Badge variant="outline" className="text-[10px] h-5 border-amber-500/50 text-amber-500 bg-amber-500/10">
+                        <Badge
+                            variant="outline"
+                            className="text-[10px] h-5 border-amber-500/50 text-amber-500 bg-amber-500/10"
+                        >
                             Cached
                         </Badge>
                     )}
                     <span className="text-2xl font-bold">
                         {latestValue.toFixed(3)}
-                        <span className="text-xs font-normal text-muted-foreground ml-1">
-                            {unit}
-                        </span>
+                        <span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span>
                     </span>
                 </div>
             </CardHeader>

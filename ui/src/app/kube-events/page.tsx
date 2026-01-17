@@ -32,10 +32,11 @@ function EventsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedEvent, setSelectedEvent] = useState<EventInfo | null>(null);
 
-    const filteredEvents = events.filter(e =>
-        e.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        e.object.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        e.reason.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredEvents = events.filter(
+        (e) =>
+            e.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            e.object.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            e.reason.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     useEffect(() => {
@@ -51,7 +52,7 @@ function EventsContent() {
         setEvents([]);
         try {
             const data = await api.get<any>(`/kube/events?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setEvents(data.events || []);
         } catch (error) {
@@ -79,7 +80,9 @@ function EventsContent() {
                                     {events.length} Events Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view events" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view events"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -116,9 +119,7 @@ function EventsContent() {
                         ) : events.length === 0 ? (
                             <div className="text-center py-12">
                                 <CheckCircle className="h-12 w-12 mx-auto text-green-500/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No events found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No events found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -135,10 +136,12 @@ function EventsContent() {
                                     >
                                         <div className="flex items-start gap-3 justify-between">
                                             <div className="flex items-start gap-3 flex-1 min-w-0">
-                                                <div className={cn(
-                                                    "p-2 rounded-lg mt-0.5",
-                                                    e.type === "Warning" ? "bg-amber-500/10" : "bg-blue-500/10"
-                                                )}>
+                                                <div
+                                                    className={cn(
+                                                        "p-2 rounded-lg mt-0.5",
+                                                        e.type === "Warning" ? "bg-amber-500/10" : "bg-blue-500/10"
+                                                    )}
+                                                >
                                                     {e.type === "Warning" ? (
                                                         <AlertTriangle className="h-4 w-4 text-amber-500" />
                                                     ) : (
@@ -173,7 +176,9 @@ function EventsContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(e.last_seen)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(e.last_seen)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -198,7 +203,13 @@ function EventsContent() {
 
 export default function EventsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <EventsContent />
         </Suspense>
     );

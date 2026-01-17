@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import { formatAge } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -47,7 +40,7 @@ export function RelatedJobsTable({ resource, context }: RelatedJobsTableProps) {
 
             try {
                 // For CronJobs, we can find Jobs by owner reference UID.
-                // But since our API doesn't support ownerUid filtering directly, 
+                // But since our API doesn't support ownerUid filtering directly,
                 // and we've added label selector support, we'll try to find by labels.
                 // CronJob controller adds 'controller-uid' label to Jobs.
 
@@ -61,12 +54,12 @@ export function RelatedJobsTable({ resource, context }: RelatedJobsTableProps) {
                 }
 
                 const data = await api.get<{ jobs: Job[] }>(`/kube/jobs?${queryParams}`, {
-                    headers: { "x-kube-context": context || "" }
+                    headers: { "x-kube-context": context || "" },
                 });
 
                 // Sort by age (newest first)
-                const sortedJobs = (data.jobs || []).sort((a, b) =>
-                    new Date(b.age).getTime() - new Date(a.age).getTime()
+                const sortedJobs = (data.jobs || []).sort(
+                    (a, b) => new Date(b.age).getTime() - new Date(a.age).getTime()
                 );
 
                 setJobs(sortedJobs);
@@ -112,7 +105,10 @@ export function RelatedJobsTable({ resource, context }: RelatedJobsTableProps) {
                     Related Job History
                 </h3>
                 {jobs.length > 0 && (
-                    <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                    <Badge
+                        variant="secondary"
+                        className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                    >
                         {jobs.length}
                     </Badge>
                 )}
@@ -125,17 +121,21 @@ export function RelatedJobsTable({ resource, context }: RelatedJobsTableProps) {
                         Fetching job history...
                     </div>
                 ) : error ? (
-                    <div className="p-4 text-destructive text-xs">
-                        {error}
-                    </div>
+                    <div className="p-4 text-destructive text-xs">{error}</div>
                 ) : jobs.length > 0 ? (
                     <Table>
                         <TableHeader className="bg-muted text-muted-foreground">
                             <TableRow>
-                                <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">Job Name</TableHead>
-                                <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">Completions</TableHead>
+                                <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">
+                                    Job Name
+                                </TableHead>
+                                <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">
+                                    Completions
+                                </TableHead>
                                 <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">Status</TableHead>
-                                <TableHead className="h-8 text-[11px] font-medium text-right whitespace-nowrap">Age</TableHead>
+                                <TableHead className="h-8 text-[11px] font-medium text-right whitespace-nowrap">
+                                    Age
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -150,7 +150,10 @@ export function RelatedJobsTable({ resource, context }: RelatedJobsTableProps) {
                                     <TableCell className="py-2 whitespace-nowrap">
                                         <Badge
                                             variant="outline"
-                                            className={cn("text-[9px] font-bold px-1.5 py-0 h-4 border flex items-center gap-1 w-fit", getStatusColor(job))}
+                                            className={cn(
+                                                "text-[9px] font-bold px-1.5 py-0 h-4 border flex items-center gap-1 w-fit",
+                                                getStatusColor(job)
+                                            )}
                                         >
                                             {getStatusIcon(job)}
                                             {getStatusText(job)}
@@ -164,9 +167,7 @@ export function RelatedJobsTable({ resource, context }: RelatedJobsTableProps) {
                         </TableBody>
                     </Table>
                 ) : (
-                    <div className="p-4 text-center text-xs text-muted-foreground italic">
-                        No job history found.
-                    </div>
+                    <div className="p-4 text-center text-xs text-muted-foreground italic">No job history found.</div>
                 )}
             </div>
         </div>

@@ -26,9 +26,7 @@ function NetworkPoliciesContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedItem, setSelectedItem] = useState<NetworkPolicyInfo | null>(null);
 
-    const filteredItems = policies.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = policies.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -43,7 +41,7 @@ function NetworkPoliciesContent() {
         setPolicies([]);
         try {
             const data = await api.get<any>(`/kube/network-policies?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setPolicies(data.networkpolicies || []);
         } catch (error) {
@@ -71,7 +69,9 @@ function NetworkPoliciesContent() {
                                     {policies.length} Network Policies Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view network policies" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view network policies"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -114,7 +114,7 @@ function NetworkPoliciesContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredItems.map(item => (
+                                {filteredItems.map((item) => (
                                     <div
                                         key={item.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -133,7 +133,9 @@ function NetworkPoliciesContent() {
                                             </div>
 
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(item.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(item.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -153,13 +155,19 @@ function NetworkPoliciesContent() {
                 kind="NetworkPolicy"
                 onUpdate={handleRefresh}
             />
-        </div >
+        </div>
     );
 }
 
 export default function NetworkPoliciesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <NetworkPoliciesContent />
         </Suspense>
     );

@@ -28,7 +28,7 @@ export function LogViewerModal({
     containers: string[];
     initContainers?: string[];
     selector?: string;
-    pods?: Array<{ name: string, status: string }>;
+    pods?: Array<{ name: string; status: string }>;
     showPodSelector?: boolean;
     title?: string;
 }) {
@@ -63,7 +63,7 @@ export function LogViewerModal({
             // "No Wrap" mode: Set massive column width, restrict rows to container height
             const dims = fitAddonRef.current.proposeDimensions();
             if (dims) {
-                // 1000 cols is usually enough to prevent wrap for reasonable logs. 
+                // 1000 cols is usually enough to prevent wrap for reasonable logs.
                 // We keep rows dynamic to fill vertical space.
                 xtermRef.current.resize(1000, dims.rows);
             }
@@ -74,8 +74,6 @@ export function LogViewerModal({
     useEffect(() => {
         handleResize();
     }, [isWrapEnabled]);
-
-
 
     useEffect(() => {
         if (!isOpen) {
@@ -105,8 +103,8 @@ export function LogViewerModal({
                 fontSize: 12,
                 fontFamily: 'Menlo, Monaco, "Courier New", monospace',
                 theme: {
-                    background: '#09090b',
-                    foreground: '#f4f4f5',
+                    background: "#09090b",
+                    foreground: "#f4f4f5",
                 },
                 disableStdin: true,
                 convertEol: true, // Help with line endings if needed
@@ -125,7 +123,6 @@ export function LogViewerModal({
             requestAnimationFrame(() => {
                 handleResize();
             });
-
 
             if (selectedContainers.length === 0 || selectedPods.length === 0) {
                 if (wsRef.current) {
@@ -153,11 +150,23 @@ export function LogViewerModal({
             }
 
             const selectorParam = selector ? `&selector=${encodeURIComponent(selector)}` : "";
-            const wsUrl = api.getWsUrl(`/api/v1/kube/logs?context=${context}&namespace=${namespace}&pod=${podParam}&container=${containerParam}&timestamps=${showTimestamps}&prefix=${showPrefix}${selectorParam}`);
+            const wsUrl = api.getWsUrl(
+                `/api/v1/kube/logs?context=${context}&namespace=${namespace}&pod=${podParam}&container=${containerParam}&timestamps=${showTimestamps}&prefix=${showPrefix}${selectorParam}`
+            );
 
             setStatus("connecting");
-            const podDisplay = podParam === "__all__" ? "All Pods" : (selectedPods.length > 1 ? `${selectedPods.length} Pods` : podParam);
-            const containerDisplay = containerParam === "__all__" ? "All Containers" : (selectedContainers.length > 1 ? `${selectedContainers.length} Containers` : containerParam);
+            const podDisplay =
+                podParam === "__all__"
+                    ? "All Pods"
+                    : selectedPods.length > 1
+                      ? `${selectedPods.length} Pods`
+                      : podParam;
+            const containerDisplay =
+                containerParam === "__all__"
+                    ? "All Containers"
+                    : selectedContainers.length > 1
+                      ? `${selectedContainers.length} Containers`
+                      : containerParam;
             term.writeln(`\x1b[33mConnecting to logs for ${podDisplay} [${containerDisplay}]...\x1b[0m`);
 
             const ws = new WebSocket(wsUrl);
@@ -170,7 +179,7 @@ export function LogViewerModal({
 
             ws.onmessage = (event) => {
                 // Ensure data is string
-                if (typeof event.data === 'string') {
+                if (typeof event.data === "string") {
                     term.write(event.data);
                 } else {
                     // If blob, read it (rare for textmessage, but safe to handle)
@@ -212,9 +221,7 @@ export function LogViewerModal({
             }
             // Logic to dispose xterm is handled at start of effect or on modal close
         };
-
     }, [isOpen, context, namespace, selectedContainers, selectedPods, showTimestamps, showPrefix, selector]); // Re-run when container changes
-
 
     // Pod selection handlers
     const handlePodSelection = (newSelection: string[]) => {
@@ -234,13 +241,13 @@ export function LogViewerModal({
                         <DialogTitle className="flex items-center gap-2 text-sm font-mono text-zinc-200">
                             <span>Logs: {title || "Unknown Resource"}</span>
                             {status === "connecting" && <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />}
-                            {status === "connected" && <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
+                            {status === "connected" && (
+                                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                            )}
                             {status === "disconnected" && <div className="h-2 w-2 rounded-full bg-zinc-500" />}
                             {status === "error" && <div className="h-2 w-2 rounded-full bg-red-500" />}
                         </DialogTitle>
-                        <DialogDescription className="text-xs font-mono text-zinc-500">
-                            {namespace}
-                        </DialogDescription>
+                        <DialogDescription className="text-xs font-mono text-zinc-500">{namespace}</DialogDescription>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -248,7 +255,7 @@ export function LogViewerModal({
                         {(showPodSelector ?? (pods && pods.length > 0)) && (
                             <div className="w-48 overflow-hidden">
                                 <MultiSelect
-                                    options={(pods || []).map(p => ({ value: p.name, label: p.name }))}
+                                    options={(pods || []).map((p) => ({ value: p.name, label: p.name }))}
                                     selected={selectedPods}
                                     onChange={handlePodSelection}
                                     placeholder="Select Pods"
@@ -265,13 +272,13 @@ export function LogViewerModal({
                                 groups={[
                                     {
                                         label: "Containers",
-                                        options: containers.map(c => ({ value: c, label: c }))
+                                        options: containers.map((c) => ({ value: c, label: c })),
                                     },
                                     {
                                         label: "Init Containers",
-                                        options: (initContainers || []).map(c => ({ value: c, label: c }))
-                                    }
-                                ].filter(g => g.options.length > 0)}
+                                        options: (initContainers || []).map((c) => ({ value: c, label: c })),
+                                    },
+                                ].filter((g) => g.options.length > 0)}
                                 selected={selectedContainers}
                                 onChange={setSelectedContainers}
                                 placeholder="Select Containers"
@@ -285,7 +292,7 @@ export function LogViewerModal({
 
                         <button
                             onClick={() => setShowPrefix(!showPrefix)}
-                            className={`p-2 rounded-md transition-colors hover:bg-white/10 ${showPrefix ? 'text-primary' : 'text-zinc-500'}`}
+                            className={`p-2 rounded-md transition-colors hover:bg-white/10 ${showPrefix ? "text-primary" : "text-zinc-500"}`}
                             title={showPrefix ? "Hide Container Names" : "Show Container Names"}
                         >
                             <Tag className="h-4 w-4" />
@@ -293,14 +300,14 @@ export function LogViewerModal({
 
                         <button
                             onClick={() => setShowTimestamps(!showTimestamps)}
-                            className={`p-2 rounded-md transition-colors hover:bg-white/10 ${showTimestamps ? 'text-primary' : 'text-zinc-500'}`}
+                            className={`p-2 rounded-md transition-colors hover:bg-white/10 ${showTimestamps ? "text-primary" : "text-zinc-500"}`}
                             title={showTimestamps ? "Hide Timestamps" : "Show Timestamps"}
                         >
                             <Clock className="h-4 w-4" />
                         </button>
                         <button
                             onClick={() => setIsWrapEnabled(!isWrapEnabled)}
-                            className={`p-2 rounded-md transition-colors hover:bg-white/10 ${isWrapEnabled ? 'text-primary' : 'text-zinc-500'}`}
+                            className={`p-2 rounded-md transition-colors hover:bg-white/10 ${isWrapEnabled ? "text-primary" : "text-zinc-500"}`}
                             title={isWrapEnabled ? "Disable Wrap" : "Enable Wrap"}
                         >
                             <WrapText className="h-4 w-4" />

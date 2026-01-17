@@ -33,12 +33,13 @@ export function VersionDisplay() {
         fetchVersion();
     }, []);
 
-    if (loading) return (
-        <div className="px-3 py-2 flex items-center gap-2 opacity-30">
-            <RefreshCcw className="h-3 w-3 animate-spin" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">v...</span>
-        </div>
-    );
+    if (loading)
+        return (
+            <div className="px-3 py-2 flex items-center gap-2 opacity-30">
+                <RefreshCcw className="h-3 w-3 animate-spin" />
+                <span className="text-[10px] font-medium uppercase tracking-wider">v...</span>
+            </div>
+        );
 
     if (!version) return null;
 
@@ -66,7 +67,10 @@ export function VersionDisplay() {
                     rel="noopener noreferrer"
                     className="group"
                 >
-                    <Badge variant="outline" className="text-[10px] h-5 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-colors cursor-pointer w-fit py-0 px-2 font-semibold">
+                    <Badge
+                        variant="outline"
+                        className="text-[10px] h-5 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-colors cursor-pointer w-fit py-0 px-2 font-semibold"
+                    >
                         Update available: {version.latest_version}
                     </Badge>
                 </a>

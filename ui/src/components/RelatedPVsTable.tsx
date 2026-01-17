@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import { formatAge } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -48,7 +41,7 @@ export function RelatedPVsTable({ resource, context }: RelatedPVsTableProps) {
 
             try {
                 const data = await api.get<{ pvs: PV[] }>(`/kube/pvs?storageClass=${metadata.name}`, {
-                    headers: { "x-kube-context": context || "" }
+                    headers: { "x-kube-context": context || "" },
                 });
                 setPvs(data.pvs || []);
             } catch (err: any) {
@@ -87,7 +80,10 @@ export function RelatedPVsTable({ resource, context }: RelatedPVsTableProps) {
                     Persistent Volumes
                 </h3>
                 {pvs.length > 0 && (
-                    <Badge variant="secondary" className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4">
+                    <Badge
+                        variant="secondary"
+                        className="bg-muted text-muted-foreground border-none text-[10px] font-bold px-1.5 h-4"
+                    >
                         {pvs.length}
                     </Badge>
                 )}
@@ -100,27 +96,34 @@ export function RelatedPVsTable({ resource, context }: RelatedPVsTableProps) {
                         Fetching related volumes...
                     </div>
                 ) : error ? (
-                    <div className="p-4 text-destructive text-xs">
-                        {error}
-                    </div>
+                    <div className="p-4 text-destructive text-xs">{error}</div>
                 ) : pvs.length > 0 ? (
                     <Table>
                         <TableHeader className="bg-muted text-muted-foreground">
                             <TableRow>
                                 <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">Name</TableHead>
-                                <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">Capacity</TableHead>
+                                <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">
+                                    Capacity
+                                </TableHead>
                                 <TableHead className="h-8 text-[11px] font-medium whitespace-nowrap">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {pvs.map((pv) => (
                                 <TableRow key={pv.name} className="hover:bg-muted/50 border-border">
-                                    <TableCell className="py-2 text-xs font-mono font-medium whitespace-nowrap">{pv.name}</TableCell>
-                                    <TableCell className="py-2 text-xs text-muted-foreground whitespace-nowrap">{pv.capacity}</TableCell>
+                                    <TableCell className="py-2 text-xs font-mono font-medium whitespace-nowrap">
+                                        {pv.name}
+                                    </TableCell>
+                                    <TableCell className="py-2 text-xs text-muted-foreground whitespace-nowrap">
+                                        {pv.capacity}
+                                    </TableCell>
                                     <TableCell className="py-2 whitespace-nowrap">
                                         <Badge
                                             variant="outline"
-                                            className={cn("text-[9px] font-bold px-1.5 py-0 h-4 border", getStatusColor(pv.status))}
+                                            className={cn(
+                                                "text-[9px] font-bold px-1.5 py-0 h-4 border",
+                                                getStatusColor(pv.status)
+                                            )}
                                         >
                                             {pv.status}
                                         </Badge>

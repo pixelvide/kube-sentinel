@@ -24,9 +24,7 @@ function IngressClassesContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedItem, setSelectedItem] = useState<IngressClassInfo | null>(null);
 
-    const filteredItems = classes.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = classes.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext) {
@@ -41,7 +39,7 @@ function IngressClassesContent() {
         setClasses([]);
         try {
             const data = await api.get<any>(`/kube/ingress-classes`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setClasses(data.ingressclasses || []);
         } catch (error) {
@@ -69,7 +67,9 @@ function IngressClassesContent() {
                                     {classes.length} Ingress Classes Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext ? "Select a cluster from the top bar to view ingress classes" : "Cluster-wide resource"}
+                                    {!selectedContext
+                                        ? "Select a cluster from the top bar to view ingress classes"
+                                        : "Cluster-wide resource"}
                                 </CardDescription>
                             </div>
                             <Button
@@ -105,7 +105,7 @@ function IngressClassesContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredItems.map(item => (
+                                {filteredItems.map((item) => (
                                     <div
                                         key={item.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -120,7 +120,9 @@ function IngressClassesContent() {
                                             </div>
 
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(item.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(item.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -140,13 +142,19 @@ function IngressClassesContent() {
                 kind="IngressClass"
                 onUpdate={handleRefresh}
             />
-        </div >
+        </div>
     );
 }
 
 export default function IngressClassesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <IngressClassesContent />
         </Suspense>
     );

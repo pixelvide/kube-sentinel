@@ -24,9 +24,7 @@ function NamespacesContent() {
     const searchQuery = searchParams.get("q") || "";
     const [viewNamespace, setViewNamespace] = useState<string | null>(null);
 
-    const filteredNamespaces = namespaces.filter(ns =>
-        ns.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredNamespaces = namespaces.filter((ns) => ns.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Load contexts on mount just for names
     useEffect(() => {
@@ -50,7 +48,7 @@ function NamespacesContent() {
             setNamespaces([]);
             try {
                 const data = await api.get<any>(`/kube/namespaces`, {
-                    headers: { "x-kube-context": selectedContext || "" }
+                    headers: { "x-kube-context": selectedContext || "" },
                 });
                 setNamespaces(data.namespaces || []);
             } catch (error) {
@@ -69,7 +67,7 @@ function NamespacesContent() {
                 setNamespacesLoading(true);
                 try {
                     const data = await api.get<any>(`/kube/namespaces`, {
-                        headers: { "x-kube-context": selectedContext || "" }
+                        headers: { "x-kube-context": selectedContext || "" },
                     });
                     setNamespaces(data.namespaces || []);
                 } catch (error) {
@@ -83,15 +81,13 @@ function NamespacesContent() {
     };
 
     const getDisplayName = (contextName: string) => {
-        const ctx = contexts.find(c => c.name === contextName);
+        const ctx = contexts.find((c) => c.name === contextName);
         return ctx?.display_name || contextName;
     };
 
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-background/50 p-4 md:p-0">
             <div className="w-full max-w-5xl space-y-8">
-
-
                 {/* Namespaces Grid */}
                 <Card className="border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-sm overflow-hidden rounded-3xl">
                     <CardHeader className="border-b bg-card/50 px-8 py-6">
@@ -134,13 +130,11 @@ function NamespacesContent() {
                         ) : namespaces.length === 0 ? (
                             <div className="text-center py-12">
                                 <Layers className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No namespaces found in this cluster.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No namespaces found in this cluster.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredNamespaces.map(ns => (
+                                {filteredNamespaces.map((ns) => (
                                     <div
                                         key={ns}
                                         className="p-4 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -152,7 +146,9 @@ function NamespacesContent() {
                                             </div>
                                             <div className="overflow-hidden">
                                                 <p className="font-semibold text-sm truncate">{ns}</p>
-                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">namespace</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                                                    namespace
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -178,7 +174,13 @@ function NamespacesContent() {
 
 export default function NamespacesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <NamespacesContent />
         </Suspense>
     );

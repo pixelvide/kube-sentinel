@@ -32,9 +32,7 @@ function CronJobsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedCronJob, setSelectedCronJob] = useState<CronJobInfo | null>(null);
 
-    const filteredCronJobs = cronjobs.filter(cj =>
-        cj.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredCronJobs = cronjobs.filter((cj) => cj.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -49,7 +47,7 @@ function CronJobsContent() {
         setCronjobs([]);
         try {
             const data = await api.get<any>(`/kube/cron-jobs?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setCronjobs(data.cronjobs || []);
         } catch (error) {
@@ -77,7 +75,9 @@ function CronJobsContent() {
                                     {cronjobs.length} CronJobs Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view cronjobs" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view cronjobs"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -114,13 +114,11 @@ function CronJobsContent() {
                         ) : cronjobs.length === 0 ? (
                             <div className="text-center py-12">
                                 <Clock className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No cronjobs found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No cronjobs found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredCronJobs.map(cj => (
+                                {filteredCronJobs.map((cj) => (
                                     <div
                                         key={cj.name + cj.namespace}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -128,10 +126,12 @@ function CronJobsContent() {
                                     >
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
                                             <div className="flex items-center gap-4 min-w-0">
-                                                <div className={cn(
-                                                    "p-3 rounded-xl",
-                                                    cj.suspend ? "bg-gray-500/10" : "bg-teal-500/10"
-                                                )}>
+                                                <div
+                                                    className={cn(
+                                                        "p-3 rounded-xl",
+                                                        cj.suspend ? "bg-gray-500/10" : "bg-teal-500/10"
+                                                    )}
+                                                >
                                                     {cj.suspend ? (
                                                         <PauseCircle className="h-6 w-6 text-gray-500" />
                                                     ) : (
@@ -160,17 +160,24 @@ function CronJobsContent() {
                                                             </span>
                                                         )}
                                                         <span className="text-xs text-muted-foreground">
-                                                            Next: {cj.suspend ? "N/A" : (() => {
-                                                                try {
-                                                                    const parser = (cronParser as any).parse || (cronParser as any).default?.parse;
-                                                                    if (!parser) return "Parser Error";
-                                                                    const tz = cj.timezone || "UTC";
-                                                                    const nextDate = parser(cj.schedule, { tz }).next().toDate();
-                                                                    return nextDate.toLocaleString();
-                                                                } catch (e) {
-                                                                    return "Invalid Schedule";
-                                                                }
-                                                            })()}
+                                                            Next:{" "}
+                                                            {cj.suspend
+                                                                ? "N/A"
+                                                                : (() => {
+                                                                      try {
+                                                                          const parser =
+                                                                              (cronParser as any).parse ||
+                                                                              (cronParser as any).default?.parse;
+                                                                          if (!parser) return "Parser Error";
+                                                                          const tz = cj.timezone || "UTC";
+                                                                          const nextDate = parser(cj.schedule, { tz })
+                                                                              .next()
+                                                                              .toDate();
+                                                                          return nextDate.toLocaleString();
+                                                                      } catch (e) {
+                                                                          return "Invalid Schedule";
+                                                                      }
+                                                                  })()}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -186,7 +193,9 @@ function CronJobsContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(cj.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(cj.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -212,7 +221,13 @@ function CronJobsContent() {
 
 export default function CronJobsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <CronJobsContent />
         </Suspense>
     );

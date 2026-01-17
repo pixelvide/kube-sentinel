@@ -71,7 +71,7 @@ export default function ClusterSettingsPage() {
             const data = await api.post<any>("/settings/kube/validate");
             setValidationStatus({
                 success: data.valid,
-                message: data.valid ? data.message : (data.error || "Validation failed")
+                message: data.valid ? data.message : data.error || "Validation failed",
             });
         } catch (error) {
             setValidationStatus({ success: false, message: "Network error during validation" });
@@ -105,7 +105,9 @@ export default function ClusterSettingsPage() {
             <div className="w-full max-w-5xl space-y-8">
                 <div className="flex flex-col gap-1 mt-8">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">Cluster Settings</h1>
-                    <p className="text-muted-foreground text-sm">Configure your Kubernetes clusters and authentication.</p>
+                    <p className="text-muted-foreground text-sm">
+                        Configure your Kubernetes clusters and authentication.
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -121,25 +123,40 @@ export default function ClusterSettingsPage() {
                                     <CheckCircle2 className="h-5 w-5 text-green-500" />
                                     Active Cluster
                                 </CardTitle>
-                                <CardDescription>Select the Kubernetes cluster context to use for all operations.</CardDescription>
+                                <CardDescription>
+                                    Select the Kubernetes cluster context to use for all operations.
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="p-8">
                                 {contexts.length === 0 ? (
-                                    <p className="text-muted-foreground text-sm text-center py-4">No contexts available. Configure a GitLab Agent first.</p>
+                                    <p className="text-muted-foreground text-sm text-center py-4">
+                                        No contexts available. Configure a GitLab Agent first.
+                                    </p>
                                 ) : (
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="active-cluster" className="text-xs font-bold uppercase tracking-wider opacity-60">Current Context</Label>
+                                            <Label
+                                                htmlFor="active-cluster"
+                                                className="text-xs font-bold uppercase tracking-wider opacity-60"
+                                            >
+                                                Current Context
+                                            </Label>
                                             <Select value={selectedContext} onValueChange={handleContextChange}>
                                                 <SelectTrigger className="h-12 text-sm rounded-xl bg-muted/30 border-muted/20">
                                                     <SelectValue placeholder="Select a cluster context" />
                                                 </SelectTrigger>
                                                 <SelectContent className="rounded-xl">
-                                                    {contexts.map(c => (
-                                                        <SelectItem key={c.name} value={c.name} className="rounded-lg text-sm py-3">
+                                                    {contexts.map((c) => (
+                                                        <SelectItem
+                                                            key={c.name}
+                                                            value={c.name}
+                                                            className="rounded-lg text-sm py-3"
+                                                        >
                                                             <div className="flex flex-col">
                                                                 <span className="font-medium">{c.display_name}</span>
-                                                                <span className="text-xs opacity-50 font-mono">{c.name}</span>
+                                                                <span className="text-xs opacity-50 font-mono">
+                                                                    {c.name}
+                                                                </span>
                                                             </div>
                                                         </SelectItem>
                                                     ))}
@@ -147,7 +164,8 @@ export default function ClusterSettingsPage() {
                                             </Select>
                                         </div>
                                         <p className="text-xs text-muted-foreground">
-                                            This context will be used for all Kubernetes operations including pod management and deployments.
+                                            This context will be used for all Kubernetes operations including pod
+                                            management and deployments.
                                         </p>
                                     </div>
                                 )}
@@ -162,12 +180,19 @@ export default function ClusterSettingsPage() {
                             <CardContent className="p-8">
                                 {loading ? (
                                     <div className="h-64 flex items-center justify-center">
-                                        <p className="text-muted-foreground animate-pulse font-mono text-sm uppercase tracking-widest">Retrieving configuration...</p>
+                                        <p className="text-muted-foreground animate-pulse font-mono text-sm uppercase tracking-widest">
+                                            Retrieving configuration...
+                                        </p>
                                     </div>
                                 ) : (
                                     <div className="space-y-6">
                                         <div className="space-y-3">
-                                            <Label htmlFor="kubeconfig" className="text-xs font-bold uppercase tracking-wider opacity-60 ml-1">Config YAML (Read Only)</Label>
+                                            <Label
+                                                htmlFor="kubeconfig"
+                                                className="text-xs font-bold uppercase tracking-wider opacity-60 ml-1"
+                                            >
+                                                Config YAML (Read Only)
+                                            </Label>
                                             <textarea
                                                 id="kubeconfig"
                                                 className="w-full h-48 p-6 font-mono text-xs border rounded-2xl bg-black/5 transition-all resize-none outline-none leading-relaxed cursor-not-allowed opacity-80"
@@ -178,14 +203,28 @@ export default function ClusterSettingsPage() {
                                         </div>
 
                                         {validationStatus && (
-                                            <div className={cn(
-                                                "p-4 rounded-2xl border flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300",
-                                                validationStatus.success ? "bg-green-500/5 border-green-500/20 text-green-700" : "bg-destructive/5 border-destructive/20 text-destructive"
-                                            )}>
-                                                {validationStatus.success ? <ShieldCheck className="h-5 w-5 mt-0.5 shrink-0" /> : <ShieldCheck className="h-5 w-5 mt-0.5 shrink-0 opacity-50" />}
+                                            <div
+                                                className={cn(
+                                                    "p-4 rounded-2xl border flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300",
+                                                    validationStatus.success
+                                                        ? "bg-green-500/5 border-green-500/20 text-green-700"
+                                                        : "bg-destructive/5 border-destructive/20 text-destructive"
+                                                )}
+                                            >
+                                                {validationStatus.success ? (
+                                                    <ShieldCheck className="h-5 w-5 mt-0.5 shrink-0" />
+                                                ) : (
+                                                    <ShieldCheck className="h-5 w-5 mt-0.5 shrink-0 opacity-50" />
+                                                )}
                                                 <div className="space-y-1">
-                                                    <p className="text-[10px] font-bold uppercase tracking-wider">{validationStatus.success ? "Validation Successful" : "Validation Failed"}</p>
-                                                    <p className="text-[11px] leading-relaxed opacity-80 break-words font-mono">{validationStatus.message}</p>
+                                                    <p className="text-[10px] font-bold uppercase tracking-wider">
+                                                        {validationStatus.success
+                                                            ? "Validation Successful"
+                                                            : "Validation Failed"}
+                                                    </p>
+                                                    <p className="text-[11px] leading-relaxed opacity-80 break-words font-mono">
+                                                        {validationStatus.message}
+                                                    </p>
                                                 </div>
                                             </div>
                                         )}
@@ -214,13 +253,20 @@ export default function ClusterSettingsPage() {
                             </CardHeader>
                             <CardContent className="p-8">
                                 {contexts.length === 0 ? (
-                                    <p className="text-muted-foreground text-sm text-center py-8">No contexts available. Configure a GitLab Agent first.</p>
+                                    <p className="text-muted-foreground text-sm text-center py-8">
+                                        No contexts available. Configure a GitLab Agent first.
+                                    </p>
                                 ) : (
                                     <div className="space-y-3">
                                         {contexts.map((ctx) => (
-                                            <div key={ctx.name} className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-muted/20">
+                                            <div
+                                                key={ctx.name}
+                                                className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-muted/20"
+                                            >
                                                 <div className="flex-1">
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">Original Context</p>
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">
+                                                        Original Context
+                                                    </p>
                                                     <p className="font-mono text-xs opacity-70">{ctx.name}</p>
                                                 </div>
                                                 {editingContext === ctx.name ? (
@@ -232,20 +278,37 @@ export default function ClusterSettingsPage() {
                                                             placeholder="Enter display name"
                                                             autoFocus
                                                         />
-                                                        <Button size="icon" variant="ghost" className="h-10 w-10 text-green-600 hover:bg-green-500/10 rounded-xl" onClick={() => handleSaveMapping(ctx.name)}>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-10 w-10 text-green-600 hover:bg-green-500/10 rounded-xl"
+                                                            onClick={() => handleSaveMapping(ctx.name)}
+                                                        >
                                                             <Check className="h-4 w-4" />
                                                         </Button>
-                                                        <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive hover:bg-destructive/10 rounded-xl" onClick={handleCancelEdit}>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-10 w-10 text-destructive hover:bg-destructive/10 rounded-xl"
+                                                            onClick={handleCancelEdit}
+                                                        >
                                                             <X className="h-4 w-4" />
                                                         </Button>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center gap-3 flex-1 justify-end">
                                                         <div className="text-right">
-                                                            <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">Display Name</p>
+                                                            <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">
+                                                                Display Name
+                                                            </p>
                                                             <p className="font-bold text-sm">{ctx.display_name}</p>
                                                         </div>
-                                                        <Button size="icon" variant="ghost" className="h-10 w-10 hover:bg-primary/10 rounded-xl" onClick={() => handleStartEdit(ctx)}>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-10 w-10 hover:bg-primary/10 rounded-xl"
+                                                            onClick={() => handleStartEdit(ctx)}
+                                                        >
                                                             <Edit2 className="h-4 w-4" />
                                                         </Button>
                                                     </div>

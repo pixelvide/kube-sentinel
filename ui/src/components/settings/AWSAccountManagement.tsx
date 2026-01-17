@@ -57,7 +57,8 @@ export default function AWSAccountManagement() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Are you sure you want to remove this AWS account? This may break connected EKS clusters.")) return;
+        if (!confirm("Are you sure you want to remove this AWS account? This may break connected EKS clusters."))
+            return;
         try {
             await awsApi.deleteConfig(id);
             fetchConfigs();
@@ -100,12 +101,17 @@ export default function AWSAccountManagement() {
                 <div className="text-center py-12 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg">
                     <Key className="w-12 h-12 mx-auto text-zinc-400 mb-3" />
                     <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">No accounts connected</h3>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Connect an AWS account to get started.</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        Connect an AWS account to get started.
+                    </p>
                 </div>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {configs.map((config) => (
-                        <div key={config.id} className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm relative group">
+                        <div
+                            key={config.id}
+                            className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm relative group"
+                        >
                             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={() => handleDelete(config.id)}
@@ -137,7 +143,10 @@ export default function AWSAccountManagement() {
                     <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
                         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
                             <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">Connect AWS Account</h3>
-                            <button onClick={() => setIsAdding(false)} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                            <button
+                                onClick={() => setIsAdding(false)}
+                                className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                            >
                                 <XCircle className="w-5 h-5" />
                             </button>
                         </div>
@@ -150,7 +159,9 @@ export default function AWSAccountManagement() {
                             )}
 
                             <div>
-                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Account Name</label>
+                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                                    Account Name
+                                </label>
                                 <input
                                     type="text"
                                     value={name}
@@ -163,7 +174,9 @@ export default function AWSAccountManagement() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Access Key ID</label>
+                                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                                        Access Key ID
+                                    </label>
                                     <input
                                         type="text"
                                         value={accessKeyId}
@@ -173,7 +186,9 @@ export default function AWSAccountManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Region</label>
+                                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                                        Region
+                                    </label>
                                     <input
                                         type="text"
                                         value={region}
@@ -185,7 +200,9 @@ export default function AWSAccountManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Secret Access Key</label>
+                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                                    Secret Access Key
+                                </label>
                                 <input
                                     type="password"
                                     value={secretAccessKey}
@@ -196,7 +213,9 @@ export default function AWSAccountManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Session Token (Optional)</label>
+                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                                    Session Token (Optional)
+                                </label>
                                 <input
                                     type="password"
                                     value={sessionToken}

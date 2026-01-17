@@ -31,9 +31,7 @@ function PVCContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedItem, setSelectedItem] = useState<PVCInfo | null>(null);
 
-    const filteredItems = pvcs.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = pvcs.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -48,7 +46,7 @@ function PVCContent() {
         setPvcs([]);
         try {
             const data = await api.get<any>(`/kube/pvcs?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setPvcs(data.pvcs || []);
         } catch (error) {
@@ -66,10 +64,14 @@ function PVCContent() {
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
-            case 'bound': return 'bg-green-500/10 text-green-600';
-            case 'pending': return 'bg-yellow-500/10 text-yellow-600';
-            case 'lost': return 'bg-red-500/10 text-red-600';
-            default: return 'bg-muted text-muted-foreground';
+            case "bound":
+                return "bg-green-500/10 text-green-600";
+            case "pending":
+                return "bg-yellow-500/10 text-yellow-600";
+            case "lost":
+                return "bg-red-500/10 text-red-600";
+            default:
+                return "bg-muted text-muted-foreground";
         }
     };
 
@@ -85,7 +87,9 @@ function PVCContent() {
                                     {pvcs.length} PVCs Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view PVCs" : "Manage storage requests"}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view PVCs"
+                                        : "Manage storage requests"}
                                 </CardDescription>
                             </div>
                             <Button
@@ -122,13 +126,11 @@ function PVCContent() {
                         ) : pvcs.length === 0 ? (
                             <div className="text-center py-12">
                                 <Database className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No PVCs found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No PVCs found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredItems.map(item => (
+                                {filteredItems.map((item) => (
                                     <div
                                         key={item.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -138,7 +140,12 @@ function PVCContent() {
                                             <div className="min-w-0 flex-1">
                                                 <p className="font-semibold text-base truncate">{item.name}</p>
                                                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                    <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full", getStatusColor(item.status))}>
+                                                    <span
+                                                        className={cn(
+                                                            "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
+                                                            getStatusColor(item.status)
+                                                        )}
+                                                    >
                                                         {item.status}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -168,7 +175,9 @@ function PVCContent() {
                                             </div>
 
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(item.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(item.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -188,13 +197,19 @@ function PVCContent() {
                 kind="PersistentVolumeClaim"
                 onUpdate={handleRefresh}
             />
-        </div >
+        </div>
     );
 }
 
 export default function PVCPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <PVCContent />
         </Suspense>
     );

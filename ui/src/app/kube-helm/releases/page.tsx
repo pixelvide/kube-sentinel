@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/lib/api";
 
-
 interface HelmRelease {
     name: string;
     namespace: string;
@@ -41,8 +40,8 @@ export default function HelmReleasesPage() {
         if (namespace) params.append("namespace", namespace);
 
         api.get<{ releases: HelmRelease[] }>(`/kube/helm/releases?${params.toString()}`)
-            .then(data => setReleases(data.releases || []))
-            .catch(err => setError(err.message))
+            .then((data) => setReleases(data.releases || []))
+            .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
     };
 
@@ -54,10 +53,11 @@ export default function HelmReleasesPage() {
 
     const context = searchParams.get("context");
 
-    const filteredReleases = releases.filter(r =>
-        r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.chart_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.status.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredReleases = releases.filter(
+        (r) =>
+            r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.chart_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.status.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -75,7 +75,18 @@ export default function HelmReleasesPage() {
 
                         <div className="flex items-center gap-2 flex-1 justify-end max-w-md">
                             <div className="relative flex-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                >
                                     <circle cx="11" cy="11" r="8" />
                                     <path d="m21 21-4.3-4.3" />
                                 </svg>
@@ -92,7 +103,18 @@ export default function HelmReleasesPage() {
                                 className="p-1.5 hover:bg-background rounded-md text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border"
                                 title="Refresh Releases"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-rotate-cw ${loading ? "animate-spin" : ""}`}>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className={`lucide lucide-rotate-cw ${loading ? "animate-spin" : ""}`}
+                                >
                                     <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
                                     <path d="M21 3v5h-5" />
                                 </svg>
@@ -104,7 +126,9 @@ export default function HelmReleasesPage() {
                         {!context ? (
                             <div className="flex flex-col items-center justify-center h-full p-8 text-center text-muted-foreground">
                                 <span className="font-mono text-sm mb-2">No Context Selected</span>
-                                <span className="text-xs">Select a cluster from the top bar to view Helm releases.</span>
+                                <span className="text-xs">
+                                    Select a cluster from the top bar to view Helm releases.
+                                </span>
                             </div>
                         ) : loading ? (
                             <div className="p-8 text-center text-muted-foreground font-mono text-sm animate-pulse">
@@ -117,7 +141,6 @@ export default function HelmReleasesPage() {
                                         Error: {error}
                                     </div>
                                 )}
-
 
                                 {!loading && !error && releases.length === 0 && (
                                     <div className="p-8 text-center text-muted-foreground font-mono text-sm italic">
@@ -160,16 +183,14 @@ export default function HelmReleasesPage() {
                                                                 r.status === "deployed"
                                                                     ? "text-green-500 border-green-500/20 bg-green-500/10"
                                                                     : r.status === "failed"
-                                                                        ? "text-destructive border-destructive/20 bg-destructive/10"
-                                                                        : "text-muted-foreground border-border bg-muted/30"
+                                                                      ? "text-destructive border-destructive/20 bg-destructive/10"
+                                                                      : "text-muted-foreground border-border bg-muted/30"
                                                             }
                                                         >
                                                             {r.status}
                                                         </Badge>
                                                     </td>
-                                                    <td className="p-4 text-muted-foreground text-xs">
-                                                        {r.revision}
-                                                    </td>
+                                                    <td className="p-4 text-muted-foreground text-xs">{r.revision}</td>
                                                     <td className="p-4 text-muted-foreground text-xs whitespace-nowrap">
                                                         {new Date(r.updated).toLocaleString()}
                                                     </td>

@@ -30,9 +30,7 @@ function ReplicaSetsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedReplicaSet, setSelectedReplicaSet] = useState<ReplicaSetInfo | null>(null);
 
-    const filteredReplicaSets = replicasets.filter(rs =>
-        rs.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredReplicaSets = replicasets.filter((rs) => rs.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -47,7 +45,7 @@ function ReplicaSetsContent() {
         setReplicaSets([]);
         try {
             const data = await api.get<any>(`/kube/replica-sets?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setReplicaSets(data.replicasets || []);
         } catch (error) {
@@ -75,7 +73,9 @@ function ReplicaSetsContent() {
                                     {replicasets.length} ReplicaSets Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view replicasets" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view replicasets"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -112,13 +112,11 @@ function ReplicaSetsContent() {
                         ) : replicasets.length === 0 ? (
                             <div className="text-center py-12">
                                 <Layers className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No replicasets found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No replicasets found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredReplicaSets.map(rs => (
+                                {filteredReplicaSets.map((rs) => (
                                     <div
                                         key={rs.name + rs.namespace}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -126,10 +124,14 @@ function ReplicaSetsContent() {
                                     >
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
                                             <div className="flex items-center gap-4 min-w-0">
-                                                <div className={cn(
-                                                    "p-3 rounded-xl",
-                                                    rs.ready_replicas === rs.replicas ? "bg-green-500/10" : "bg-amber-500/10"
-                                                )}>
+                                                <div
+                                                    className={cn(
+                                                        "p-3 rounded-xl",
+                                                        rs.ready_replicas === rs.replicas
+                                                            ? "bg-green-500/10"
+                                                            : "bg-amber-500/10"
+                                                    )}
+                                                >
                                                     {rs.ready_replicas === rs.replicas ? (
                                                         <CheckCircle2 className="h-6 w-6 text-green-500" />
                                                     ) : (
@@ -156,7 +158,9 @@ function ReplicaSetsContent() {
 
                                             {/* Age */}
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(rs.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(rs.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -182,7 +186,13 @@ function ReplicaSetsContent() {
 
 export default function ReplicaSetsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <ReplicaSetsContent />
         </Suspense>
     );

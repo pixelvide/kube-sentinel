@@ -27,9 +27,7 @@ function EndpointsContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedItem, setSelectedItem] = useState<EndpointInfo | null>(null);
 
-    const filteredItems = endpoints.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = endpoints.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -44,7 +42,7 @@ function EndpointsContent() {
         setEndpoints([]);
         try {
             const data = await api.get<any>(`/kube/endpoints?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setEndpoints(data.endpoints || []);
         } catch (error) {
@@ -72,7 +70,9 @@ function EndpointsContent() {
                                     {endpoints.length} Endpoints Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view endpoints" : null}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view endpoints"
+                                        : null}
                                 </CardDescription>
                             </div>
                             <Button
@@ -109,13 +109,11 @@ function EndpointsContent() {
                         ) : endpoints.length === 0 ? (
                             <div className="text-center py-12">
                                 <Network className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                                <p className="text-muted-foreground text-sm">
-                                    No endpoints found in this namespace.
-                                </p>
+                                <p className="text-muted-foreground text-sm">No endpoints found in this namespace.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredItems.map(item => (
+                                {filteredItems.map((item) => (
                                     <div
                                         key={item.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -137,7 +135,9 @@ function EndpointsContent() {
                                             </div>
 
                                             <div className="flex flex-col items-end min-w-[80px]">
-                                                <span className="text-xs text-muted-foreground">{formatAge(item.age)}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatAge(item.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -157,13 +157,19 @@ function EndpointsContent() {
                 kind="Endpoints"
                 onUpdate={handleRefresh}
             />
-        </div >
+        </div>
     );
 }
 
 export default function EndpointsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <EndpointsContent />
         </Suspense>
     );

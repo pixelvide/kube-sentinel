@@ -27,9 +27,7 @@ function LeasesContent() {
     const searchQuery = searchParams.get("q") || "";
     const [selectedResource, setSelectedResource] = useState<LeaseInfo | null>(null);
 
-    const filteredResources = resources.filter(res =>
-        res.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredResources = resources.filter((res) => res.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         if (!selectedContext || !selectedNamespace) {
@@ -45,7 +43,7 @@ function LeasesContent() {
         setResources([]);
         try {
             const data = await api.get<any>(`/kube/leases?namespace=${selectedNamespace}`, {
-                headers: { "x-kube-context": selectedContext || "" }
+                headers: { "x-kube-context": selectedContext || "" },
             });
             setResources(data.leases || []);
         } catch (error) {
@@ -73,7 +71,9 @@ function LeasesContent() {
                                     {resources.length} Leases Found
                                 </CardTitle>
                                 <CardDescription>
-                                    {!selectedContext || !selectedNamespace ? "Select a namespace from the top bar to view Leases" : "Distributed coordination and locking"}
+                                    {!selectedContext || !selectedNamespace
+                                        ? "Select a namespace from the top bar to view Leases"
+                                        : "Distributed coordination and locking"}
                                 </CardDescription>
                             </div>
                             <Button
@@ -110,7 +110,7 @@ function LeasesContent() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredResources.map(res => (
+                                {filteredResources.map((res) => (
                                     <div
                                         key={res.name}
                                         className="p-6 bg-muted/30 rounded-2xl border border-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -120,12 +120,19 @@ function LeasesContent() {
                                             <div className="min-w-0 flex-1">
                                                 <p className="font-semibold text-base truncate">{res.name}</p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-xs text-muted-foreground">Holder: <span className="text-primary font-mono">{res.holder || "None"}</span></span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        Holder:{" "}
+                                                        <span className="text-primary font-mono">
+                                                            {res.holder || "None"}
+                                                        </span>
+                                                    </span>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-6">
                                                 <NamespaceBadge namespace={res.namespace} />
-                                                <span className="text-xs text-muted-foreground min-w-[80px] text-right">{formatAge(res.age)}</span>
+                                                <span className="text-xs text-muted-foreground min-w-[80px] text-right">
+                                                    {formatAge(res.age)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -151,7 +158,13 @@ function LeasesContent() {
 
 export default function LeasesPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            }
+        >
             <LeasesContent />
         </Suspense>
     );

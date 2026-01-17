@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ShieldCheck } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
     const handleLogin = () => {
@@ -24,24 +24,31 @@ export default function LoginPage() {
                             <ShieldCheck className="w-10 h-10 text-primary-foreground text-white" />
                         </div>
                     </div>
-                    <CardTitle className="text-3xl font-extrabold tracking-tight text-foreground">Cloud Sentinel</CardTitle>
-                    <CardDescription className="text-xs font-bold uppercase tracking-[0.3em] opacity-40 mt-2">K8s Access Console</CardDescription>
+                    <CardTitle className="text-3xl font-extrabold tracking-tight text-foreground">
+                        Cloud Sentinel
+                    </CardTitle>
+                    <CardDescription className="text-xs font-bold uppercase tracking-[0.3em] opacity-40 mt-2">
+                        K8s Access Console
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="px-12 pb-12 pt-6">
                     <div className="space-y-6">
                         <p className="text-center text-sm text-muted-foreground leading-relaxed">
-                            A secure, professional-grade k8s access environment for managing your Kubernetes clusters at scale.
+                            A secure, professional-grade k8s access environment for managing your Kubernetes clusters at
+                            scale.
                         </p>
                         <Button
                             className="w-full h-14 font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-primary/20 rounded-2xl transition-all active:scale-95 group"
                             onClick={handleLogin}
                         >
-                            <span className="group-hover:translate-x-1 transition-transform inline-block mr-2">Secure SSO Login</span>
+                            <span className="group-hover:translate-x-1 transition-transform inline-block mr-2">
+                                Secure SSO Login
+                            </span>
                             &rarr;
                         </Button>
                     </div>
                 </CardContent>
             </Card>
         </div>
-    )
+    );
 }

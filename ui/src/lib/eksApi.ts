@@ -1,4 +1,3 @@
-
 import { api } from "./api";
 
 export interface EKSCluster {
@@ -24,7 +23,10 @@ export const eksApi = {
         return response;
     },
     importClusters: async (params: ImportEKSClustersParams): Promise<{ message: string; imported_count: number }> => {
-        const response = await api.post<{ message: string; imported_count: number }>("/settings/aws/eks/import", params);
+        const response = await api.post<{ message: string; imported_count: number }>(
+            "/settings/aws/eks/import",
+            params
+        );
         return response;
     },
 };
