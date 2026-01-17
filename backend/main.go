@@ -85,6 +85,13 @@ func main() {
 				kube.POST("", api.UpdateKubeConfig)
 				kube.POST("/validate", api.ValidateKubeConfig)
 				kube.POST("/context", api.SetCurrentContext)
+
+				configs := kube.Group("/configs")
+				{
+					configs.GET("", api.ListKubeConfigs)
+					configs.POST("", api.UploadKubeConfig)
+					configs.DELETE("/:id", api.DeleteKubeConfig)
+				}
 			}
 			contextMappings := settings.Group("/context-mappings")
 			{

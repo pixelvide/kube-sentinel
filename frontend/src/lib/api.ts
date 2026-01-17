@@ -15,6 +15,11 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
         },
     };
 
+    if (options.body instanceof FormData) {
+        // Let the browser set the Content-Type with the boundary
+        delete (defaultOptions.headers as any)["Content-Type"];
+    }
+
     const response = await fetch(url, defaultOptions);
 
     if (response.status === 401) {

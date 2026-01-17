@@ -1,10 +1,10 @@
 package api
 
 import (
+	"cloud-sentinel-k8s/db"
 	"cloud-sentinel-k8s/models"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -28,22 +28,35 @@ func UpdateKubeConfig(c *gin.Context) {
 		return
 	}
 
-	// Target path via central helper
-	userConfigPath := GetUserKubeConfigPath(user.StorageNamespace)
+	// Update or Create Default Config in DB
+	var config models.KubeConfig
+	err := db.DB.Where("user_id = ? AND is_default = ?", user.ID, true).First(&config).Error
+	if err != nil {
+		// Create new default
+		config = models.KubeConfig{
+			UserID:    user.ID,
+			Name:      "Default",
+			Content:   input.Config,
+			IsDefault: true,
+		}
+		if err := db.DB.Create(&config).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save kubeconfig to db"})
+			return
+		}
+	} else {
+		// Update existing
+		config.Content = input.Config
+		if err := db.DB.Save(&config).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update kubeconfig in db"})
+			return
+		}
+	}
 
-	// Ensure user directory exists
-	if err := os.MkdirAll(filepath.Dir(userConfigPath), 0777); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create config directory"})
+	// Sync to disk
+	if err := SyncKubeConfigs(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to sync kubeconfig to disk"})
 		return
 	}
-	os.Chmod(filepath.Dir(userConfigPath), 0777)
-
-	// Write kubeconfig
-	if err := os.WriteFile(userConfigPath, []byte(input.Config), 0666); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save kubeconfig"})
-		return
-	}
-	os.Chmod(userConfigPath, 0666)
 
 	// Record Audit Log
 	RecordAuditLog(c, "UPDATE_KUBE_CONFIG", nil)
@@ -58,19 +71,32 @@ func GetKubeConfig(c *gin.Context) {
 		return
 	}
 
-	userConfigPath := GetUserKubeConfigPath(user.StorageNamespace)
-
-	content, err := os.ReadFile(userConfigPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			c.JSON(http.StatusOK, gin.H{"config": ""})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to read kubeconfig"})
+	// Try to get from DB first
+	var config models.KubeConfig
+	err := db.DB.Where("user_id = ? AND is_default = ?", user.ID, true).First(&config).Error
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{"config": config.Content})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"config": string(content)})
+	// If not in DB, check file (Migration path)
+	userConfigPath := GetUserKubeConfigPath(user.StorageNamespace)
+	content, err := os.ReadFile(userConfigPath)
+	if err == nil {
+		// Migrate to DB
+		newConfig := models.KubeConfig{
+			UserID:    user.ID,
+			Name:      "Default",
+			Content:   string(content),
+			IsDefault: true,
+		}
+		db.DB.Create(&newConfig)
+		c.JSON(http.StatusOK, gin.H{"config": string(content)})
+		return
+	}
+
+	// Not found anywhere
+	c.JSON(http.StatusOK, gin.H{"config": ""})
 }
 func ValidateKubeConfig(c *gin.Context) {
 	user, exists := c.MustGet("user").(*models.User)

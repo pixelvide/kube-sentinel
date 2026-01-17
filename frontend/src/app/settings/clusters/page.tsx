@@ -10,6 +10,7 @@ import { Cloud, ShieldCheck, Edit2, Check, X, Server, CheckCircle2 } from "lucid
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import { KubeConfigUpload } from "@/components/settings/KubeConfigUpload";
 
 interface ContextInfo {
     name: string;
@@ -109,22 +110,7 @@ export default function ClusterSettingsPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-1 space-y-4">
-                        <div className="p-6 rounded-2xl bg-primary/5 border border-primary/10 space-y-3">
-                            <h3 className="font-semibold text-primary flex items-center gap-2">
-                                <Cloud className="h-4 w-4" />
-                                Custom Kubeconfig
-                            </h3>
-                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                Your kubeconfig is managed via GitLab Agent configuration. Use the GitLab settings to add new clusters.
-                            </p>
-                            <div className="pt-2">
-                                <Link href="/settings/gitlab">
-                                    <Button variant="link" className="p-0 h-auto text-[11px] font-bold uppercase tracking-wider text-primary">
-                                        GitLab Settings &rarr;
-                                    </Button>
-                                </Link>
-                            </div>
-                        </div>
+                        <KubeConfigUpload />
                     </div>
 
                     <div className="lg:col-span-2 space-y-8">
