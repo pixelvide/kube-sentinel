@@ -50,7 +50,9 @@ function EventsContent() {
         setLoading(true);
         setEvents([]);
         try {
-            const data = await api.get<any>(`/kube/events?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/events?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setEvents(data.events || []);
         } catch (error) {
             console.error("Failed to fetch events:", error);

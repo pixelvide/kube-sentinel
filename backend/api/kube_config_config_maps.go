@@ -14,7 +14,7 @@ import (
 func GetConfigMaps(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
 	ns := c.Query("namespace")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
 	if err != nil {

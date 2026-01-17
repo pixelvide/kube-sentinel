@@ -31,7 +31,9 @@ export default function CRDsPage() {
         const fetchCRDs = async () => {
             setLoading(true);
             try {
-                const res = await api.get<{ items: CRDInfo[] }>(`/kube/crds?context=${currentContext}`);
+                const res = await api.get<{ items: CRDInfo[] }>(`/kube/crds`, {
+                    headers: { "x-kube-context": currentContext || "" }
+                });
                 setCrds(res.items || []);
             } catch (err) {
                 console.error(err);

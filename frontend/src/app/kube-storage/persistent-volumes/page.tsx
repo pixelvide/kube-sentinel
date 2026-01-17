@@ -46,7 +46,9 @@ function PVContent() {
         setLoading(true);
         setPvs([]);
         try {
-            const data = await api.get<any>(`/kube/pvs?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/pvs`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setPvs(data.pvs || []);
         } catch (error) {
             console.error("Failed to fetch PVs:", error);

@@ -76,7 +76,9 @@ function ClusterContextSelectorContent() {
         const fetchNamespaces = async () => {
             setNsLoading(true);
             try {
-                const data = await api.get<any>(`/kube/namespaces?context=${currentContext}`);
+                const data = await api.get<any>(`/kube/namespaces`, {
+                    headers: { "x-kube-context": currentContext || "" }
+                });
                 const nsList = data.namespaces || [];
                 setNamespaces(nsList);
 

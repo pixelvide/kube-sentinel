@@ -46,7 +46,9 @@ function ReplicationControllersContent() {
         setLoading(true);
         setRcs([]);
         try {
-            const data = await api.get<any>(`/kube/replication-controllers?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/replication-controllers?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setRcs(data.replicationcontrollers || []);
         } catch (error) {
             console.error("Failed to fetch replicationcontrollers:", error);

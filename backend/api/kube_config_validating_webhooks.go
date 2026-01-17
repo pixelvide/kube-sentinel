@@ -13,7 +13,7 @@ import (
 // GetValidatingWebhooks lists validating webhook configurations for a given context (cluster-wide)
 func GetValidatingWebhooks(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
 	if err != nil {

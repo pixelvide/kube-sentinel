@@ -55,12 +55,16 @@ function DashboardContent() {
     setLoading(true);
     try {
       // Fetch summary
-      const data = await api.get<DashboardSummary>(`/kube/dashboard?context=${selectedContext}`);
+      const data = await api.get<DashboardSummary>(`/kube/dashboard`, {
+        headers: { "x-kube-context": selectedContext }
+      });
       setSummary(data);
 
       // Fetch events (if namespace selected)
       if (selectedNamespace) {
-        const eventsData = await api.get<any>(`/kube/events?context=${selectedContext}&namespace=${selectedNamespace}&limit=10`);
+        const eventsData = await api.get<any>(`/kube/events?namespace=${selectedNamespace}&limit=10`, {
+          headers: { "x-kube-context": selectedContext }
+        });
         setEvents(eventsData.events || []);
       } else {
         setEvents([]);

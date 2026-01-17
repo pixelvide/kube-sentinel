@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NAVIGATION_CONFIG, NavigationItem } from "@/config/navigation";
 import { VersionDisplay } from "@/components/VersionDisplay";
+import { api } from "@/lib/api";
 
 interface UserProfile {
     id: number;
@@ -70,11 +71,10 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
         const fetchCRDs = async () => {
             if (!currentContext) return;
             try {
-                const res = await fetch(`/api/v1/kube/crds?context=${currentContext}`, { credentials: "include" });
-                if (res.ok) {
-                    const data = await res.json();
-                    setCrds(data.items || []);
-                }
+                const data = await api.get<any>(`/kube/crds`, {
+                    headers: { "x-kube-context": currentContext || "" }
+                });
+                setCrds(data.items || []);
             } catch (err) {
                 console.error("Failed to fetch CRDs:", err);
             }

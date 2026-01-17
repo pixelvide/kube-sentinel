@@ -40,7 +40,9 @@ function ClusterRoleBindingsContent() {
         setLoading(true);
         setBindings([]);
         try {
-            const data = await api.get<any>(`/kube/cluster-role-bindings?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/cluster-role-bindings`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setBindings(data.clusterrolebindings || []);
         } catch (error) {
             console.error("Failed to fetch Cluster Role Bindings:", error);

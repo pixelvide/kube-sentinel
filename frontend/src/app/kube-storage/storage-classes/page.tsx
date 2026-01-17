@@ -44,7 +44,9 @@ function StorageClassesContent() {
         setLoading(true);
         setClasses([]);
         try {
-            const data = await api.get<any>(`/kube/storage-classes?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/storage-classes`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setClasses(data.storageclasses || []);
         } catch (error) {
             console.error("Failed to fetch storage classes:", error);

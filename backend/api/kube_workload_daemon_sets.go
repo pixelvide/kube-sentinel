@@ -14,7 +14,7 @@ import (
 func GetDaemonSets(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
 	ns := c.Query("namespace")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	if ns == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "namespace required"})

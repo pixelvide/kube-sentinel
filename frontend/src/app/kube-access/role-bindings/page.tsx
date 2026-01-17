@@ -43,7 +43,9 @@ function RoleBindingsContent() {
         setLoading(true);
         setBindings([]);
         try {
-            const data = await api.get<any>(`/kube/role-bindings?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/role-bindings?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setBindings(data.rolebindings || []);
         } catch (error) {
             console.error("Failed to fetch Role Bindings:", error);

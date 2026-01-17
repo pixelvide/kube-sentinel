@@ -14,7 +14,7 @@ import (
 // RolloutRestartResource handles triggering a rollout restart for Deployment, DaemonSet, and StatefulSet
 func RolloutRestartResource(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	namespace := c.Query("namespace")
 	name := c.Query("name")
 	kind := c.Query("kind")

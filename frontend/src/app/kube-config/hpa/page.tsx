@@ -47,7 +47,9 @@ function HPAContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/hpas?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/hpas?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.hpas || []);
         } catch (error) {
             console.error("Failed to fetch HPAs:", error);

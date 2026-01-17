@@ -15,6 +15,7 @@ import (
 )
 
 // SyncKubeConfigs merges all DB records for a user and writes to the disk.
+// This includes manually uploaded KubeConfigs AND EKS Clusters.
 // This is the "source of truth" -> "artifact" generation step.
 func SyncKubeConfigs(user *models.User) error {
 	var configs []models.KubeConfig
@@ -22,15 +23,19 @@ func SyncKubeConfigs(user *models.User) error {
 		return err
 	}
 
-	if len(configs) == 0 {
-		// Nothing to sync, maybe clear the file?
-		// For now, we'll just return nil, or we could write an empty config.
+	var eksClusters []models.EKSCluster
+	if err := db.DB.Preload("AWSConfig").Where("user_id = ?", user.ID).Find(&eksClusters).Error; err != nil {
+		return err
+	}
+
+	if len(configs) == 0 && len(eksClusters) == 0 {
 		return nil
 	}
 
 	// Start with an empty config
 	finalConfig := clientcmdapi.NewConfig()
 
+	// 1. Process Manual Configs
 	for _, cfg := range configs {
 		loaded, err := clientcmd.Load([]byte(cfg.Content))
 		if err != nil {
@@ -72,6 +77,57 @@ func SyncKubeConfigs(user *models.User) error {
 		// Preserve current context if it's the default config
 		if cfg.IsDefault {
 			finalConfig.CurrentContext = loaded.CurrentContext
+		}
+	}
+
+	// 2. Process EKS Clusters
+	for _, cluster := range eksClusters {
+		configName := fmt.Sprintf("eks-%s-%s", cluster.AccountID, cluster.Name)
+		contextName := configName
+
+		// Cluster
+		finalConfig.Clusters[configName] = &clientcmdapi.Cluster{
+			Server:                   cluster.Endpoint,
+			CertificateAuthorityData: []byte(cluster.CertificateAuthorityData), // encoded string in DB? Wait, stored as string but is it base64? Usually yes.
+			// However in Import logic we just cast []byte to string. So here we cast string back to []byte. Correct.
+		}
+
+		// Auth Info
+		execEnv := []clientcmdapi.ExecEnvVar{
+			{Name: "AWS_ACCESS_KEY_ID", Value: cluster.AWSConfig.AccessKeyID},
+			{Name: "AWS_SECRET_ACCESS_KEY", Value: cluster.AWSConfig.SecretAccessKey},
+		}
+		if cluster.AWSConfig.SessionToken != "" {
+			execEnv = append(execEnv, clientcmdapi.ExecEnvVar{
+				Name:  "AWS_SESSION_TOKEN",
+				Value: cluster.AWSConfig.SessionToken,
+			})
+		}
+
+		// Use cluster region if set, otherwise config region
+		region := cluster.Region
+		if region == "" {
+			region = cluster.AWSConfig.Region
+		}
+
+		finalConfig.AuthInfos[configName] = &clientcmdapi.AuthInfo{
+			Exec: &clientcmdapi.ExecConfig{
+				APIVersion: "client.authentication.k8s.io/v1beta1",
+				Command:    "aws",
+				Args: []string{
+					"eks", "get-token",
+					"--region", region,
+					"--cluster-name", cluster.Name,
+					"--output", "json",
+				},
+				Env: execEnv,
+			},
+		}
+
+		// Context
+		finalConfig.Contexts[contextName] = &clientcmdapi.Context{
+			Cluster:  configName,
+			AuthInfo: configName,
 		}
 	}
 

@@ -74,7 +74,7 @@ func GetResourceScopes(c *gin.Context) {
 func GetResourceDetails(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
 	ns := c.Query("namespace")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	name := c.Query("name")
 	kind := c.Query("kind") // e.g., "Pod", "Deployment", "Service" (Case sensitive matching SupportedResources)
 
@@ -209,7 +209,7 @@ func GetResourceDetails(c *gin.Context) {
 func DeleteResource(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
 	ns := c.Query("namespace")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	name := c.Query("name")
 	kind := c.Query("kind")
 
@@ -275,7 +275,7 @@ func DeleteResource(c *gin.Context) {
 // UpdateResource updates a generic Kubernetes resource from a YAML manifest
 func UpdateResource(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	ns := c.Query("namespace")
 	name := c.Query("name")
 	kind := c.Query("kind")

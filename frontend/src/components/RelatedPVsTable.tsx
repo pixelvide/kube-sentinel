@@ -47,7 +47,9 @@ export function RelatedPVsTable({ resource, context }: RelatedPVsTableProps) {
             setPvs([]);
 
             try {
-                const data = await api.get<{ pvs: PV[] }>(`/kube/pvs?context=${context}&storageClass=${metadata.name}`);
+                const data = await api.get<{ pvs: PV[] }>(`/kube/pvs?storageClass=${metadata.name}`, {
+                    headers: { "x-kube-context": context || "" }
+                });
                 setPvs(data.pvs || []);
             } catch (err: any) {
                 console.error("Failed to fetch related PVs:", err);

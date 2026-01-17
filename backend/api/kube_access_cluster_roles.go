@@ -13,7 +13,7 @@ import (
 // GetClusterRoles lists cluster-wide cluster roles
 func GetClusterRoles(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
 	if err != nil {

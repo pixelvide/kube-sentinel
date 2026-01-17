@@ -66,7 +66,9 @@ function NodesContent() {
         setNodesLoading(true);
         setNodes([]);
         try {
-            const data = await api.get<any>(`/kube/nodes?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/nodes`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setNodes(data.nodes || []);
         } catch (error) {
             console.error("Failed to fetch nodes:", error);

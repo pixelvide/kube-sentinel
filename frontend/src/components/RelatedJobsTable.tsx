@@ -60,7 +60,9 @@ export function RelatedJobsTable({ resource, context }: RelatedJobsTableProps) {
                     return;
                 }
 
-                const data = await api.get<{ jobs: Job[] }>(`/kube/jobs?context=${context}&${queryParams}`);
+                const data = await api.get<{ jobs: Job[] }>(`/kube/jobs?${queryParams}`, {
+                    headers: { "x-kube-context": context || "" }
+                });
 
                 // Sort by age (newest first)
                 const sortedJobs = (data.jobs || []).sort((a, b) =>

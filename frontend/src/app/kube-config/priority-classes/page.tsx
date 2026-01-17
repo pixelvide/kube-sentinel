@@ -41,7 +41,9 @@ function PriorityClassesContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/priority-classes?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/priority-classes`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.priorityclasses || []);
         } catch (error) {
             console.error("Failed to fetch PriorityClasses:", error);

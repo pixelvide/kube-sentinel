@@ -49,7 +49,9 @@ function NamespacesContent() {
             setNamespacesLoading(true);
             setNamespaces([]);
             try {
-                const data = await api.get<any>(`/kube/namespaces?context=${selectedContext}`);
+                const data = await api.get<any>(`/kube/namespaces`, {
+                    headers: { "x-kube-context": selectedContext || "" }
+                });
                 setNamespaces(data.namespaces || []);
             } catch (error) {
                 console.error("Failed to fetch namespaces:", error);
@@ -66,7 +68,9 @@ function NamespacesContent() {
             const fetchNamespaces = async () => {
                 setNamespacesLoading(true);
                 try {
-                    const data = await api.get<any>(`/kube/namespaces?context=${selectedContext}`);
+                    const data = await api.get<any>(`/kube/namespaces`, {
+                        headers: { "x-kube-context": selectedContext || "" }
+                    });
                     setNamespaces(data.namespaces || []);
                 } catch (error) {
                     console.error("Failed to fetch namespaces:", error);

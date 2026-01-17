@@ -17,7 +17,7 @@ import (
 func GetCronJobs(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
 	ns := c.Query("namespace")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	if ns == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "namespace required"})
@@ -89,7 +89,7 @@ func GetCronJobs(c *gin.Context) {
 // ToggleCronJobSuspend toggles the suspend state of a CronJob
 func ToggleCronJobSuspend(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	namespace := c.Query("namespace")
 	name := c.Query("name")
 
@@ -132,7 +132,7 @@ func ToggleCronJobSuspend(c *gin.Context) {
 // TriggerCronJob creates a Job from a CronJob
 func TriggerCronJob(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	namespace := c.Query("namespace")
 	name := c.Query("name")
 

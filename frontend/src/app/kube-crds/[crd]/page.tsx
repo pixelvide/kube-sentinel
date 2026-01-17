@@ -58,9 +58,10 @@ function CustomResourcesContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<{ items: CRResource[], crd: CRDMeta }>(
-                `/kube/crds/${encodeURIComponent(crdName)}/resources?context=${encodeURIComponent(selectedContext)}&namespace=${encodeURIComponent(selectedNamespace)}`
-            );
+            const url = `/kube/crds/${encodeURIComponent(crdName)}/resources?namespace=${encodeURIComponent(selectedNamespace)}`;
+            const data = await api.get<{ items: CRResource[], crd: CRDMeta }>(url, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.items || []);
             setCrdMeta(data.crd);
         } catch (error) {

@@ -23,7 +23,7 @@ func HandleLogs(c *gin.Context) {
 	ns := c.Query("namespace")
 	podName := c.Query("pod")
 	containerName := c.Query("container")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	timestampsStr := c.Query("timestamps")
 	selectorStr := c.Query("selector")
 

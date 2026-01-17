@@ -54,7 +54,9 @@ function DeploymentsContent() {
         setLoading(true);
         setDeployments([]);
         try {
-            const data = await api.get<any>(`/kube/deployments?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/deployments?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setDeployments(data.deployments || []);
         } catch (error) {
             console.error("Failed to fetch deployments:", error);

@@ -42,7 +42,9 @@ function RolesContent() {
         setLoading(true);
         setRoles([]);
         try {
-            const data = await api.get<any>(`/kube/roles?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/roles?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setRoles(data.roles || []);
         } catch (error) {
             console.error("Failed to fetch Roles:", error);

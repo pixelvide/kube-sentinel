@@ -468,6 +468,14 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         category: 'Settings',
         showHeader: false
     },
+    {
+        path: "/settings/eks",
+        title: "AWS EKS Settings",
+        description: "Connect AWS EKS clusters",
+        icon: Cloud,
+        category: 'Settings',
+        showHeader: false
+    },
     // Helm
     {
         path: "/kube-helm/releases",

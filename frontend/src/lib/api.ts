@@ -101,4 +101,15 @@ export const api = {
     del,
     fetch: apiFetch,
     getWsUrl,
+    getPodMetrics: async (context: string, namespace: string, podName: string) => {
+        return get<{
+            cpu: Array<{ timestamp: string; value: number }>;
+            memory: Array<{ timestamp: string; value: number }>;
+            fallback: boolean;
+        }>(`/kube/metrics/pods?namespace=${encodeURIComponent(namespace)}&podName=${encodeURIComponent(podName)}`, {
+            headers: {
+                "x-kube-context": context
+            }
+        });
+    }
 };

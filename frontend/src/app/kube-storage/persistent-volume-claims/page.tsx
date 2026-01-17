@@ -47,7 +47,9 @@ function PVCContent() {
         setLoading(true);
         setPvcs([]);
         try {
-            const data = await api.get<any>(`/kube/pvcs?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/pvcs?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setPvcs(data.pvcs || []);
         } catch (error) {
             console.error("Failed to fetch PVCs:", error);

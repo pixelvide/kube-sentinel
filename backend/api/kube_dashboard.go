@@ -12,7 +12,7 @@ import (
 // GetDashboardSummary returns counts of various resources
 func GetDashboardSummary(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	if ctxName == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "context required"})

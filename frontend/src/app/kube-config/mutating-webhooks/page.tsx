@@ -41,7 +41,9 @@ function MutatingWebhooksContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/mutating-webhooks?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/mutating-webhooks`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.mutatingwebhooks || []);
         } catch (error) {
             console.error("Failed to fetch MutatingWebhooks:", error);

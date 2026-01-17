@@ -41,7 +41,9 @@ function RuntimeClassesContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/runtime-classes?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/runtime-classes`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.runtimeclasses || []);
         } catch (error) {
             console.error("Failed to fetch RuntimeClasses:", error);

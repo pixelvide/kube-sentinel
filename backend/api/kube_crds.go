@@ -31,7 +31,7 @@ type CRDInfo struct {
 // GetCustomResourceDefinitions lists all CRDs in the cluster
 func GetCustomResourceDefinitions(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	_, config, err := GetClientInfo(user.StorageNamespace, ctxName)
 	if err != nil {
@@ -103,7 +103,7 @@ func GetCustomResourceDefinitions(c *gin.Context) {
 // GetCustomResources lists resources for a specific CRD
 func GetCustomResources(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	ns := c.Query("namespace")
 	crdName := c.Param("crd_name")
 
@@ -205,7 +205,7 @@ func GetCustomResources(c *gin.Context) {
 // GetCustomResourceDetails fetches detailed info for a single CR
 func GetCustomResourceDetails(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	ns := c.Query("namespace")
 	crdName := c.Param("crd_name")
 	name := c.Param("name")

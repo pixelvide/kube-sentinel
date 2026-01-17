@@ -45,7 +45,9 @@ function SecretsContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/secrets?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/secrets?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.secrets || []);
         } catch (error) {
             console.error("Failed to fetch Secrets:", error);

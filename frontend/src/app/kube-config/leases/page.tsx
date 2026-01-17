@@ -44,7 +44,9 @@ function LeasesContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/leases?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/leases?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.leases || []);
         } catch (error) {
             console.error("Failed to fetch Leases:", error);

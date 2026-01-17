@@ -49,7 +49,9 @@ function StatefulSetsContent() {
         setLoading(true);
         setStatefulSets([]);
         try {
-            const data = await api.get<any>(`/kube/stateful-sets?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/stateful-sets?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setStatefulSets(data.statefulsets || []);
         } catch (error) {
             console.error("Failed to fetch statefulsets:", error);

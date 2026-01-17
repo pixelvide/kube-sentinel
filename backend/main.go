@@ -23,6 +23,7 @@ func main() {
 
 	// Reconfigure all GitLab K8s agents on startup (for non-persistent data directories)
 	go api.ReconfigureAllAgentsOnStartup()
+	go api.ReconfigureAllKubeConfigsOnStartup()
 
 	// Set app version from build tag
 	api.SetAppVersion(Version)
@@ -91,6 +92,18 @@ func main() {
 					configs.GET("", api.ListKubeConfigs)
 					configs.POST("", api.UploadKubeConfig)
 					configs.DELETE("/:id", api.DeleteKubeConfig)
+				}
+			}
+			awsCfg := settings.Group("/aws")
+			{
+				awsCfg.GET("", api.ListAWSConfigs)
+				awsCfg.POST("", api.CreateAWSConfig)
+				awsCfg.DELETE("/:id", api.DeleteAWSConfig)
+
+				eks := awsCfg.Group("/eks")
+				{
+					eks.POST("/clusters", api.ListEKSClusters)
+					eks.POST("/import", api.ImportEKSClusters)
 				}
 			}
 			contextMappings := settings.Group("/context-mappings")
@@ -163,6 +176,9 @@ func main() {
 			kubeGroup.POST("/resource/restart", api.RolloutRestartResource)
 			kubeGroup.GET("/dashboard", api.GetDashboardSummary)
 			kubeGroup.GET("/helm/releases", api.ListHelmReleases)
+
+			// Metrics
+			kubeGroup.GET("/metrics/pods", api.GetPodMetrics)
 
 			// CRDs
 			kubeGroup.GET("/crds", api.GetCustomResourceDefinitions)

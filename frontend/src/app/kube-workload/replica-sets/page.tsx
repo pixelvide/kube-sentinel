@@ -46,7 +46,9 @@ function ReplicaSetsContent() {
         setLoading(true);
         setReplicaSets([]);
         try {
-            const data = await api.get<any>(`/kube/replica-sets?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/replica-sets?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setReplicaSets(data.replicasets || []);
         } catch (error) {
             console.error("Failed to fetch replicasets:", error);

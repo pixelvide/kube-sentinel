@@ -15,7 +15,7 @@ import (
 func GetPods(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
 	ns := c.Query("namespace")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	// ns optional, empty means all namespaces
 

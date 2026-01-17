@@ -42,7 +42,9 @@ function NetworkPoliciesContent() {
         setLoading(true);
         setPolicies([]);
         try {
-            const data = await api.get<any>(`/kube/network-policies?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/network-policies?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setPolicies(data.networkpolicies || []);
         } catch (error) {
             console.error("Failed to fetch network policies:", error);

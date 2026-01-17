@@ -50,7 +50,9 @@ function DaemonSetsContent() {
         setLoading(true);
         setDaemonSets([]);
         try {
-            const data = await api.get<any>(`/kube/daemon-sets?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/daemon-sets?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setDaemonSets(data.daemonsets || []);
         } catch (error) {
             console.error("Failed to fetch daemonsets:", error);

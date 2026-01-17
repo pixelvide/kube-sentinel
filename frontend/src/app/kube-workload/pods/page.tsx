@@ -47,7 +47,9 @@ function PodsContent() {
         setPodsLoading(true);
         setPods([]);
         try {
-            const data = await api.get<any>(`/kube/pods?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/pods?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext }
+            });
             setPods(data.pods || []);
         } catch (error) {
             console.error("Failed to fetch pods:", error);

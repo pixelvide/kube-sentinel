@@ -45,7 +45,9 @@ function PDBsContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/pdbs?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/pdbs?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.pdbs || []);
         } catch (error) {
             console.error("Failed to fetch PDBs:", error);

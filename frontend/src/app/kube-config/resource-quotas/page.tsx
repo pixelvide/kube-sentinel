@@ -43,7 +43,9 @@ function ResourceQuotasContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/resource-quotas?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/resource-quotas?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.resourcequotas || []);
         } catch (error) {
             console.error("Failed to fetch ResourceQuotas:", error);

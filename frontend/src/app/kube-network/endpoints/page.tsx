@@ -43,7 +43,9 @@ function EndpointsContent() {
         setLoading(true);
         setEndpoints([]);
         try {
-            const data = await api.get<any>(`/kube/endpoints?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/endpoints?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setEndpoints(data.endpoints || []);
         } catch (error) {
             console.error("Failed to fetch endpoints:", error);

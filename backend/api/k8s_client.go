@@ -11,15 +11,17 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	metricsclientset "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 // Cache structure
 type cachedClient struct {
-	Clientset    *kubernetes.Clientset
-	Config       *rest.Config
-	ClientConfig clientcmd.ClientConfig
-	LastMod      time.Time
-	KubeConfig   string
+	Clientset     *kubernetes.Clientset
+	MetricsClient *metricsclientset.Clientset
+	Config        *rest.Config
+	ClientConfig  clientcmd.ClientConfig
+	LastMod       time.Time
+	KubeConfig    string
 }
 
 var (
@@ -34,6 +36,16 @@ func GetClientInfo(storageNamespace string, contextName string) (*kubernetes.Cli
 		return nil, nil, err
 	}
 	return client.Clientset, client.Config, nil
+}
+
+// GetMetricsClient returns a metrics clientset for a specific context and user storage namespace
+func GetMetricsClient(storageNamespace string, contextName string) (*metricsclientset.Clientset, error) {
+	client, err := getCachedClient(storageNamespace, contextName)
+	if err != nil {
+		return nil, err
+	}
+	// Return nil if initialization failed silently (though we handle it below)
+	return client.MetricsClient, nil
 }
 
 // GetClientConfig returns the raw ClientConfig interface for use with other tools (like Helm)
@@ -123,13 +135,23 @@ func getCachedClient(storageNamespace string, contextName string) (*cachedClient
 		return nil, err
 	}
 
+	// Initialize metrics client
+	// We don't error out if this fails, just log it? Or maybe we should?
+	// Usually invalid config fails both.
+	metricsClient, err := metricsclientset.NewForConfig(restConfig)
+	if err != nil {
+		log.Printf("Warning: Failed to create metrics client: %v", err)
+		// We continue without metrics client
+	}
+
 	// Update Cache
 	cached := &cachedClient{
-		Clientset:    clientset,
-		Config:       restConfig,
-		ClientConfig: clientConfig,
-		LastMod:      modTime,
-		KubeConfig:   kubeconfig,
+		Clientset:     clientset,
+		MetricsClient: metricsClient,
+		Config:        restConfig,
+		ClientConfig:  clientConfig,
+		LastMod:       modTime,
+		KubeConfig:    kubeconfig,
 	}
 	clientCache[cacheKey] = cached
 

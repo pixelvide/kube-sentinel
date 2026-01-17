@@ -2,6 +2,8 @@ package api
 
 import (
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ParseNamespaces parses the namespace query parameter.
@@ -29,4 +31,15 @@ func ParseNamespaces(ns string) []string {
 	}
 
 	return namespaces
+}
+
+// GetKubeContext retrieves the Kubernetes context from the request.
+// It prioritizes the "x-kube-context" header, falling back to the "context" query parameter.
+// GetKubeContext retrieves the Kubernetes context from the request.
+// It prioritizes the "x-kube-context" header, falling back to the "context" query parameter.
+func GetKubeContext(c *gin.Context) string {
+	if ctx := c.GetHeader("x-kube-context"); ctx != "" {
+		return ctx
+	}
+	return c.Query("context")
 }

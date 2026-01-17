@@ -55,7 +55,9 @@ function JobsContent() {
         setLoading(true);
         setJobs([]);
         try {
-            const data = await api.get<any>(`/kube/jobs?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/jobs?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setJobs(data.jobs || []);
         } catch (error) {
             console.error("Failed to fetch jobs:", error);

@@ -55,7 +55,7 @@ func InitDB() {
 	log.Println("Database connection established")
 
 	// Migration
-	err = DB.AutoMigrate(&models.User{}, &models.UserIdentity{}, &models.AuditLog{}, &models.GitlabConfig{}, &models.GitlabK8sAgentConfig{}, &models.K8sClusterContextMapping{}, &models.KubeConfig{})
+	err = DB.AutoMigrate(&models.User{}, &models.UserIdentity{}, &models.AuditLog{}, &models.GitlabConfig{}, &models.GitlabK8sAgentConfig{}, &models.K8sClusterContextMapping{}, &models.KubeConfig{}, &models.AWSConfig{}, &models.EKSCluster{})
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}

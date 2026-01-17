@@ -20,7 +20,7 @@ import (
 // ListHelmReleases lists all Helm releases across all namespaces
 func ListHelmReleases(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	ns := c.Query("namespace")
 
 	// Get the shared client config which handles auth sanitization (e.g. glab)

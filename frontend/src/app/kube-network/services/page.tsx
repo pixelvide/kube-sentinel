@@ -46,7 +46,9 @@ function ServicesContent() {
         setServicesLoading(true);
         setServices([]);
         try {
-            const data = await api.get<any>(`/kube/services?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/services?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setServices(data.services || []);
         } catch (error) {
             console.error("Failed to fetch services:", error);

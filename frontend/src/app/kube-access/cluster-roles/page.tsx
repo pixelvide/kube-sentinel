@@ -39,7 +39,9 @@ function ClusterRolesContent() {
         setLoading(true);
         setRoles([]);
         try {
-            const data = await api.get<any>(`/kube/cluster-roles?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/cluster-roles`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setRoles(data.clusterroles || []);
         } catch (error) {
             console.error("Failed to fetch Cluster Roles:", error);

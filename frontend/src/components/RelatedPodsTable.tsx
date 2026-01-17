@@ -73,7 +73,9 @@ export function RelatedPodsTable({ resource, context }: RelatedPodsTableProps) {
                     return; // No strategy to fetch pods
                 }
 
-                const data = await api.get<{ pods: Pod[] }>(`/kube/pods?context=${context}&${queryParams}`);
+                const data = await api.get<{ pods: Pod[] }>(`/kube/pods?${queryParams}`, {
+                    headers: { "x-kube-context": context || "" }
+                });
                 setPods(data.pods || []);
             } catch (err: any) {
                 console.error("Failed to fetch related pods:", err);

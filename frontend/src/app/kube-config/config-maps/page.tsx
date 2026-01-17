@@ -44,7 +44,9 @@ function ConfigMapsContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/config-maps?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/config-maps?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.configmaps || []);
         } catch (error) {
             console.error("Failed to fetch ConfigMaps:", error);

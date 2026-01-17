@@ -12,7 +12,7 @@ import (
 // GetNamespaces lists namespaces for a given context
 func GetNamespaces(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config: " + err.Error()})

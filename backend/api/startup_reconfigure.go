@@ -95,3 +95,20 @@ func ReconfigureAllAgentsOnStartup() {
 
 	log.Println("[Startup] Completed reconfiguration of all GitLab agents")
 }
+
+func ReconfigureAllKubeConfigsOnStartup() {
+	var users []models.User
+	if err := db.DB.Find(&users).Error; err != nil {
+		log.Printf("Failed to fetch users for kubeconfig reconfiguration: %v", err)
+		return
+	}
+
+	for _, user := range users {
+		if err := SyncKubeConfigs(&user); err != nil {
+			log.Printf("Failed to sync kubeconfig for user %s: %v", user.Email, err)
+		} else {
+			log.Printf("Synced kubeconfig for user %s", user.Email)
+		}
+	}
+	log.Printf("Successfully synced kubeconfigs for %d users", len(users))
+}

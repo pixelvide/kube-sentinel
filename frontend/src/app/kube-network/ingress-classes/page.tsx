@@ -40,7 +40,9 @@ function IngressClassesContent() {
         setLoading(true);
         setClasses([]);
         try {
-            const data = await api.get<any>(`/kube/ingress-classes?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/ingress-classes`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setClasses(data.ingressclasses || []);
         } catch (error) {
             console.error("Failed to fetch ingress classes:", error);

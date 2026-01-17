@@ -43,7 +43,9 @@ function SAContent() {
         setLoading(true);
         setSas([]);
         try {
-            const data = await api.get<any>(`/kube/service-accounts?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/service-accounts?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setSas(data.serviceaccounts || []);
         } catch (error) {
             console.error("Failed to fetch Service Accounts:", error);

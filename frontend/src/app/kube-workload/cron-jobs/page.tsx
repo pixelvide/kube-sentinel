@@ -48,7 +48,9 @@ function CronJobsContent() {
         setLoading(true);
         setCronjobs([]);
         try {
-            const data = await api.get<any>(`/kube/cron-jobs?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/cron-jobs?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setCronjobs(data.cronjobs || []);
         } catch (error) {
             console.error("Failed to fetch cronjobs:", error);

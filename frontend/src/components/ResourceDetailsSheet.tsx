@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { KubeProperties } from "@/components/KubeProperties";
 import { Button } from "@/components/ui/button";
-import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit, PauseCircle, PlayCircle, Play, Maximize2, Minus, Plus, RotateCcw, Copy } from "lucide-react";
+import { Terminal as TerminalIcon, FileText, Ban, Trash2, CheckCircle2, Edit, PauseCircle, PlayCircle, Play, Maximize2, Minus, Plus, RotateCcw, Copy, Activity } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { LogViewerModal } from "@/components/LogViewerModal";
 import { api } from "@/lib/api";
@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { RelatedPodsTable } from "@/components/RelatedPodsTable";
 import { RelatedPVsTable } from "@/components/RelatedPVsTable";
 import { RelatedJobsTable } from "@/components/RelatedJobsTable";
+import { MetricsChart } from "@/components/shared/MetricsChart";
 
 
 interface ResourceDetailsSheetProps {
@@ -129,6 +130,12 @@ export function ResourceDetailsSheet({
         initContainers: string[]
     } | null>(null);
 
+    const [metrics, setMetrics] = useState<{
+        cpu: Array<{ timestamp: string; value: number }>;
+        memory: Array<{ timestamp: string; value: number }>;
+        fallback: boolean;
+    } | null>(null);
+
     useEffect(() => {
         // Fetch scopes once
         api.get<any>("/kube/scopes")
@@ -136,15 +143,27 @@ export function ResourceDetailsSheet({
             .catch(err => console.error("Failed to fetch scopes:", err));
     }, []);
 
+    useEffect(() => {
+        if (isOpen && kind === "Pod" && namespace && name && context) {
+            setMetrics(null);
+            api.getPodMetrics(context, namespace, name)
+                .then(setMetrics)
+                .catch(err => console.error("Failed to fetch metrics:", err));
+        } else {
+            setMetrics(null);
+        }
+    }, [isOpen, kind, namespace, name, context]);
+
     const fetchDetails = () => {
         if (!isOpen || !context || !name) return;
 
         if (crdName) {
             setLoading(true);
             setError("");
-            api.get<ResourceDetails>(
-                `/kube/crds/${encodeURIComponent(crdName)}/resources/${encodeURIComponent(name)}?context=${encodeURIComponent(context)}&namespace=${encodeURIComponent(namespace)}`
-            )
+            const url = `/kube/crds/${encodeURIComponent(crdName)}/resources/${encodeURIComponent(name)}?namespace=${encodeURIComponent(namespace)}`;
+            api.get<ResourceDetails>(url, {
+                headers: { "x-kube-context": context || "" }
+            })
                 .then((data) => setDetails(data))
                 .catch((err) => setError(err.message))
                 .finally(() => setLoading(false));
@@ -159,9 +178,10 @@ export function ResourceDetailsSheet({
                 setLoading(true);
                 setError("");
 
-                api.get<ResourceDetails>(
-                    `/kube/resource?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`
-                )
+                const url = `/kube/resource?namespace=${namespace}&name=${name}&kind=${kind}`;
+                api.get<ResourceDetails>(url, {
+                    headers: { "x-kube-context": context || "" }
+                })
                     .then((data) => setDetails(data))
                     .catch((err) => setError(err.message))
                     .finally(() => setLoading(false));
@@ -225,7 +245,9 @@ export function ResourceDetailsSheet({
                                             if (matchLabels) {
                                                 const selector = Object.entries(matchLabels).map(([k, v]) => `${k}=${v}`).join(",");
                                                 try {
-                                                    const data = await api.get<any>(`/kube/pods?context=${context}&namespace=${namespace}&selector=${encodeURIComponent(selector)}`);
+                                                    const data = await api.get<any>(`/kube/pods?namespace=${namespace}&selector=${encodeURIComponent(selector)}`, {
+                                                        headers: { "x-kube-context": context || "" }
+                                                    });
                                                     const pods = data.pods || [];
                                                     setLogResource({
                                                         name: name,
@@ -270,8 +292,10 @@ export function ResourceDetailsSheet({
                                                     setActioning(true);
                                                     setConfirmConfig(prev => ({ ...prev, isOpen: false }));
                                                     try {
-                                                        await api.post(`/kube/nodes/cordon?context=${context}&name=${name}`, {
+                                                        await api.post(`/kube/nodes/cordon?name=${name}`, {
                                                             unschedulable: !isUnschedulable
+                                                        }, {
+                                                            headers: { "x-kube-context": context || "" }
                                                         });
                                                         toast.success(`Node ${name} ${isUnschedulable ? "uncordoned" : "cordoned"}`);
                                                         fetchDetails();
@@ -319,7 +343,9 @@ export function ResourceDetailsSheet({
                                                     setActioning(true);
                                                     setConfirmConfig(prev => ({ ...prev, isOpen: false }));
                                                     try {
-                                                        const res = await api.post<any>(`/kube/nodes/drain?context=${context}&name=${name}`, {});
+                                                        const res = await api.post<any>(`/kube/nodes/drain?name=${name}`, {}, {
+                                                            headers: { "x-kube-context": context || "" }
+                                                        });
                                                         toast.success(`Drain started: ${res.evicted} pods evicted, ${res.skipped} skipped.`);
                                                         fetchDetails();
                                                         onUpdate?.();
@@ -360,8 +386,10 @@ export function ResourceDetailsSheet({
                                                 setActioning(true);
                                                 setConfirmConfig(prev => ({ ...prev, isOpen: false }));
                                                 try {
-                                                    await api.post(`/kube/cron-jobs/suspend?context=${context}&namespace=${namespace}&name=${name}`, {
+                                                    await api.post(`/kube/cron-jobs/suspend?namespace=${namespace}&name=${name}`, {
                                                         suspend: !isSuspended
+                                                    }, {
+                                                        headers: { "x-kube-context": context || "" }
                                                     });
                                                     toast.success(`CronJob ${name} ${isSuspended ? "resumed" : "suspended"}`);
                                                     fetchDetails();
@@ -445,7 +473,9 @@ export function ResourceDetailsSheet({
                                                 setActioning(true);
                                                 setConfirmConfig(prev => ({ ...prev, isOpen: false }));
                                                 try {
-                                                    await api.post(`/kube/resource/restart?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`, {});
+                                                    await api.post(`/kube/resource/restart?namespace=${namespace}&name=${name}&kind=${kind}`, {}, {
+                                                        headers: { "x-kube-context": context || "" }
+                                                    });
                                                     toast.success(`${kind} ${name} restart triggered`);
                                                     fetchDetails();
                                                     onUpdate?.();
@@ -498,7 +528,9 @@ export function ResourceDetailsSheet({
                                             setActioning(true);
                                             setConfirmConfig(prev => ({ ...prev, isOpen: false }));
                                             try {
-                                                await api.del(`/kube/resource?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`);
+                                                await api.del(`/kube/resource?namespace=${namespace}&name=${name}&kind=${kind}`, {
+                                                    headers: { "x-kube-context": context || "" }
+                                                });
                                                 toast.success(`${kind} ${name} deleted successfully`);
                                                 onClose();
                                                 onUpdate?.();
@@ -533,8 +565,33 @@ export function ResourceDetailsSheet({
 
                     {details && (
                         <div className="flex flex-col gap-6 p-6">
-                            <KubeProperties resource={details.raw} />
+                            {/* Metrics Section */}
+                            {kind === "Pod" && metrics && (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                        <Activity className="h-4 w-4" />
+                                        Performance
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <MetricsChart
+                                            title="CPU Usage"
+                                            data={metrics.cpu}
+                                            unit=" Cores"
+                                            color="#8b5cf6" // violet
+                                            fallback={metrics.fallback}
+                                        />
+                                        <MetricsChart
+                                            title="Memory Usage"
+                                            data={metrics.memory}
+                                            unit=" MiB"
+                                            color="#ec4899" // pink
+                                            fallback={metrics.fallback}
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
+                            <KubeProperties resource={details.raw} />
                             {/* Insights Section */}
                             {details.analysis && details.analysis.anomalies?.length > 0 && (
                                 <div className="space-y-4">
@@ -734,8 +791,10 @@ export function ResourceDetailsSheet({
                             onClick={async () => {
                                 setActioning(true);
                                 try {
-                                    await api.put(`/kube/resource?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`, {
+                                    await api.put(`/kube/resource?namespace=${namespace}&name=${name}&kind=${kind}`, {
                                         manifest: editManifest
+                                    }, {
+                                        headers: { "x-kube-context": context || "" }
                                     });
                                     toast.success(`${kind} ${name} updated successfully`);
                                     setIsEditDialogOpen(false);
@@ -791,8 +850,10 @@ export function ResourceDetailsSheet({
                             onClick={async () => {
                                 setActioning(true);
                                 try {
-                                    const res = await api.post<{ jobName: string }>(`/kube/cron-jobs/trigger?context=${context}&namespace=${namespace}&name=${name}`, {
+                                    const res = await api.post<{ jobName: string }>(`/kube/cron-jobs/trigger?namespace=${namespace}&name=${name}`, {
                                         jobName: runJobName
+                                    }, {
+                                        headers: { "x-kube-context": context || "" }
                                     });
                                     toast.success(`Job ${res.jobName} created successfully`);
                                     setIsRunDialogOpen(false);
@@ -864,8 +925,10 @@ export function ResourceDetailsSheet({
                             onClick={async () => {
                                 setActioning(true);
                                 try {
-                                    await api.post(`/kube/resource/scale?context=${context}&namespace=${namespace}&name=${name}&kind=${kind}`, {
+                                    await api.post(`/kube/resource/scale?namespace=${namespace}&name=${name}&kind=${kind}`, {
                                         replicas: scaleReplicas
+                                    }, {
+                                        headers: { "x-kube-context": context || "" }
                                     });
                                     toast.success(`${kind} ${name} scaled to ${scaleReplicas}`);
                                     setIsScaleDialogOpen(false);

@@ -41,7 +41,9 @@ function ValidatingWebhooksContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/validating-webhooks?context=${selectedContext}`);
+            const data = await api.get<any>(`/kube/validating-webhooks`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.validatingwebhooks || []);
         } catch (error) {
             console.error("Failed to fetch ValidatingWebhooks:", error);

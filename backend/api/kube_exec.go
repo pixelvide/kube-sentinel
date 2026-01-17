@@ -23,7 +23,7 @@ func HandleExec(c *gin.Context) {
 	ns := c.Query("namespace")
 	pod := c.Query("pod")
 	container := c.Query("container")
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 
 	if ns == "" || pod == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "namespace and pod required"})

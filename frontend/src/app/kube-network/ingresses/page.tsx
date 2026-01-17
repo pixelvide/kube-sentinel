@@ -44,7 +44,9 @@ function IngressesContent() {
         setIngLoading(true);
         setIngresses([]);
         try {
-            const data = await api.get<any>(`/kube/ingresses?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/ingresses?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setIngresses(data.ingresses || []);
         } catch (error) {
             console.error("Failed to fetch ingresses:", error);

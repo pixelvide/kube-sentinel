@@ -16,7 +16,7 @@ import (
 // GetNodes lists nodes for a given context
 func GetNodes(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config: " + err.Error()})
@@ -95,7 +95,7 @@ func GetNodes(c *gin.Context) {
 // ToggleCordon toggles the unschedulable state of a node
 func ToggleCordon(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	nodeName := c.Query("name")
 
 	var input struct {
@@ -136,7 +136,7 @@ func ToggleCordon(c *gin.Context) {
 // DrainNode cordons and evicts pods from a node
 func DrainNode(c *gin.Context) {
 	user := c.MustGet("user").(*models.User)
-	ctxName := c.Query("context")
+	ctxName := GetKubeContext(c)
 	nodeName := c.Query("name")
 
 	clientset, _, err := GetClientInfo(user.StorageNamespace, ctxName)

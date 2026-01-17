@@ -43,7 +43,9 @@ function LimitRangesContent() {
         setLoading(true);
         setResources([]);
         try {
-            const data = await api.get<any>(`/kube/limit-ranges?context=${selectedContext}&namespace=${selectedNamespace}`);
+            const data = await api.get<any>(`/kube/limit-ranges?namespace=${selectedNamespace}`, {
+                headers: { "x-kube-context": selectedContext || "" }
+            });
             setResources(data.limitranges || []);
         } catch (error) {
             console.error("Failed to fetch LimitRanges:", error);
