@@ -3,16 +3,10 @@ kind: Kustomization
 
 resources:
   - backend.yaml
-  - ui.yaml
 
 images:
   - name: ghcr.io/pixcorp/cloud-sentinel-k8s-backend
-    newName: ghcr.io/pixcorp/cloud-sentinel-k8s-backend
-    # x-release-please-start-version
-    newTag: 1.8.0
-    # x-release-please-end
-  - name: ghcr.io/pixcorp/cloud-sentinel-k8s-ui
-    newName: ghcr.io/pixcorp/cloud-sentinel-k8s-ui
+    newName: ghcr.io/pixcorp/cloud-sentinel-k8s
     # x-release-please-start-version
     newTag: 1.8.0
     # x-release-please-end
