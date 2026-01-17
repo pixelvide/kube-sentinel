@@ -269,4 +269,63 @@ func init() {
 	GlobalAnalyzers = append(GlobalAnalyzers, &ImmutableTagAnalyzer{})
 	GlobalAnalyzers = append(GlobalAnalyzers, &PrivilegedContainerAnalyzer{})
 	GlobalAnalyzers = append(GlobalAnalyzers, &RootUserAnalyzer{})
+	GlobalAnalyzers = append(GlobalAnalyzers, &HostPathAnalyzer{})
+}
+
+// HostPathAnalyzer detects usage of hostPath volumes
+type HostPathAnalyzer struct{}
+
+func (h *HostPathAnalyzer) Name() string { return "HostPathVolume" }
+
+func (h *HostPathAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
+	kind := obj.GetKind()
+	supportedKinds := map[string]bool{
+		"Deployment":  true,
+		"StatefulSet": true,
+		"DaemonSet":   true,
+		"Pod":         true,
+	}
+
+	if !supportedKinds[kind] {
+		return nil
+	}
+
+	// Helper to extract volumes
+	var volumes []interface{}
+	var found bool
+	var err error
+
+	if kind == "Pod" {
+		volumes, found, err = unstructured.NestedSlice(obj.Object, "spec", "volumes")
+	} else {
+		volumes, found, err = unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "volumes")
+	}
+
+	if err != nil || !found {
+		return nil
+	}
+
+	var anomalies []models.Anomaly
+
+	for _, v := range volumes {
+		vol, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		name, _, _ := unstructured.NestedString(vol, "name")
+		_, hasHostPath, _ := unstructured.NestedMap(vol, "hostPath")
+
+		if hasHostPath {
+			anomalies = append(anomalies, NewAnomaly(
+				h.Name(),
+				models.SeverityWarning,
+				"HostPath Volume Detected",
+				fmt.Sprintf("Volume '%s' is using hostPath.", name),
+				"Avoid using hostPath volumes as they present security risks and limit pod portability. Use PVCs or emptyDir instead.",
+			))
+		}
+	}
+
+	return anomalies
 }
