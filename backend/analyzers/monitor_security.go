@@ -14,7 +14,7 @@ type ImmutableTagAnalyzer struct{}
 
 func (i *ImmutableTagAnalyzer) Name() string { return "ImmutableTags" }
 
-func (i *ImmutableTagAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (i *ImmutableTagAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	kind := obj.GetKind()
 	supportedKinds := map[string]bool{
 		"Deployment":  true,
@@ -92,7 +92,7 @@ type PrivilegedContainerAnalyzer struct{}
 
 func (p *PrivilegedContainerAnalyzer) Name() string { return "PrivilegedContainer" }
 
-func (p *PrivilegedContainerAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (p *PrivilegedContainerAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	kind := obj.GetKind()
 	supportedKinds := map[string]bool{
 		"Deployment":  true,
@@ -155,7 +155,7 @@ type RootUserAnalyzer struct{}
 
 func (r *RootUserAnalyzer) Name() string { return "RootUser" }
 
-func (r *RootUserAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (r *RootUserAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	kind := obj.GetKind()
 	supportedKinds := map[string]bool{
 		"Deployment":  true,

@@ -16,7 +16,7 @@ type DanglingServiceAnalyzer struct{}
 
 func (d *DanglingServiceAnalyzer) Name() string { return "DanglingService" }
 
-func (d *DanglingServiceAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (d *DanglingServiceAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	if obj.GetKind() != "Service" {
 		return nil
 	}
@@ -66,7 +66,7 @@ type EmptyNamespaceAnalyzer struct{}
 
 func (e *EmptyNamespaceAnalyzer) Name() string { return "EmptyNamespace" }
 
-func (e *EmptyNamespaceAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (e *EmptyNamespaceAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	if obj.GetKind() != "Namespace" {
 		return nil
 	}

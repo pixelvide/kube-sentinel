@@ -13,7 +13,7 @@ type ResourceLimitsAnalyzer struct{}
 
 func (r *ResourceLimitsAnalyzer) Name() string { return "ResourceLimits" }
 
-func (r *ResourceLimitsAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (r *ResourceLimitsAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	kind := obj.GetKind()
 	supportedKinds := map[string]bool{
 		"Deployment":  true,

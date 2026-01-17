@@ -12,7 +12,7 @@ type IngressClassAnalyzer struct{}
 
 func (i *IngressClassAnalyzer) Name() string { return "DeprecatedIngressClass" }
 
-func (i *IngressClassAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (i *IngressClassAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	if obj.GetKind() != "Ingress" {
 		return nil
 	}

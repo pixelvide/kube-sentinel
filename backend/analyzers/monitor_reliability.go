@@ -16,7 +16,7 @@ type SingleReplicaAnalyzer struct{}
 
 func (s *SingleReplicaAnalyzer) Name() string { return "SingleReplica" }
 
-func (s *SingleReplicaAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (s *SingleReplicaAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	kind := obj.GetKind()
 	if kind != "Deployment" && kind != "StatefulSet" {
 		return nil
@@ -53,7 +53,7 @@ type ProbeAnalyzer struct{}
 
 func (p *ProbeAnalyzer) Name() string { return "MissingProbes" }
 
-func (p *ProbeAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (p *ProbeAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	kind := obj.GetKind()
 	supportedKinds := map[string]bool{
 		"Deployment":  true,
@@ -123,7 +123,7 @@ type MissingPDBAnalyzer struct{}
 
 func (m *MissingPDBAnalyzer) Name() string { return "MissingPDB" }
 
-func (m *MissingPDBAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly {
+func (m *MissingPDBAnalyzer) Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly {
 	kind := obj.GetKind()
 	if kind != "Deployment" && kind != "StatefulSet" {
 		return nil

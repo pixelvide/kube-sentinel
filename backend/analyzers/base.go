@@ -12,19 +12,19 @@ import (
 // Analyzer defines the interface for resource analysis rules
 type Analyzer interface {
 	Name() string
-	Analyze(obj *unstructured.Unstructured, client dynamic.Interface) []models.Anomaly
+	Analyze(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) []models.Anomaly
 }
 
 // GlobalAnalyzers is the registry of all active analysis rules
 var GlobalAnalyzers []Analyzer
 
 // AnalyzeResource performs on-demand analysis of a Kubernetes resource
-func AnalyzeResource(obj *unstructured.Unstructured, client dynamic.Interface) models.ResourceAnalysis {
+func AnalyzeResource(obj *unstructured.Unstructured, client dynamic.Interface, clusterID string) models.ResourceAnalysis {
 	anomalies := []models.Anomaly{}
 
 	// Run all registered analyzers
 	for _, analyzer := range GlobalAnalyzers {
-		results := analyzer.Analyze(obj, client)
+		results := analyzer.Analyze(obj, client, clusterID)
 		if len(results) > 0 {
 			anomalies = append(anomalies, results...)
 		}
