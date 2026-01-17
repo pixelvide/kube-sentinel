@@ -3,21 +3,10 @@ package auth
 import (
 	"cloud-sentinel-k8s/pkg/common"
 	"errors"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
-
-var jwtSecret []byte
-
-func InitJWT() {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		secret = "cloud-sentinel-default-secret-change-me"
-	}
-	jwtSecret = []byte(secret)
-}
 
 // InternalClaims represents our app's JWT claims
 type InternalClaims struct {
@@ -41,7 +30,7 @@ func GenerateToken(userID uint, email, name string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
+	return token.SignedString(common.JWTSecret)
 }
 
 // ValidateToken parses and validates an internal JWT
@@ -50,7 +39,7 @@ func ValidateToken(tokenString string) (*InternalClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-		return jwtSecret, nil
+		return common.JWTSecret, nil
 	})
 
 	if err != nil {

@@ -65,7 +65,6 @@ func SkipOIDC(c *gin.Context) {
 	// Create a dummy disabled provider
 	provider := models.OAuthProvider{
 		Name:         "skipped",
-		Type:         "oidc",
 		ClientID:     "skipped",
 		ClientSecret: "skipped",
 		Enabled:      false,

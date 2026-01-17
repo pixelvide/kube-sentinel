@@ -11,13 +11,16 @@ import (
 
 // GetProviders returns the list of configured OAuth providers
 func GetProviders(c *gin.Context) {
+	// Check if local login (password) is enabled
+	localLoginEnabled, _ := models.IsLocalLoginEnabled()
+
 	// Priority 1: Environment Variables (Single SSO)
 	if os.Getenv("OIDC_ISSUER") != "" {
-		c.JSON(http.StatusOK, []gin.H{{
-			"name":      "SSO",
-			"type":      "oidc",
-			"login_url": "/api/v1/auth/login",
-		}})
+		providers := []string{"SSO"}
+		if localLoginEnabled {
+			providers = append(providers, "password")
+		}
+		c.JSON(http.StatusOK, providers)
 		return
 	}
 
@@ -28,18 +31,19 @@ func GetProviders(c *gin.Context) {
 		return
 	}
 
-	var result []gin.H
+	var result []string
 	for _, p := range providers {
 		// Skip the dummy "skipped" provider which is used to mark initialization step as complete
 		if p.Name == "skipped" {
 			continue
 		}
 
-		result = append(result, gin.H{
-			"name":      p.Name,
-			"type":      p.Type,
-			"login_url": "/api/v1/auth/login", // Currently routes to the single active provider
-		})
+		result = append(result, p.Name)
+	}
+
+	// Manually add "password" provider if enabled
+	if localLoginEnabled {
+		result = append(result, "password")
 	}
 
 	c.JSON(http.StatusOK, result)

@@ -43,7 +43,7 @@ func InitOIDC() {
 
 	// If env vars are missing, try DB
 	if issuer == "" {
-		if err := models.DB.Where("enabled = ? AND type = ?", true, "oidc").First(&dbProvider).Error; err == nil {
+		if err := models.DB.Where("enabled = ? AND name = ?", true, "oidc").First(&dbProvider).Error; err == nil {
 			issuer = dbProvider.Issuer
 			clientID = dbProvider.ClientID
 			clientSecret = dbProvider.ClientSecret
@@ -52,8 +52,6 @@ func InitOIDC() {
 
 	if issuer == "" {
 		// Log only if we expect OIDC to be configured (e.g. not skipped)
-		// logic for skipped? If skipped, we might have a disabled record.
-		// If no enabled record and no env, OIDC is disabled.
 		return
 	}
 
@@ -87,7 +85,7 @@ func InitOIDC() {
 		base = strings.TrimSuffix(base, "/")
 
 		// Determine redirect URL
-		redirectURL := frontendURL + base + "/api/v1/auth/callback"
+		redirectURL := frontendURL + base + "/api/auth/callback"
 
 		oauth2Config = oauth2.Config{
 			ClientID:     clientID,

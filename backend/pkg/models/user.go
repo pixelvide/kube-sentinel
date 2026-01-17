@@ -1,6 +1,7 @@
 package models
 
 import (
+	"cloud-sentinel-k8s/pkg/utils"
 	"os"
 	"path/filepath"
 	"time"
@@ -33,4 +34,32 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 
 	return
+}
+
+func (u *User) SetPassword(password string) error {
+	hashedPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return err
+	}
+	u.Password = hashedPassword
+	return nil
+}
+
+func (u *User) CheckPassword(password string) bool {
+	return utils.CheckPasswordHash(password, u.Password)
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	var user User
+	err := DB.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func LoginUser(user *User) error {
+	now := time.Now()
+	user.LastLoginAt = &now
+	return DB.Save(user).Error
 }

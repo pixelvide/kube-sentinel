@@ -21,6 +21,9 @@ var (
 	DB *gorm.DB
 
 	once sync.Once
+
+	// GlobalApp holds the single instance of the application configuration
+	GlobalApp *App
 )
 
 type Model struct {
@@ -46,13 +49,7 @@ func InitDB() {
 
 	var err error
 	once.Do(func() {
-		dbType := os.Getenv("DB_TYPE")
-		if dbType == "" {
-			dbType = "postgres"
-		}
-
-		dsn := os.Getenv("DB_DSN")
-		if dsn == "" {
+		if common.DBDSN == "" {
 			panic("DB_DSN environment variable is required")
 		}
 
@@ -62,11 +59,11 @@ func InitDB() {
 
 		// Retry logic for database connection
 		for i := 0; i < 10; i++ {
-			switch dbType {
+			switch common.DBType {
 			case "sqlite":
-				DB, err = gorm.Open(sqlite.Open(dsn), cfg)
+				DB, err = gorm.Open(sqlite.Open(common.DBDSN), cfg)
 			case "mysql":
-				mysqlDSN := strings.TrimPrefix(dsn, "mysql://")
+				mysqlDSN := strings.TrimPrefix(common.DBDSN, "mysql://")
 				if !strings.Contains(mysqlDSN, "parseTime=") {
 					separator := "?"
 					if strings.Contains(mysqlDSN, "?") {
@@ -76,9 +73,9 @@ func InitDB() {
 				}
 				DB, err = gorm.Open(mysql.Open(mysqlDSN), cfg)
 			case "postgres":
-				DB, err = gorm.Open(postgres.Open(dsn), cfg)
+				DB, err = gorm.Open(postgres.Open(common.DBDSN), cfg)
 			default:
-				panic("unsupported DB_TYPE: " + dbType + " (supported: postgres, mysql, sqlite)")
+				panic("unsupported DB_TYPE: " + common.DBType + " (supported: postgres, mysql, sqlite)")
 			}
 
 			if err == nil {
@@ -93,7 +90,7 @@ func InitDB() {
 		}
 
 		// For SQLite we must enable foreign key enforcement explicitly
-		if dbType == "sqlite" {
+		if common.DBType == "sqlite" {
 			if err := DB.Exec("PRAGMA foreign_keys = ON").Error; err != nil {
 				panic("failed to enable sqlite foreign keys: " + err.Error())
 			}
@@ -109,6 +106,7 @@ func InitDB() {
 	// Auto-migrate all models
 	models := []interface{}{
 		&App{},
+		&AppConfig{},
 		&AppUser{},
 		&OAuthProvider{},
 		&User{},
@@ -147,6 +145,55 @@ func InitDB() {
 			}
 		} else {
 			log.Printf("Error checking for %s app: %v", common.AppName, result.Error)
+		}
+	}
+
+	GlobalApp = &app
+
+	// Ensure default app configs exist
+	if app.ID != 0 {
+		// LOCAL_LOGIN_ENABLED
+		if _, err := GetAppConfig("LOCAL_LOGIN_ENABLED"); err != nil {
+			if err == gorm.ErrRecordNotFound {
+				config := AppConfig{
+					// AppID is set inside CreateAppConfig using GlobalApp
+					Key:   "LOCAL_LOGIN_ENABLED",
+					Value: "true",
+				}
+				if err := CreateAppConfig(&config); err != nil {
+					log.Printf("Failed to create LOCAL_LOGIN_ENABLED config: %v", err)
+				} else {
+					log.Printf("Seeded LOCAL_LOGIN_ENABLED=true for app %s", app.Name)
+				}
+			}
+		}
+	}
+
+	initOIDCProvider()
+}
+
+func initOIDCProvider() {
+	issuer := os.Getenv("OIDC_ISSUER")
+	if issuer == "" {
+		return
+	}
+
+	clientID := os.Getenv("OIDC_CLIENT_ID")
+	clientSecret := os.Getenv("OIDC_CLIENT_SECRET")
+
+	var count int64
+	DB.Model(&OAuthProvider{}).Where("name = ?", "oidc").Count(&count)
+	if count == 0 {
+		log.Println("Persisting OIDC configuration from environment to database...")
+		newProvider := OAuthProvider{
+			Name:         "oidc",
+			Issuer:       issuer,
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			Enabled:      true,
+		}
+		if err := CreateOAuthProvider(&newProvider); err != nil {
+			log.Printf("Failed to persist OIDC provider to DB: %v", err)
 		}
 	}
 }

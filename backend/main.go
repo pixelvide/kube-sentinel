@@ -15,6 +15,7 @@ import (
 
 	"cloud-sentinel-k8s/api"
 	"cloud-sentinel-k8s/auth"
+	"cloud-sentinel-k8s/pkg/common"
 	"cloud-sentinel-k8s/pkg/handler"
 	"cloud-sentinel-k8s/pkg/middleware"
 	"cloud-sentinel-k8s/pkg/models"
@@ -26,17 +27,23 @@ var Version = "dev"
 func main() {
 	klog.InitFlags(nil)
 	flag.Parse()
-
+	common.LoadEnvs()
 	if klog.V(1).Enabled() {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	r := gin.New()
+	r.Use(middleware.Metrics())
+	r.Use(gin.Recovery())
+	r.Use(middleware.Logger())
+	r.Use(middleware.CORS())
+
+	// Initialize services
 	// Initialize services
 	models.InitDB()
 	auth.InitOIDC()
-	auth.InitJWT()
 
 	// Reconfigure all GitLab K8s agents on startup (for non-persistent data directories)
 	go api.ReconfigureAllAgentsOnStartup()
@@ -51,12 +58,6 @@ func main() {
 		base = "/" + base
 	}
 	base = strings.TrimSuffix(base, "/")
-
-	r := gin.New()
-	r.Use(middleware.Metrics())
-	r.Use(gin.Recovery())
-	r.Use(middleware.Logger())
-	r.Use(middleware.CORS())
 
 	setupAPIRouter(r, base)
 	setupStatic(r, base)
@@ -127,12 +128,14 @@ func setupAPIRouter(r *gin.Engine, base string) {
 	g.POST("/api/v1/create_superuser", handler.CreateSuperUser)
 	g.POST("/api/v1/skip_oidc", handler.SkipOIDC)
 
-	authGroup := g.Group("/api/v1/auth")
+	authGroup := g.Group("/api/auth")
 	{
+		authGroup.GET("/providers", handler.GetProviders)
 		authGroup.GET("/login", auth.LoginHandler)
+		authGroup.POST("/login/password", handler.PasswordLogin)
 		authGroup.GET("/callback", auth.CallbackHandler)
 		authGroup.GET("/logout", auth.LogoutHandler)
-		authGroup.GET("/providers", handler.GetProviders)
+
 	}
 
 	apiGroup := g.Group("/api/v1")

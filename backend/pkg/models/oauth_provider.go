@@ -1,11 +1,12 @@
 package models
 
-import "strings"
+import (
+	"strings"
+)
 
 type OAuthProvider struct {
 	Model
 	Name         string `gorm:"uniqueIndex;not null" json:"name"`
-	Type         string `gorm:"not null;default:'oidc'" json:"type"` // e.g., "oidc", "gitlab", "github"
 	ClientID     string `gorm:"not null" json:"client_id"`
 	ClientSecret string `gorm:"not null" json:"-"` // Never expose via JSON
 	AuthURL      string `json:"auth_url"`
@@ -42,4 +43,16 @@ func GetOAuthProviderByName(name string) (OAuthProvider, error) {
 		return OAuthProvider{}, err
 	}
 	return provider, nil
+}
+
+// CreateOAuthProvider creates a new OAuth provider in the database
+func CreateOAuthProvider(provider *OAuthProvider) error {
+	// Ensure name is lowercase
+	provider.Name = strings.ToLower(provider.Name)
+	return DB.Create(provider).Error
+}
+
+// UpdateOAuthProvider updates an existing OAuth provider
+func UpdateOAuthProvider(provider *OAuthProvider, updates map[string]interface{}) error {
+	return DB.Model(provider).Updates(updates).Error
 }
