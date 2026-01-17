@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.7.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v1.6.0...v1.7.0) (2026-01-17)
+
+
+### Features
+
+* add HostPath volume analyzer to detect security risks ([bf1f3d5](https://github.com/pixelvide/cloud-sentinel-k8s/commit/bf1f3d5ea51f0773ab65a787707d9356307444a9))
+* **backend:** implement context-aware caching for topology detection ([2836c5f](https://github.com/pixelvide/cloud-sentinel-k8s/commit/2836c5fa434e6ca42707e3650461ec09f24b53fe))
+* enhance anomaly detection with security and hygiene checks ([bc143cf](https://github.com/pixelvide/cloud-sentinel-k8s/commit/bc143cf42c7127719a1c2839ad8a35368c608c8b))
+
 ## [1.6.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v1.5.0...v1.6.0) (2026-01-16)
 
 
