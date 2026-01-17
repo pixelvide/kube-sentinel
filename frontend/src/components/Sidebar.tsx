@@ -1,8 +1,5 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { X, LayoutDashboard, ChevronDown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,9 +13,10 @@ interface UserProfile {
     name: string;
 }
 
-function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () => void }) {
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+export function Sidebar({ isOpen, onClose }: { isOpen?: boolean, onClose?: () => void }) {
+    const location = useLocation();
+    const pathname = location.pathname;
+    const [searchParams] = useSearchParams();
     const currentContext = searchParams.get("context");
 
     const [user, setUser] = useState<UserProfile | null>(null);
@@ -186,7 +184,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                 if (!item) return null;
                                 const Icon = item.icon;
                                 return (
-                                    <Link key={item.path} href={getLinkHref(item.path)} className="block" onClick={onClose}>
+                                    <Link key={item.path} to={getLinkHref(item.path)} className="block" onClick={onClose}>
                                         <Button
                                             variant={isActive(item.path) ? "secondary" : "ghost"}
                                             className={cn(
@@ -226,7 +224,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                                 {items.map((item) => {
                                                     const Icon = item.icon;
                                                     return (
-                                                        <Link key={item.path} href={getLinkHref(item.path)} className="block" onClick={onClose}>
+                                                        <Link key={item.path} to={getLinkHref(item.path)} className="block" onClick={onClose}>
                                                             <Button
                                                                 variant={isActive(item.path) ? "secondary" : "ghost"}
                                                                 className={cn(
@@ -257,7 +255,7 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
                                                         {openGroups[group] && (
                                                             <div className="ml-4 space-y-1 border-l border-white/5 pl-2">
                                                                 {groupCrds.map((crd: any) => (
-                                                                    <Link key={crd.name} href={getLinkHref(`/kube-crds/${crd.name}`)} className="block" onClick={onClose}>
+                                                                    <Link key={crd.name} to={getLinkHref(`/kube-crds/${crd.name}`)} className="block" onClick={onClose}>
                                                                         <Button
                                                                             variant={isActive(`/kube-crds/${crd.name}`) ? "secondary" : "ghost"}
                                                                             className={cn(
@@ -309,10 +307,4 @@ function SidebarContent({ isOpen, onClose }: { isOpen?: boolean, onClose?: () =>
     );
 }
 
-export function Sidebar(props: { isOpen?: boolean, onClose?: () => void }) {
-    return (
-        <Suspense fallback={<div className="w-64 h-screen bg-sidebar sticky top-0" />}>
-            <SidebarContent {...props} />
-        </Suspense>
-    );
-}
+

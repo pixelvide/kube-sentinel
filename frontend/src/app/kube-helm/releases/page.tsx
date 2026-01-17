@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/lib/api";
@@ -19,7 +19,7 @@ interface HelmRelease {
 }
 
 export default function HelmReleasesPage() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const [releases, setReleases] = useState<HelmRelease[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");

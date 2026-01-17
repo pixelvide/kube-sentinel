@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Cloud, ShieldCheck, Edit2, Check, X, Server, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { KubeConfigUpload } from "@/components/settings/KubeConfigUpload";

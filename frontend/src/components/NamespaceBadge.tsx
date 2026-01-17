@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 interface NamespaceBadgeProps {
     namespace: string;
@@ -8,14 +8,15 @@ interface NamespaceBadgeProps {
 }
 
 export function NamespaceBadge({ namespace, className = "" }: NamespaceBadgeProps) {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const pathname = location.pathname;
+    const [searchParams] = useSearchParams();
 
     const handleClick = () => {
         const params = new URLSearchParams(searchParams.toString());
         params.set("namespace", namespace);
-        router.replace(`${pathname}?${params.toString()}`);
+        navigate(`${pathname}?${params.toString()}`);
     };
 
     return (

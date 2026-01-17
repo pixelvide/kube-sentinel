@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Trash2, ShieldCheck, LayoutDashboard, Edit, CheckCircle2, AlertCircle, Plus, Globe, Key, Shield, ShieldAlert, Server, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
     Select,

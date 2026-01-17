@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { HardDrive, RefreshCw, Cpu, MemoryStick, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ interface NodeInfo {
 }
 
 function NodesContent() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const selectedContext = searchParams.get("context") || "";
 
     const [contexts, setContexts] = useState<ContextInfo[]>([]);

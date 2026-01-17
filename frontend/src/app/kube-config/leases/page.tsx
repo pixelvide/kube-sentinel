@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Key, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ interface LeaseInfo {
 }
 
 function LeasesContent() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const selectedContext = searchParams.get("context") || "";
     const selectedNamespace = searchParams.get("namespace") || "";
 

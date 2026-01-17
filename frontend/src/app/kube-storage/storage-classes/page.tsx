@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Layers, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,7 @@ interface StorageClassInfo {
 }
 
 function StorageClassesContent() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const selectedContext = searchParams.get("context") || "";
 
     const [classes, setClasses] = useState<StorageClassInfo[]>([]);

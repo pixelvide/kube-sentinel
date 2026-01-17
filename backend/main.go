@@ -44,6 +44,19 @@ func main() {
 	config.AllowCredentials = true
 	r.Use(cors.New(config))
 
+	// Serve static files from the "static" directory
+	r.Static("/assets", "./static/assets")
+	r.StaticFile("/favicon.ico", "./static/favicon.ico")
+	r.StaticFile("/logo192.png", "./static/logo192.png")
+	r.StaticFile("/manifest.json", "./static/manifest.json")
+
+	// SPA Handler: Serve index.html for unknown routes (excluding /api)
+	r.NoRoute(func(c *gin.Context) {
+		if !strings.HasPrefix(c.Request.URL.Path, "/api") {
+			c.File("./static/index.html")
+		}
+	})
+
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ok",

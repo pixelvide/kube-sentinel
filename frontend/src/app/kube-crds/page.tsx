@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { api } from "@/lib/api";
 import { Search, FileCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
 interface CRDInfo {
@@ -20,7 +20,7 @@ interface CRDInfo {
 }
 
 export default function CRDsPage() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const currentContext = searchParams.get("context") || "";
 
     const [crds, setCrds] = useState<CRDInfo[]>([]);
@@ -63,7 +63,7 @@ export default function CRDsPage() {
                     {filtered.map(crd => (
                         <Link
                             key={crd.name}
-                            href={`/kube-crds/${crd.name}?context=${currentContext}`}
+                            to={`/kube-crds/${crd.name}?context=${currentContext}`}
                             className="group block p-4 rounded-xl border bg-card hover:bg-accent/5 transition-all hover:border-primary/20 hover:shadow-lg"
                         >
                             <div className="flex items-start justify-between mb-3">

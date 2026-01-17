@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Server, Layers } from "lucide-react";
@@ -14,9 +14,10 @@ interface ContextInfo {
 }
 
 function ClusterContextSelectorContent() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const pathname = location.pathname;
+    const [searchParams] = useSearchParams();
 
     const [contexts, setContexts] = useState<ContextInfo[]>([]);
     const [namespaces, setNamespaces] = useState<string[]>([]);
@@ -86,7 +87,7 @@ function ClusterContextSelectorContent() {
                 if (!searchParams.get("namespace")) {
                     const params = new URLSearchParams(searchParams.toString());
                     params.set("namespace", "__all__");
-                    router.replace(`${pathname}?${params.toString()}`);
+                    navigate(`${pathname}?${params.toString()}`);
                 }
             } catch (error) {
                 console.error("Failed to fetch namespaces:", error);
@@ -105,7 +106,7 @@ function ClusterContextSelectorContent() {
         params.set("context", ctx);
         // Default to All Namespaces when context changes
         params.set("namespace", "__all__");
-        router.replace(`${pathname}?${params.toString()}`);
+        navigate(`${pathname}?${params.toString()}`);
     };
 
     const updateNamespaces = (selected: string[]) => {
@@ -115,7 +116,7 @@ function ClusterContextSelectorContent() {
         } else {
             params.delete("namespace");
         }
-        router.replace(`${pathname}?${params.toString()}`);
+        navigate(`${pathname}?${params.toString()}`);
     };
 
     if (contexts.length === 0 && !loading) return null;

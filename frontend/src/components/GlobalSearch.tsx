@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function GlobalSearchContent({ placeholder = "Search..." }: { placeholder?: string }) {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const pathname = location.pathname;
+    const [searchParams] = useSearchParams();
 
     const [query, setQuery] = useState(searchParams.get("q") || "");
 
@@ -25,7 +26,7 @@ function GlobalSearchContent({ placeholder = "Search..." }: { placeholder?: stri
         } else {
             params.delete("q");
         }
-        router.replace(`${pathname}?${params.toString()}`);
+        navigate(`${pathname}?${params.toString()}`);
     };
 
     const clearSearch = () => {

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LayoutDashboard, HardDrive, Layers, Box, Grid, Globe,
@@ -34,7 +34,7 @@ interface EventInfo {
 }
 
 function DashboardContent() {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const selectedContext = searchParams.get("context") || "";
   const selectedNamespace = searchParams.get("namespace") || "";
 
@@ -117,7 +117,7 @@ function DashboardContent() {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {statCards.map((stat) => (
-                <Link key={stat.label} href={getLinkHref(stat.href)}>
+                <Link key={stat.label} to={getLinkHref(stat.href)}>
                   <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm rounded-2xl hover:bg-card/80 transition-all cursor-pointer group">
                     <CardContent className="p-5">
                       <div className="flex items-center gap-3">
@@ -144,7 +144,7 @@ function DashboardContent() {
                     Recent Events
                   </CardTitle>
                   {selectedNamespace && (
-                    <Link href={getLinkHref("/kube-events")} className="text-xs text-primary hover:underline">
+                    <Link to={getLinkHref("/kube-events")} className="text-xs text-primary hover:underline">
                       View all →
                     </Link>
                   )}

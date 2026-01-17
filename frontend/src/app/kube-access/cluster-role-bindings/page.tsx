@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Link2, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ interface BindingInfo {
 }
 
 function ClusterRoleBindingsContent() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const selectedContext = searchParams.get("context") || "";
 
     const [bindings, setBindings] = useState<BindingInfo[]>([]);

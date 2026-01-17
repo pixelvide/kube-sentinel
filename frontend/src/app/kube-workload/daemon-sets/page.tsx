@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, CheckCircle2, Server } from "lucide-react";
@@ -31,7 +31,7 @@ interface PodInfo {
 }
 
 function DaemonSetsContent() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const selectedContext = searchParams.get("context");
     const selectedNamespace = searchParams.get("namespace");
 

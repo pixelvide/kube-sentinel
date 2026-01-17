@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { History as HistoryIcon, RefreshCw, ChevronLeft, ChevronRight, Info, Search, Filter, ArrowRight, Clock, ShieldCheck, Activity, Database, Key, Server, LayoutDashboard, Boxes, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";

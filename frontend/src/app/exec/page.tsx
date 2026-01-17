@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -55,7 +55,7 @@ function MobileKeyboard({ onKeyPress }: { onKeyPress: (key: string) => void }) {
 }
 
 function ExecContent() {
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const context = searchParams.get("context");
     const namespace = searchParams.get("namespace");
     const pod = searchParams.get("pod");

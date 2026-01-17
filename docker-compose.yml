@@ -13,19 +13,11 @@ services:
       - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
       - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_SSLMODE=${DB_SSLMODE:-require}
       - DB_TIMEZONE=${DB_TIMEZONE:-UTC}
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    ports:
+      - "${FRONTEND_PORT:-3000}:8080"
     ulimits:
       nofile:
         soft: 65536
         hard: 65536
-
-  frontend:
-    build:
-      context: ./
-      dockerfile: frontend/Dockerfile
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
-    depends_on:
-      - backend

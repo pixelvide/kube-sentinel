@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Box, RefreshCw, Layers, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { cn, formatAge } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/NamespaceBadge";
 import { ResourceDetailsSheet } from "@/components/ResourceDetailsSheet";
 import { api } from "@/lib/api";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
 interface CRResource {
@@ -32,7 +32,7 @@ function CustomResourcesContent() {
     const params = useParams();
     const crdName = params.crd as string;
 
-    const searchParams = useSearchParams();
+    const [searchParams] = useSearchParams();
     const selectedContext = searchParams.get("context") || "";
     const selectedNamespace = searchParams.get("namespace") || "";
     const searchQuery = searchParams.get("q") || "";

@@ -1,7 +1,5 @@
-"use client";
-
 import { Sidebar } from "@/components/Sidebar";
-import { usePathname, useRouter } from "next/navigation";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Menu, LayoutDashboard, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,8 +14,9 @@ const PAGE_CONFIG = NAVIGATION_CONFIG.reduce((acc, item) => {
 }, {} as Record<string, typeof NAVIGATION_CONFIG[0]>);
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
-    const pathname = usePathname();
-    const router = useRouter();
+    const location = useLocation();
+    const pathname = location.pathname;
+    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAuthChecking, setIsAuthChecking] = useState(true);
     const isLoginPage = pathname === "/login";
@@ -35,18 +34,18 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             try {
                 const res = await fetch("/api/v1/me", { credentials: "include" });
                 if (res.status === 401) {
-                    router.push("/login");
+                    navigate("/login");
                     return;
                 }
             } catch (err) {
                 console.error("Auth check failed:", err);
-                router.push("/login");
+                navigate("/login");
                 return;
             }
             setIsAuthChecking(false);
         };
         checkAuth();
-    }, [pathname, isLoginPage, router]);
+    }, [pathname, isLoginPage, navigate]);
 
     // Close sidebar on path change
     useEffect(() => {
