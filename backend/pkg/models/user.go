@@ -10,14 +10,16 @@ import (
 )
 
 type User struct {
-	ID               uint           `gorm:"primaryKey" json:"id"`
+	Model
 	Email            string         `gorm:"uniqueIndex;not null" json:"email"`
+	Password         string         `json:"-"`
 	Name             string         `json:"name"`
+	Role             string         `gorm:"default:'user'" json:"role"`
+	Enabled          bool           `gorm:"default:true" json:"enabled"`
+	LastLoginAt      *time.Time     `json:"last_login_at,omitempty"`
 	StorageNamespace string         `gorm:"uniqueIndex;not null" json:"storage_namespace"`
 	Identities       []UserIdentity `json:"identities,omitempty"`
 	GitlabConfigs    []GitlabConfig `json:"gitlab_configs,omitempty"`
-	CreatedAt        time.Time      `json:"created_at"`
-	UpdatedAt        time.Time      `json:"updated_at"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {

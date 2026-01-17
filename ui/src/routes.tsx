@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import HomePage from "./pages/page";
 import LoginPage from "./pages/login/page";
 import ExecPage from "./pages/exec/page";
+import { getSubPath } from "./lib/subpath";
 
 // Kube Access
 import ClusterRolesPage from "./pages/kube-access/cluster-roles/page";
@@ -185,4 +186,6 @@ export const router = createBrowserRouter([
             },
         ],
     },
-]);
+], {
+    basename: getSubPath()
+});

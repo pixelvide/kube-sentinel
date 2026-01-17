@@ -1,11 +1,15 @@
 import { API_URL } from "./config";
+import { getSubPath, withSubPath } from "./subpath";
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
+    const subPath = getSubPath();
+    const fullApiBase = subPath ? `${subPath}${API_URL}` : API_URL;
+
     // If it's a relative path, prepend API_URL
     const url =
-        path.startsWith("http") || (path.startsWith("/") && path.startsWith(API_URL))
+        path.startsWith("http") || (path.startsWith("/") && path.startsWith(fullApiBase))
             ? path
-            : `${API_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+            : `${fullApiBase}${path.startsWith("/") ? "" : "/"}${path}`;
 
     const defaultOptions: RequestInit = {
         credentials: "include",
@@ -25,7 +29,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
 
     if (response.status === 401) {
         if (typeof window !== "undefined") {
-            window.location.href = "/login";
+            window.location.href = withSubPath("/login");
         }
     }
 
@@ -58,6 +62,7 @@ export async function post<T>(path: string, body?: any, options: RequestInit = {
  * @returns The full WebSocket URL
  */
 export function getWsUrl(path: string): string {
+    const subPath = getSubPath();
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     let wsHost = window.location.host;
 
@@ -72,7 +77,8 @@ export function getWsUrl(path: string): string {
     }
 
     const cleanPath = path.startsWith("/") ? path : `/${path}`;
-    return `${protocol}//${wsHost}${cleanPath}`;
+    const fullPath = subPath ? `${subPath}${cleanPath}` : cleanPath;
+    return `${protocol}//${wsHost}${fullPath}`;
 }
 
 export async function put<T>(path: string, body?: any, options: RequestInit = {}): Promise<T> {

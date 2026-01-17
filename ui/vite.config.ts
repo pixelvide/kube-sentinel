@@ -5,7 +5,7 @@ import path from "path";
 import { dynamicBase } from "vite-plugin-dynamic-base";
 
 export default defineConfig({
-    base: process.env.NODE_ENV === "production" ? "/__dynamic_base__/" : "/",
+    base: process.env.NODE_ENV === "production" ? "/__dynamic_base__/" : (process.env.VITE_CLOUD_SENTINEL_K8S_BASE || "/"),
     plugins: [
         dynamicBase({
             publicPath: "window.__dynamic_base__",
@@ -14,6 +14,7 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
+    envPrefix: ["VITE_", "CLOUD_SENTINEL_K8S_"],
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "./src"),

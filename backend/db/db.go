@@ -55,9 +55,28 @@ func InitDB() {
 	log.Println("Database connection established")
 
 	// Migration
-	err = DB.AutoMigrate(&models.User{}, &models.UserIdentity{}, &models.AuditLog{}, &models.GitlabConfig{}, &models.GitlabK8sAgentConfig{}, &models.K8sClusterContextMapping{}, &models.KubeConfig{}, &models.AWSConfig{}, &models.EKSCluster{})
+	err = DB.AutoMigrate(&models.App{}, &models.OAuthProvider{}, &models.User{}, &models.UserIdentity{}, &models.AuditLog{}, &models.GitlabConfig{}, &models.GitlabK8sAgentConfig{}, &models.K8sClusterContextMapping{}, &models.KubeConfig{}, &models.AWSConfig{}, &models.EKSCluster{})
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}
 	log.Println("Database migration completed")
+
+	// Ensure cloud-sentinel-k8s app exists
+	var app models.App
+	result := DB.Where("name = ?", "cloud-sentinel-k8s").First(&app)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			app = models.App{
+				Name:    "cloud-sentinel-k8s",
+				Enabled: true,
+			}
+			if err := DB.Create(&app).Error; err != nil {
+				log.Printf("Failed to create cloud-sentinel-k8s app: %v", err)
+			} else {
+				log.Println("Created cloud-sentinel-k8s app")
+			}
+		} else {
+			log.Printf("Error checking for cloud-sentinel-k8s app: %v", result.Error)
+		}
+	}
 }

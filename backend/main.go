@@ -2,17 +2,22 @@ package main
 
 import (
 	"flag"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"k8s.io/klog/v2"
+	ctrlmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"cloud-sentinel-k8s/api"
 	"cloud-sentinel-k8s/auth"
 	"cloud-sentinel-k8s/db"
+	"cloud-sentinel-k8s/pkg/middleware"
+	"cloud-sentinel-k8s/pkg/utils"
 )
 
 var Version = "dev"
@@ -39,31 +44,46 @@ func main() {
 	// Set app version from build tag
 	api.SetAppVersion(Version)
 
-	r := gin.Default()
+	// Subpath support
+	base := os.Getenv("CLOUD_SENTINEL_K8S_BASE")
+	if base != "" && !strings.HasPrefix(base, "/") {
+		base = "/" + base
+	}
+	base = strings.TrimSuffix(base, "/")
 
-	config := cors.DefaultConfig()
-	// Read CORS origins from environment variable, default to localhost:3000
-	frontendURL := os.Getenv("FRONTEND_URL")
-	if frontendURL == "" {
-		frontendURL = "http://localhost:3000"
+	r := gin.New()
+	r.Use(middleware.Metrics())
+	r.Use(gin.Recovery())
+	r.Use(middleware.Logger())
+	r.Use(middleware.CORS())
+
+	setupAPIRouter(r, base)
+	setupStatic(r, base)
+
+	klog.Infof("Server running on :8080")
+	r.Run(":8080")
+}
+
+func setupStatic(r *gin.Engine, base string) {
+	if base != "" && base != "/" {
+		r.GET("/", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, base+"/")
+		})
 	}
-	corsOrigins := os.Getenv("CORS_ORIGINS")
-	if corsOrigins == "" {
-		corsOrigins = frontendURL
-	}
-	config.AllowOrigins = strings.Split(corsOrigins, ",")
-	config.AllowCredentials = true
-	r.Use(cors.New(config))
 
 	// Serve static files from the "static" directory
-	r.Static("/assets", "./static/assets")
+	r.Static(base+"/assets", "./static/assets")
 
 	// SPA Handler: Serve static files if they exist, otherwise serve index.html
 	r.NoRoute(func(c *gin.Context) {
 		path := c.Request.URL.Path
-		if strings.HasPrefix(path, "/api") {
+		if strings.HasPrefix(path, base+"/api") {
 			c.JSON(404, gin.H{"error": "API route not found"})
 			return
+		}
+
+		if base != "" && strings.HasPrefix(path, base) {
+			path = strings.TrimPrefix(path, base)
 		}
 
 		// Check if file exists in static folder (e.g. /sw.js, /favicon.ico)
@@ -75,24 +95,40 @@ func main() {
 		}
 
 		// Fallback to SPA index.html for all other non-API routes
-		c.File("./static/index.html")
-	})
+		content, err := os.ReadFile("./static/index.html")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read index.html"})
+			return
+		}
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":  "ok",
-			"version": Version,
+		htmlContent := utils.InjectBase(string(content), base)
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.String(http.StatusOK, htmlContent)
+	})
+}
+
+func setupAPIRouter(r *gin.Engine, base string) {
+	g := r.Group(base)
+
+	g.GET("/healthz", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
 		})
 	})
 
-	authGroup := r.Group("/api/v1/auth")
+	g.GET("/metrics", gin.WrapH(promhttp.HandlerFor(prometheus.Gatherers{
+		prometheus.DefaultGatherer,
+		ctrlmetrics.Registry,
+	}, promhttp.HandlerOpts{})))
+
+	authGroup := g.Group("/api/v1/auth")
 	{
 		authGroup.GET("/login", auth.LoginHandler)
 		authGroup.GET("/callback", auth.CallbackHandler)
 		authGroup.GET("/logout", auth.LogoutHandler)
 	}
 
-	apiGroup := r.Group("/api/v1")
+	apiGroup := g.Group("/api/v1")
 	apiGroup.Use(auth.AuthMiddleware())
 	{
 		apiGroup.GET("/me", api.GetMe)
@@ -224,7 +260,4 @@ func main() {
 			kubeGroup.GET("/logs", api.HandleLogs)
 		}
 	}
-
-	klog.Infof("Server running on :8080")
-	r.Run(":8080")
 }

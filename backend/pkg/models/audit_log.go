@@ -13,4 +13,5 @@ type AuditLog struct {
 	UserAgent string    `json:"user_agent"`
 	Payload   string    `gorm:"type:text" json:"payload"` // JSON encoded payload
 	CreatedAt time.Time `gorm:"index" json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

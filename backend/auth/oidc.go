@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"cloud-sentinel-k8s/api"
@@ -56,10 +57,16 @@ func InitOIDC() {
 			frontendURL = "http://localhost:3000"
 		}
 
+		base := os.Getenv("CLOUD_SENTINEL_K8S_BASE")
+		if base != "" && !strings.HasPrefix(base, "/") {
+			base = "/" + base
+		}
+		base = strings.TrimSuffix(base, "/")
+
 		oauth2Config = oauth2.Config{
 			ClientID:     os.Getenv("OIDC_CLIENT_ID"),
 			ClientSecret: os.Getenv("OIDC_CLIENT_SECRET"),
-			RedirectURL:  frontendURL + "/api/v1/auth/callback",
+			RedirectURL:  frontendURL + base + "/api/v1/auth/callback",
 			Endpoint:     provider.Endpoint(),
 			Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 		}
@@ -72,7 +79,14 @@ func LogoutHandler(c *gin.Context) {
 	if frontendURL == "" {
 		frontendURL = "http://localhost:3000"
 	}
-	c.Redirect(http.StatusFound, frontendURL+"/login")
+
+	base := os.Getenv("CLOUD_SENTINEL_K8S_BASE")
+	if base != "" && !strings.HasPrefix(base, "/") {
+		base = "/" + base
+	}
+	base = strings.TrimSuffix(base, "/")
+
+	c.Redirect(http.StatusFound, frontendURL+base+"/login")
 }
 
 func LoginHandler(c *gin.Context) {
@@ -191,6 +205,12 @@ func CallbackHandler(c *gin.Context) {
 		frontendURL = "http://localhost:3000"
 	}
 
+	base := os.Getenv("CLOUD_SENTINEL_K8S_BASE")
+	if base != "" && !strings.HasPrefix(base, "/") {
+		base = "/" + base
+	}
+	base = strings.TrimSuffix(base, "/")
+
 	// Record Audit Log for login
 	api.RecordAuditLogForUser(c, "USER_LOGIN", dbUser.Email, gin.H{
 		"email": dbUser.Email,
@@ -198,7 +218,7 @@ func CallbackHandler(c *gin.Context) {
 	})
 
 	// Redirect to Frontend
-	c.Redirect(http.StatusFound, frontendURL)
+	c.Redirect(http.StatusFound, frontendURL+base)
 }
 
 func AuthMiddleware() gin.HandlerFunc {
