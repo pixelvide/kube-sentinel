@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
+	"cloud-sentinel-k8s/pkg/common"
 	"cloud-sentinel-k8s/pkg/models"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func RecordAuditLogForUser(c *gin.Context, action string, actor string, payload 
 	}
 
 	auditLog := models.AuditLog{
-		AppName:   "cloud-sentinel-k8s",
+		AppName:   common.AppName,
 		Action:    action,
 		Actor:     actor,
 		IPAddress: c.ClientIP(),

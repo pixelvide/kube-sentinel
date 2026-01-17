@@ -1,12 +1,32 @@
 "use client";
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { api } from "@/lib/api";
+import { withSubPath } from "@/lib/subpath";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const checkInit = async () => {
+            try {
+                const data = await api.checkInit();
+                if (!data.initialized) {
+                    navigate("/setup");
+                }
+            } catch (e) {
+                console.error("Init check failed", e);
+            }
+        };
+        checkInit();
+    }, [navigate]);
+
     const handleLogin = () => {
-        window.location.href = "/api/v1/auth/login";
+        window.location.href = withSubPath("/api/v1/auth/login");
     };
 
     return (

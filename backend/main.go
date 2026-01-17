@@ -15,6 +15,7 @@ import (
 
 	"cloud-sentinel-k8s/api"
 	"cloud-sentinel-k8s/auth"
+	"cloud-sentinel-k8s/pkg/handler"
 	"cloud-sentinel-k8s/pkg/middleware"
 	"cloud-sentinel-k8s/pkg/models"
 	"cloud-sentinel-k8s/pkg/utils"
@@ -121,11 +122,17 @@ func setupAPIRouter(r *gin.Engine, base string) {
 		ctrlmetrics.Registry,
 	}, promhttp.HandlerOpts{})))
 
+	// Initialization routes (no auth required)
+	g.GET("/api/v1/init_check", handler.InitCheck)
+	g.POST("/api/v1/create_superuser", handler.CreateSuperUser)
+	g.POST("/api/v1/skip_oidc", handler.SkipOIDC)
+
 	authGroup := g.Group("/api/v1/auth")
 	{
 		authGroup.GET("/login", auth.LoginHandler)
 		authGroup.GET("/callback", auth.CallbackHandler)
 		authGroup.GET("/logout", auth.LogoutHandler)
+		authGroup.GET("/providers", handler.GetProviders)
 	}
 
 	apiGroup := g.Group("/api/v1")

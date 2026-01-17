@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"cloud-sentinel-k8s/pkg/common"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -128,23 +130,23 @@ func InitDB() {
 	}
 	log.Println("Database migration completed")
 
-	// Ensure cloud-sentinel-k8s app exists
+	// Ensure default app exists
 	var app App
-	result := DB.Where("name = ?", "cloud-sentinel-k8s").First(&app)
+	result := DB.Where("name = ?", common.AppName).First(&app)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			app = App{
-				Name:              "cloud-sentinel-k8s",
+				Name:              common.AppName,
 				Enabled:           true,
 				DefaultUserAccess: true,
 			}
 			if err := DB.Create(&app).Error; err != nil {
-				log.Printf("Failed to create cloud-sentinel-k8s app: %v", err)
+				log.Printf("Failed to create %s app: %v", common.AppName, err)
 			} else {
-				log.Println("Created cloud-sentinel-k8s app")
+				log.Printf("Created %s app", common.AppName)
 			}
 		} else {
-			log.Printf("Error checking for cloud-sentinel-k8s app: %v", result.Error)
+			log.Printf("Error checking for %s app: %v", common.AppName, result.Error)
 		}
 	}
 }

@@ -1,3 +1,4 @@
+import { api } from "@/lib/api";
 import { Sidebar } from "@/components/Sidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -35,11 +36,15 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
         const checkAuth = async () => {
             try {
-                const res = await fetch("/api/v1/me", { credentials: "include" });
-                if (res.status === 401) {
-                    navigate("/login");
+                // Check initialization status first
+                const initData = await api.checkInit();
+                if (!initData.initialized) {
+                    navigate("/setup");
                     return;
                 }
+
+                // Verify authentication
+                await api.get("/me");
             } catch (err) {
                 console.error("Auth check failed:", err);
                 navigate("/login");

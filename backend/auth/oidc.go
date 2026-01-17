@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"cloud-sentinel-k8s/api"
+	"cloud-sentinel-k8s/pkg/common"
 	"cloud-sentinel-k8s/pkg/models"
 
 	"crypto/tls"
@@ -34,21 +35,43 @@ func InitOIDC() {
 	customClient := &http.Client{Transport: tr}
 	ctx := oidc.ClientContext(context.Background(), customClient)
 
-	provider, err := oidc.NewProvider(ctx, os.Getenv("OIDC_ISSUER"))
+	var dbProvider models.OAuthProvider
+
+	issuer := os.Getenv("OIDC_ISSUER")
+	clientID := os.Getenv("OIDC_CLIENT_ID")
+	clientSecret := os.Getenv("OIDC_CLIENT_SECRET")
+
+	// If env vars are missing, try DB
+	if issuer == "" {
+		if err := models.DB.Where("enabled = ? AND type = ?", true, "oidc").First(&dbProvider).Error; err == nil {
+			issuer = dbProvider.Issuer
+			clientID = dbProvider.ClientID
+			clientSecret = dbProvider.ClientSecret
+		}
+	}
+
+	if issuer == "" {
+		// Log only if we expect OIDC to be configured (e.g. not skipped)
+		// logic for skipped? If skipped, we might have a disabled record.
+		// If no enabled record and no env, OIDC is disabled.
+		return
+	}
+
+	provider, err := oidc.NewProvider(ctx, issuer)
 	if err != nil {
 		log.Printf("Failed to get provider: %v. Retrying in 5 seconds...", err)
 		// Retry logic for startup race condition with network
 		time.Sleep(5 * time.Second)
-		provider, err = oidc.NewProvider(ctx, os.Getenv("OIDC_ISSUER"))
+		provider, err = oidc.NewProvider(ctx, issuer)
 		if err != nil {
 			log.Printf("Failed to get provider: %v", err)
-			// return // Don't crash
+			return // Don't crash
 		}
 	}
 
 	if provider != nil {
 		oidcConfig := &oidc.Config{
-			ClientID: os.Getenv("OIDC_CLIENT_ID"),
+			ClientID: clientID,
 		}
 		verifier = provider.Verifier(oidcConfig)
 
@@ -63,10 +86,13 @@ func InitOIDC() {
 		}
 		base = strings.TrimSuffix(base, "/")
 
+		// Determine redirect URL
+		redirectURL := frontendURL + base + "/api/v1/auth/callback"
+
 		oauth2Config = oauth2.Config{
-			ClientID:     os.Getenv("OIDC_CLIENT_ID"),
-			ClientSecret: os.Getenv("OIDC_CLIENT_SECRET"),
-			RedirectURL:  frontendURL + base + "/api/v1/auth/callback",
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			RedirectURL:  redirectURL,
 			Endpoint:     provider.Endpoint(),
 			Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 		}
@@ -219,7 +245,7 @@ func CallbackHandler(c *gin.Context) {
 
 	// Auto-grant access to apps with DefaultUserAccess=true
 	var app models.App
-	if err := models.DB.Where("name = ?", "cloud-sentinel-k8s").First(&app).Error; err == nil {
+	if err := models.DB.Where("name = ?", common.AppName).First(&app).Error; err == nil {
 		// App exists, check if it has default user access enabled
 		if app.Enabled && app.DefaultUserAccess {
 			// Check if user already has an access record

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"cloud-sentinel-k8s/pkg/common"
 	"errors"
 	"os"
 	"time"
@@ -35,7 +36,7 @@ func GenerateToken(userID uint, email, name string) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "cloud-sentinel-k8s",
+			Issuer:    common.AppName,
 		},
 	}
 

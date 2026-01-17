@@ -74,7 +74,13 @@ import GitlabPage from "./pages/settings/gitlab/page";
 
 import App from "./App";
 
+import { SetupPage } from "./pages/Setup";
+
 export const router = createBrowserRouter([
+    {
+        path: "/setup",
+        element: <SetupPage />,
+    },
     {
         path: "/login",
         element: <LoginPage />,

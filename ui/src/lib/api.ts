@@ -119,4 +119,24 @@ export const api = {
             },
         });
     },
+    checkInit: async () => {
+        return get<InitCheckResponse>("/init_check");
+    },
+    createSuperUser: async (data: CreateSuperUserRequest) => {
+        return post("/create_superuser", data);
+    },
+    skipOIDC: async () => {
+        return post("/skip_oidc");
+    },
 };
+
+export interface InitCheckResponse {
+    initialized: boolean;
+    step: number;
+}
+
+export interface CreateSuperUserRequest {
+    email: string;
+    password: string;
+    name?: string;
+}
