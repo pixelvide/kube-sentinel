@@ -13,10 +13,12 @@ import { toast } from 'sonner'
 
 import { Cluster } from '@/types/api'
 import {
+  ClusterCreateRequest,
   ClusterUpdateRequest,
   createCluster,
   deleteCluster,
   importClusters,
+  ImportClustersRequest,
   updateCluster,
   useClusterList,
 } from '@/lib/api'
@@ -248,7 +250,7 @@ export function ClusterManagement() {
   // Import clusters mutation
   const importMutation = useMutation({
     mutationFn: importClusters,
-    onSuccess: (data: any) => {
+    onSuccess: (data: { message?: string } | void) => {
       queryClient.invalidateQueries({ queryKey: ['cluster-list'] })
       toast.success(data?.message || t('clusterManagement.messages.imported', 'Clusters imported successfully'))
       setShowClusterDialog(false)
@@ -259,20 +261,20 @@ export function ClusterManagement() {
     },
   })
 
-  const handleSubmitCluster = (clusterData: any) => {
+  const handleSubmitCluster = (clusterData: ClusterCreateRequest | ClusterUpdateRequest | ImportClustersRequest) => {
     if (isImportMode) {
-      importMutation.mutate(clusterData)
+      importMutation.mutate(clusterData as ImportClustersRequest)
       return
     }
     if (editingCluster) {
       // Update existing cluster - use the form data directly
       updateMutation.mutate({
         id: editingCluster.id,
-        data: clusterData,
+        data: clusterData as ClusterUpdateRequest,
       })
     } else {
       // Create new cluster
-      createMutation.mutate(clusterData)
+      createMutation.mutate(clusterData as ClusterCreateRequest)
     }
   }
 

@@ -35,7 +35,7 @@ export function AWSConfigManagement() {
         try {
             await updateUserAWSConfig({ credentials_content: content })
             toast.success(t('settings.aws.saved', 'AWS Credentials saved successfully'))
-        } catch (error) {
+        } catch (_error) {
             toast.error(t('settings.aws.saveError', 'Failed to save AWS credentials'))
         } finally {
             setIsSaving(false)

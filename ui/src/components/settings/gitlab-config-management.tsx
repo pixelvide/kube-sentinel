@@ -4,6 +4,7 @@ import { Check, Loader2, Plus, Trash2, X } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
+import { UserGitlabConfig } from '@/types/api'
 
 import {
     Table,
@@ -87,7 +88,7 @@ export function GitlabConfigManagement() {
             setEditingConfig(null)
             form.reset()
             queryClient.invalidateQueries({ queryKey: ['user-gitlab-configs'] })
-        } catch (error) {
+        } catch (_error) {
             toast.error(t('settings.gitlab.error', 'Failed to save configuration'))
         }
     }
@@ -99,7 +100,7 @@ export function GitlabConfigManagement() {
             toast.success(t('settings.gitlab.deleted', 'Configuration deleted'))
             setDeleteConfigId(null)
             queryClient.invalidateQueries({ queryKey: ['user-gitlab-configs'] })
-        } catch (error) {
+        } catch (_error) {
             toast.error(t('settings.gitlab.deleteError', 'Failed to delete configuration'))
         }
     }
@@ -110,14 +111,14 @@ export function GitlabConfigManagement() {
             await validateUserGitlabConfig(id)
             toast.success(t('settings.gitlab.valid', 'Configuration is valid'))
             queryClient.invalidateQueries({ queryKey: ['user-gitlab-configs'] })
-        } catch (error) {
+        } catch (_error) {
             toast.error(t('settings.gitlab.invalid', 'Configuration is invalid'))
         } finally {
             setIsValidating(null)
         }
     }
 
-    const openEdit = (config: any) => {
+    const openEdit = (config: UserGitlabConfig) => {
         setEditingConfig({
             id: config.id, // Not used in upsert but useful for state
             hostId: config.gitlab_host_id.toString(),
@@ -167,7 +168,7 @@ export function GitlabConfigManagement() {
                                 <FormField
                                     control={form.control}
                                     name="gitlab_host_id"
-                                    render={({ field }: { field: any }) => (
+                                    render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>{t('settings.gitlab.host', 'GitLab Host')}</FormLabel>
                                             <Select
@@ -195,7 +196,7 @@ export function GitlabConfigManagement() {
                                 <FormField
                                     control={form.control}
                                     name="token"
-                                    render={({ field }: { field: any }) => (
+                                    render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>{t('settings.gitlab.token', 'Token')}</FormLabel>
                                             <FormControl>
