@@ -85,9 +85,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ steps.check_version.outputs.tag_name }}
-            zzde/${{ env.IMAGE_NAME }}:${{ steps.check_version.outputs.tag_name }}
+            pixelvide/${{ env.IMAGE_NAME }}:${{ steps.check_version.outputs.tag_name }}
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
-            zzde/${{ env.IMAGE_NAME }}:latest
+            pixelvide/${{ env.IMAGE_NAME }}:latest
           labels: runnumber=${{ github.run_id }}
 
       - name: Package Helm chart

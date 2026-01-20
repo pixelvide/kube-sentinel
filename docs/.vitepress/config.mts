@@ -5,8 +5,9 @@ export default defineConfig({
   title: "Cloud Sentinel K8s",
   description: "A modern, intuitive Kubernetes dashboard",
 
+  base: "/cloud-sentinel-k8s/",
   sitemap: {
-    hostname: "https://cloud-sentinel-k8s.pixelvide.cloud",
+    hostname: "https://pixelvide.github.io/cloud-sentinel-k8s/",
     lastmodDateOnly: false,
   },
 
