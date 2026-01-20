@@ -116,23 +116,15 @@ func FindWithSubOrUpsertUser(user *User) error {
 		identity.LastLoginAt = &now
 
 		// Update OIDC groups on identity if changed
-		updatesNeeded := false
 		if fmt.Sprintf("%v", identity.OIDCGroups) != fmt.Sprintf("%v", inputOIDCGroups) {
 			identity.OIDCGroups = inputOIDCGroups
 			// Update the return object as well
 			user.OIDCGroups = inputOIDCGroups
-			updatesNeeded = true
 		}
 
-		if updatesNeeded {
-			if err := DB.Save(&identity).Error; err != nil {
-				return err
-			}
-		} else {
-			// Still save identity to update LastLoginAt
-			if err := DB.Save(&identity).Error; err != nil {
-				return err
-			}
+		// Always save identity to update LastLoginAt and optionally OIDC groups
+		if err := DB.Save(&identity).Error; err != nil {
+			return err
 		}
 
 		return DB.Save(user).Error

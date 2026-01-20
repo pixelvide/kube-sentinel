@@ -89,7 +89,10 @@ func (h *ResourceApplyHandler) ApplyResource(c *gin.Context) {
 			"resourceYaml": req.YAML,
 			"previousYaml": string(previousYAML),
 		}
-		payloadBytes, _ := json.Marshal(payloadData)
+		payloadBytes, err := json.Marshal(payloadData)
+		if err != nil {
+			klog.Errorf("Failed to marshal audit payload: %v", err)
+		}
 
 		model.DB.Create(&model.AuditLog{
 			AppID:        model.CurrentApp.ID,

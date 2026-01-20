@@ -42,7 +42,9 @@ func (a *ImmutableTagAnalyzer) Analyze(ctx context.Context, c client.Client, obj
 	}
 
 	var anomalies []Anomaly
-	allContainers := append(containers, initContainers...)
+	var allContainers []corev1.Container
+	allContainers = append(allContainers, containers...)
+	allContainers = append(allContainers, initContainers...)
 
 	for _, c := range allContainers {
 		image := c.Image
@@ -105,7 +107,9 @@ func (a *PrivilegedContainerAnalyzer) Analyze(ctx context.Context, c client.Clie
 	}
 
 	var anomalies []Anomaly
-	allContainers := append(containers, initContainers...)
+	var allContainers []corev1.Container
+	allContainers = append(allContainers, containers...)
+	allContainers = append(allContainers, initContainers...)
 
 	for _, c := range allContainers {
 		if c.SecurityContext != nil && c.SecurityContext.Privileged != nil && *c.SecurityContext.Privileged {
@@ -159,7 +163,9 @@ func (a *RootUserAnalyzer) Analyze(ctx context.Context, c client.Client, obj cli
 	}
 
 	var anomalies []Anomaly
-	allContainers := append(containers, initContainers...)
+	var allContainers []corev1.Container
+	allContainers = append(allContainers, containers...)
+	allContainers = append(allContainers, initContainers...)
 
 	podRunAsNonRoot := false
 	podRunAsUser := int64(-1)

@@ -4,9 +4,9 @@ services:
     image: cloud-sentinel-k8s:local
     ports:
       - "8080:8080"
-    #volumes: 
-    # - ~/.kube:/root/.kube
-    environment:
+      #volumes: 
+      # - ~/.kube:/root/.kube
+      # environment:
       # - CLOUD_SENTINEL_K8S_USERNAME=admin
       # - CLOUD_SENTINEL_K8S_PASSWORD=admin
       # - KUBECONFIG=/root/.kube/config

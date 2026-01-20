@@ -100,7 +100,10 @@ func (h *GenericResourceHandler[T, V]) recordHistory(c *gin.Context, opType stri
 		"resourceYaml": h.ToYAML(curr),
 		"previousYaml": h.ToYAML(prev),
 	}
-	payloadBytes, _ := json.Marshal(payloadData)
+	payloadBytes, err := json.Marshal(payloadData)
+	if err != nil {
+		klog.Errorf("Failed to marshal audit payload: %v", err)
+	}
 
 	auditLog := model.AuditLog{
 		AppID:        model.CurrentApp.ID,

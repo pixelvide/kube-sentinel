@@ -286,92 +286,10 @@ func ImportClustersFromKubeconfig(kubeconfig *clientcmdapi.Config) int64 {
 		}
 		authInfo := kubeconfig.AuthInfos[context.AuthInfo]
 		if authInfo != nil && authInfo.Exec != nil {
-			if strings.Contains(authInfo.Exec.Command, "glab") {
-				skipSystemSync = true
-				// Create a copy to avoid modifying the original kubeconfig
-				copiedAuthInfo := authInfo.DeepCopy()
-				if copiedAuthInfo.Exec.Command != "glab" {
-					copiedAuthInfo.Exec.Command = "glab"
-				}
-
-				// Normalize --cache-mode to "none"
-				for i, arg := range copiedAuthInfo.Exec.Args {
-					if arg == "--cache-mode" && i+1 < len(copiedAuthInfo.Exec.Args) {
-						if copiedAuthInfo.Exec.Args[i+1] != "no" {
-							copiedAuthInfo.Exec.Args[i+1] = "no"
-						}
-					} else if strings.HasPrefix(arg, "--cache-mode=") {
-						if arg != "--cache-mode=no" {
-							copiedAuthInfo.Exec.Args[i] = "--cache-mode=no"
-						}
-					}
-				}
-				authInfo = copiedAuthInfo
-			} else if strings.Contains(authInfo.Exec.Command, "aws") || strings.Contains(authInfo.Exec.Command, "aws-iam-authenticator") {
-				skipSystemSync = true
-				copiedAuthInfo := authInfo.DeepCopy()
-
-				region := ""
-				clusterID := ""
-				var filteredArgs []string
-
-				// Extract region and cluster ID from args, and filter them out if we're converting from 'aws eks'
-				isAwsEks := strings.HasSuffix(copiedAuthInfo.Exec.Command, "aws")
-				for i := 0; i < len(copiedAuthInfo.Exec.Args); i++ {
-					arg := copiedAuthInfo.Exec.Args[i]
-					if (arg == "--region") && i+1 < len(copiedAuthInfo.Exec.Args) {
-						region = copiedAuthInfo.Exec.Args[i+1]
-						i++
-					} else if strings.HasPrefix(arg, "--region=") {
-						region = strings.TrimPrefix(arg, "--region=")
-					} else if (arg == "--cluster-name" || arg == "--cluster-id") && i+1 < len(copiedAuthInfo.Exec.Args) {
-						clusterID = copiedAuthInfo.Exec.Args[i+1]
-						i++
-					} else if strings.HasPrefix(arg, "--cluster-name=") {
-						clusterID = strings.TrimPrefix(arg, "--cluster-name=")
-					} else if strings.HasPrefix(arg, "--cluster-id=") {
-						clusterID = strings.TrimPrefix(arg, "--cluster-id=")
-					} else if !isAwsEks {
-						filteredArgs = append(filteredArgs, arg)
-					}
-				}
-
-				if isAwsEks {
-					filteredArgs = []string{"token"}
-					if clusterID != "" {
-						filteredArgs = append(filteredArgs, "-i", clusterID)
-					}
-				}
-				copiedAuthInfo.Exec.Args = filteredArgs
-
-				// Handle Environment Variables
-				hasRegion := false
-				hasStsRegional := false
-				for _, env := range copiedAuthInfo.Exec.Env {
-					if env.Name == "AWS_REGION" {
-						hasRegion = true
-					}
-					if env.Name == "AWS_STS_REGIONAL_ENDPOINTS" {
-						hasStsRegional = true
-					}
-				}
-
-				if region != "" && !hasRegion {
-					copiedAuthInfo.Exec.Env = append(copiedAuthInfo.Exec.Env, clientcmdapi.ExecEnvVar{
-						Name:  "AWS_REGION",
-						Value: region,
-					})
-				}
-
-				if !hasStsRegional {
-					copiedAuthInfo.Exec.Env = append(copiedAuthInfo.Exec.Env, clientcmdapi.ExecEnvVar{
-						Name:  "AWS_STS_REGIONAL_ENDPOINTS",
-						Value: "regional",
-					})
-				}
-
-				copiedAuthInfo.Exec.Command = "aws-iam-authenticator"
-				authInfo = copiedAuthInfo
+			var handled bool
+			authInfo, handled, skipSystemSync = processAuthInfo(authInfo)
+			if !handled {
+				// Continue with default auth info if not specifically handled
 			}
 		}
 		config.AuthInfos = map[string]*clientcmdapi.AuthInfo{
@@ -405,6 +323,104 @@ func ImportClustersFromKubeconfig(kubeconfig *clientcmdapi.Config) int64 {
 	return int64(importedCount)
 }
 
+func processAuthInfo(authInfo *clientcmdapi.AuthInfo) (*clientcmdapi.AuthInfo, bool, bool) {
+	if strings.Contains(authInfo.Exec.Command, "glab") {
+		return processGlabAuth(authInfo), true, true
+	} else if strings.Contains(authInfo.Exec.Command, "aws") || strings.Contains(authInfo.Exec.Command, "aws-iam-authenticator") {
+		return processAWSAuth(authInfo), true, true
+	}
+	return authInfo, false, false
+}
+
+func processGlabAuth(authInfo *clientcmdapi.AuthInfo) *clientcmdapi.AuthInfo {
+	// Create a copy to avoid modifying the original kubeconfig
+	copiedAuthInfo := authInfo.DeepCopy()
+	if copiedAuthInfo.Exec.Command != "glab" {
+		copiedAuthInfo.Exec.Command = "glab"
+	}
+
+	// Normalize --cache-mode to "none"
+	for i, arg := range copiedAuthInfo.Exec.Args {
+		if arg == "--cache-mode" && i+1 < len(copiedAuthInfo.Exec.Args) {
+			if copiedAuthInfo.Exec.Args[i+1] != "no" {
+				copiedAuthInfo.Exec.Args[i+1] = "no"
+			}
+		} else if strings.HasPrefix(arg, "--cache-mode=") {
+			if arg != "--cache-mode=no" {
+				copiedAuthInfo.Exec.Args[i] = "--cache-mode=no"
+			}
+		}
+	}
+	return copiedAuthInfo
+}
+
+func processAWSAuth(authInfo *clientcmdapi.AuthInfo) *clientcmdapi.AuthInfo {
+	copiedAuthInfo := authInfo.DeepCopy()
+
+	region := ""
+	clusterID := ""
+	var filteredArgs []string
+
+	// Extract region and cluster ID from args, and filter them out if we're converting from 'aws eks'
+	isAwsEks := strings.HasSuffix(copiedAuthInfo.Exec.Command, "aws")
+	for i := 0; i < len(copiedAuthInfo.Exec.Args); i++ {
+		arg := copiedAuthInfo.Exec.Args[i]
+		switch {
+		case (arg == "--region") && i+1 < len(copiedAuthInfo.Exec.Args):
+			region = copiedAuthInfo.Exec.Args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--region="):
+			region = strings.TrimPrefix(arg, "--region=")
+		case (arg == "--cluster-name" || arg == "--cluster-id") && i+1 < len(copiedAuthInfo.Exec.Args):
+			clusterID = copiedAuthInfo.Exec.Args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--cluster-name="):
+			clusterID = strings.TrimPrefix(arg, "--cluster-name=")
+		case strings.HasPrefix(arg, "--cluster-id="):
+			clusterID = strings.TrimPrefix(arg, "--cluster-id=")
+		case !isAwsEks:
+			filteredArgs = append(filteredArgs, arg)
+		}
+	}
+
+	if isAwsEks {
+		filteredArgs = []string{"token"}
+		if clusterID != "" {
+			filteredArgs = append(filteredArgs, "-i", clusterID)
+		}
+	}
+	copiedAuthInfo.Exec.Args = filteredArgs
+
+	// Handle Environment Variables
+	hasRegion := false
+	hasStsRegional := false
+	for _, env := range copiedAuthInfo.Exec.Env {
+		if env.Name == "AWS_REGION" {
+			hasRegion = true
+		}
+		if env.Name == "AWS_STS_REGIONAL_ENDPOINTS" {
+			hasStsRegional = true
+		}
+	}
+
+	if region != "" && !hasRegion {
+		copiedAuthInfo.Exec.Env = append(copiedAuthInfo.Exec.Env, clientcmdapi.ExecEnvVar{
+			Name:  "AWS_REGION",
+			Value: region,
+		})
+	}
+
+	if !hasStsRegional {
+		copiedAuthInfo.Exec.Env = append(copiedAuthInfo.Exec.Env, clientcmdapi.ExecEnvVar{
+			Name:  "AWS_STS_REGIONAL_ENDPOINTS",
+			Value: "regional",
+		})
+	}
+
+	copiedAuthInfo.Exec.Command = "aws-iam-authenticator"
+	return copiedAuthInfo
+}
+
 var (
 	syncNow = make(chan struct{}, 1)
 )
@@ -423,128 +439,139 @@ func syncClusters(cm *ClusterManager) error {
 	defer cm.mu.Unlock()
 
 	now := time.Now()
+	activeUserIDs := cm.getActiveUserIDs(now)
+
+	dbClusterMap := make(map[string]*model.Cluster)
+	for _, cluster := range clusters {
+		dbClusterMap[cluster.Name] = cluster
+		cm.updateClusterStatus(cluster, activeUserIDs, now)
+	}
+
+	cm.cleanupDeletedClusters(dbClusterMap)
+
+	klog.Infof("Cluster sync completed, active: %d shared, %d clusters with user-level sync", len(cm.clusters), len(cm.userClients))
+	return nil
+}
+
+func (cm *ClusterManager) getActiveUserIDs(now time.Time) []uint {
 	var activeUserIDs []uint
 	for userID, lastActiveAt := range cm.activeUsers {
 		if now.Sub(lastActiveAt) <= 30*time.Minute {
 			activeUserIDs = append(activeUserIDs, userID)
 		}
 	}
+	return activeUserIDs
+}
 
-	dbClusterMap := make(map[string]*model.Cluster)
-	for _, cluster := range clusters {
-		dbClusterMap[cluster.Name] = cluster
+func (cm *ClusterManager) updateClusterStatus(cluster *model.Cluster, activeUserIDs []uint, now time.Time) {
+	if !cluster.Enable || len(activeUserIDs) == 0 {
+		cm.stopClusterSync(cluster)
+		return
+	}
 
-		// Determine if this cluster needs user-level sync
-		needsUserSync := cluster.SkipSystemSync
+	if !cluster.SkipSystemSync {
+		cm.handleSharedSync(cluster)
+	} else {
+		cm.handleUserLevelSync(cluster, activeUserIDs, now)
+	}
+}
 
-		if !cluster.Enable || len(activeUserIDs) == 0 {
-			// Stop shared client if exists
-			if cs, ok := cm.clusters[cluster.Name]; ok {
-				klog.Infof("Stopping shared sync for cluster %s (disabled or no active users)", cluster.Name)
-				delete(cm.clusters, cluster.Name)
-				cs.K8sClient.Stop(cluster.Name)
+func (cm *ClusterManager) stopClusterSync(cluster *model.Cluster) {
+	if cs, ok := cm.clusters[cluster.Name]; ok {
+		klog.Infof("Stopping shared sync for cluster %s (disabled or no active users)", cluster.Name)
+		delete(cm.clusters, cluster.Name)
+		cs.K8sClient.Stop(cluster.Name)
+	}
+	if userMap, ok := cm.userClients[cluster.Name]; ok {
+		for userID, uc := range userMap {
+			klog.Infof("Stopping user client sync for user %d in cluster %s", userID, cluster.Name)
+			if uc.ClientSet != nil {
+				uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
 			}
-			// Stop all user clients for this cluster
-			if userMap, ok := cm.userClients[cluster.Name]; ok {
-				for userID, uc := range userMap {
-					klog.Infof("Stopping user client sync for user %d in cluster %s", userID, cluster.Name)
-					if uc.ClientSet != nil {
-						uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
-					}
-				}
-				delete(cm.userClients, cluster.Name)
+		}
+		delete(cm.userClients, cluster.Name)
+	}
+}
+
+func (cm *ClusterManager) handleSharedSync(cluster *model.Cluster) {
+	current, currentExist := cm.clusters[cluster.Name]
+	if shouldUpdateCluster(current, cluster) {
+		klog.Infof("Updating/Adding shared cluster %s", cluster.Name)
+		if currentExist {
+			delete(cm.clusters, cluster.Name)
+			current.K8sClient.Stop(cluster.Name)
+		}
+		clientSet, err := buildClientSet(cluster)
+		if err != nil {
+			klog.Errorf("Failed to build shared k8s client for cluster %s: %v", cluster.Name, err)
+			cm.errors[cluster.Name] = err.Error()
+			return
+		}
+		delete(cm.errors, cluster.Name)
+		cm.clusters[cluster.Name] = clientSet
+	}
+	// Stop any user clients for this cluster as it's now shared
+	if userMap, ok := cm.userClients[cluster.Name]; ok {
+		for userID, uc := range userMap {
+			if uc.ClientSet != nil {
+				uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
 			}
+		}
+		delete(cm.userClients, cluster.Name)
+	}
+}
+
+func (cm *ClusterManager) handleUserLevelSync(cluster *model.Cluster, activeUserIDs []uint, now time.Time) {
+	// Stop shared client if it was previously shared
+	if cs, ok := cm.clusters[cluster.Name]; ok {
+		delete(cm.clusters, cluster.Name)
+		cs.K8sClient.Stop(cluster.Name)
+	}
+
+	if _, ok := cm.userClients[cluster.Name]; !ok {
+		cm.userClients[cluster.Name] = make(map[uint]*UserClient)
+	}
+
+	userMap := cm.userClients[cluster.Name]
+	activeUserSet := make(map[uint]bool)
+
+	for _, userID := range activeUserIDs {
+		user, err := model.GetUserByID(uint64(userID))
+		if err != nil || !rbac.CanAccessCluster(*user, cluster.Name) {
 			continue
 		}
+		activeUserSet[userID] = true
 
-		if !needsUserSync {
-			// Shared sync
-			current, currentExist := cm.clusters[cluster.Name]
-			if shouldUpdateCluster(current, cluster) {
-				klog.Infof("Updating/Adding shared cluster %s", cluster.Name)
-				if currentExist {
-					delete(cm.clusters, cluster.Name)
-					current.K8sClient.Stop(cluster.Name)
-				}
-				clientSet, err := buildClientSet(cluster)
-				if err != nil {
-					klog.Errorf("Failed to build shared k8s client for cluster %s: %v", cluster.Name, err)
-					cm.errors[cluster.Name] = err.Error()
-					continue
-				}
-				delete(cm.errors, cluster.Name)
-				cm.clusters[cluster.Name] = clientSet
+		uc, exists := userMap[userID]
+		if !exists || shouldUpdateUserClient(uc, cluster) {
+			klog.Infof("Updating/Adding user cluster client for user %d in cluster %s", userID, cluster.Name)
+			if exists && uc.ClientSet != nil {
+				uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
 			}
-			// Stop any user clients for this cluster as it's now shared
-			if userMap, ok := cm.userClients[cluster.Name]; ok {
-				for userID, uc := range userMap {
-					if uc.ClientSet != nil {
-						uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
-					}
-				}
-				delete(cm.userClients, cluster.Name)
+			newUc, err := buildUserClientSet(cluster, user)
+			if err != nil {
+				klog.Errorf("Failed to build user client for user %d in cluster %s: %v", userID, cluster.Name, err)
+				userMap[userID] = &UserClient{LastUsedAt: now, Error: err.Error()}
+				continue
 			}
+			userMap[userID] = newUc
 		} else {
-			// User-level sync
-			// Stop shared client if it was previously shared
-			if cs, ok := cm.clusters[cluster.Name]; ok {
-				delete(cm.clusters, cluster.Name)
-				cs.K8sClient.Stop(cluster.Name)
-			}
-
-			if _, ok := cm.userClients[cluster.Name]; !ok {
-				cm.userClients[cluster.Name] = make(map[uint]*UserClient)
-			}
-
-			userMap := cm.userClients[cluster.Name]
-			activeUserSet := make(map[uint]bool)
-
-			for _, userID := range activeUserIDs {
-				user, err := model.GetUserByID(uint64(userID))
-				if err != nil {
-					continue
-				}
-				if !rbac.CanAccessCluster(*user, cluster.Name) {
-					continue
-				}
-				activeUserSet[userID] = true
-
-				uc, exists := userMap[userID]
-				if !exists || shouldUpdateUserClient(uc, cluster) {
-					klog.Infof("Updating/Adding user cluster client for user %d in cluster %s", userID, cluster.Name)
-					if exists && uc.ClientSet != nil {
-						uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
-					}
-					newUc, err := buildUserClientSet(cluster, user)
-					if err != nil {
-						klog.Errorf("Failed to build user client for user %d in cluster %s: %v", userID, cluster.Name, err)
-						userMap[userID] = &UserClient{
-							LastUsedAt: now,
-							Error:      err.Error(),
-						}
-						continue
-					}
-					userMap[userID] = newUc
-				} else {
-					// Refresh activity
-					uc.LastUsedAt = now
-				}
-			}
-
-			// Clean up users no longer active or having access
-			for userID, uc := range userMap {
-				if !activeUserSet[userID] {
-					klog.Infof("Removing inactive user client for user %d in cluster %s", userID, cluster.Name)
-					if uc.ClientSet != nil {
-						uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
-					}
-					delete(userMap, userID)
-				}
-			}
+			uc.LastUsedAt = now
 		}
 	}
 
-	// Clean up clusters no longer in DB
+	for userID, uc := range userMap {
+		if !activeUserSet[userID] {
+			klog.Infof("Removing inactive user client for user %d in cluster %s", userID, cluster.Name)
+			if uc.ClientSet != nil {
+				uc.ClientSet.K8sClient.Stop(fmt.Sprintf("%s-%d", cluster.Name, userID))
+			}
+			delete(userMap, userID)
+		}
+	}
+}
+
+func (cm *ClusterManager) cleanupDeletedClusters(dbClusterMap map[string]*model.Cluster) {
 	for name, cs := range cm.clusters {
 		if _, ok := dbClusterMap[name]; !ok {
 			klog.Infof("Removing shared cluster %s (deleted from DB)", name)
@@ -563,10 +590,6 @@ func syncClusters(cm *ClusterManager) error {
 			delete(cm.userClients, name)
 		}
 	}
-
-	klog.Infof("Cluster sync completed, active: %d shared, %d clusters with user-level sync", len(cm.clusters), len(cm.userClients))
-
-	return nil
 }
 
 func shouldUpdateUserClient(uc *UserClient, cluster *model.Cluster) bool {
