@@ -12,7 +12,7 @@ _A modern, intuitive Kubernetes dashboard_
 [![License](https://img.shields.io/badge/License-Apache-green.svg)](LICENSE)
 [![HelloGitHub](https://api.hellogithub.com/v1/widgets/recommend.svg?rid=a8bd165df55f41a295b62c716228b007&claim_uid=w5uk718RFhDzdCX&theme=small)](https://hellogithub.com/repository/pixelvide/cloud-sentinel-k8s)
 
-[**Documentation**](https://cloud-sentinel-k8s.pixelvide.cloud)
+[**Documentation**](https://pixelvide.github.io/cloud-sentinel-k8s)
 <br>
 **English**
 
@@ -73,7 +73,7 @@ _Comprehensive cluster overview with real-time metrics and resource statistics_
 
 ## 🚀 Quick Start
 
-For detailed instructions, please refer to the [documentation](https://cloud-sentinel-k8s.pixelvide.cloud/guide/installation.html).
+For detailed instructions, please refer to the [documentation](https://pixelvide.github.io/cloud-sentinel-k8s/guide/installation.html).
 
 ### Docker
 
@@ -144,12 +144,12 @@ docker run --rm -p 8080:8080 ghcr.io/pixelvide/cloud-sentinel-k8s:v0.0.0
 
 ## 🔍 Troubleshooting
 
-For troubleshooting, please refer to the [documentation](https://cloud-sentinel-k8s.pixelvide.cloud).
+For troubleshooting, please refer to the [documentation](https://pixelvide.github.io/cloud-sentinel-k8s).
 
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [contributing guidelines](https://cloud-sentinel-k8s.pixelvide.cloud/faq.html#how-can-i-contribute-to-cloud-sentinel-k8s) for details on how to get involved.
+We welcome contributions! Please see our [contributing guidelines](https://pixelvide.github.io/cloud-sentinel-k8s/faq.html#how-can-i-contribute-to-cloud-sentinel-k8s) for details on how to get involved.
 
 ## 📄 License
 
