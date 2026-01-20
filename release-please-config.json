@@ -1,7 +1,7 @@
 {
     "packages": {
         ".": {
-            "release-type": "node",
+            "release-type": "go",
             "include-v-in-tag": true,
             "include-component-in-tag": false,
             "changelog-path": "CHANGELOG.md",
