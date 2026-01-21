@@ -87,6 +87,7 @@
     "customResources": "Custom Resources",
     "customResourceDefinitions": "Custom Resource Definitions",
     "replicasets": "ReplicaSets",
+    "replicationcontrollers": "Replication Controllers",
     "cronjobs": "Cron Jobs",
     "storageclasses": "Storage Classes",
     "events": "Events",

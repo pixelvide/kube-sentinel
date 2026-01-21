@@ -18,6 +18,7 @@ import {
   IconClock,
   IconClockHour4,
   IconCode,
+  IconCopy,
   IconCpu,
   IconDatabase,
   IconFileDatabase,
@@ -32,6 +33,7 @@ import {
   IconPlayerPlay,
   IconPoint,
   IconProps,
+  IconRepeat,
   IconRocket,
   IconRoute,
   IconRouter,
@@ -95,6 +97,8 @@ const iconMap = {
   IconPoint,
   IconHierarchy,
   IconShieldLock,
+  IconCopy,
+  IconRepeat,
 }
 
 const getIconName = (iconComponent: React.ComponentType): string => {
@@ -148,6 +152,16 @@ const defaultMenus: DefaultMenus = {
   'sidebar.groups.workloads': [
     { titleKey: 'nav.pods', url: '/pods', icon: IconBox },
     { titleKey: 'nav.deployments', url: '/deployments', icon: IconRocket },
+    {
+      titleKey: 'nav.replicasets',
+      url: '/replicasets',
+      icon: IconCopy,
+    },
+    {
+      titleKey: 'nav.replicationcontrollers',
+      url: '/replicationcontrollers',
+      icon: IconRepeat,
+    },
     {
       titleKey: 'nav.statefulsets',
       url: '/statefulsets',

@@ -71,6 +71,7 @@ func RegisterRoutes(group *gin.RouterGroup) {
 		"events":                          NewEventHandler(),
 		"deployments":                     NewDeploymentHandler(),
 		"replicasets":                     NewGenericResourceHandler[*appsv1.ReplicaSet, *appsv1.ReplicaSetList]("replicasets", false, false),
+		"replicationcontrollers":          NewGenericResourceHandler[*corev1.ReplicationController, *corev1.ReplicationControllerList]("replicationcontrollers", false, false),
 		"statefulsets":                    NewGenericResourceHandler[*appsv1.StatefulSet, *appsv1.StatefulSetList]("statefulsets", false, false),
 		"daemonsets":                      NewGenericResourceHandler[*appsv1.DaemonSet, *appsv1.DaemonSetList]("daemonsets", false, true),
 		"jobs":                            NewGenericResourceHandler[*batchv1.Job, *batchv1.JobList]("jobs", false, false),

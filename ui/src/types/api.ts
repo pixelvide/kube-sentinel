@@ -43,6 +43,8 @@ import {
   PersistentVolumeClaimList,
   PersistentVolumeList,
   Pod,
+  ReplicationController,
+  ReplicationControllerList,
   ResourceQuota,
   ResourceQuotaList,
   Secret,
@@ -138,6 +140,7 @@ export type ResourceType =
   | 'storageclasses'
   | 'podmetrics'
   | 'replicasets'
+  | 'replicationcontrollers'
   | 'serviceaccounts'
   | 'roles'
   | 'rolebindings'
@@ -211,6 +214,7 @@ export interface ResourcesTypeMap {
     metadata?: listMetadataType
   }
   replicasets: ReplicaSetList
+  replicationcontrollers: ReplicationControllerList
   serviceaccounts: ServiceAccountList
   roles: RoleList
   rolebindings: RoleBindingList
@@ -291,6 +295,7 @@ export interface ResourceTypeMap {
   persistentvolumes: PersistentVolume
   storageclasses: StorageClass
   replicasets: ReplicaSet
+  replicationcontrollers: ReplicationController
   podmetrics: PodMetrics
   serviceaccounts: ServiceAccount
   roles: RawRole
