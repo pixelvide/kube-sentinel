@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.5.0...v0.6.0) (2026-01-21)
+
+
+### Features
+
+* Add INSECURE_SKIP_VERIFY option for HTTP clients and refine user and identity management. ([bd5213d](https://github.com/pixelvide/cloud-sentinel-k8s/commit/bd5213db4e8bd55b27c4028e0698f768c88118c2))
+* Introduce `.env.example` for Docker Compose environment variables and update `.gitignore`. ([3243fdd](https://github.com/pixelvide/cloud-sentinel-k8s/commit/3243fdd099d9bb80f17ed356f9c1ad4a784f19ca))
+
 ## [0.5.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.4.0...v0.5.0) (2026-01-21)
 
 
