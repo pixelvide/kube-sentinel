@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useAuth } from '@/contexts/auth-context'
 import {
   IconEdit,
   IconEye,
@@ -19,7 +20,6 @@ import {
   useTemplates,
 } from '@/lib/api'
 import { translateError } from '@/lib/utils'
-import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -116,7 +116,10 @@ export function TemplateManagement() {
     },
   })
 
-  const handleOpenDialog = (template?: ResourceTemplate, viewOnly: boolean = false) => {
+  const handleOpenDialog = (
+    template?: ResourceTemplate,
+    viewOnly: boolean = false
+  ) => {
     setIsViewOnly(viewOnly)
     if (template) {
       setEditingTemplate(template)
@@ -278,20 +281,26 @@ export function TemplateManagement() {
                 ? t('templateManagement.dialog.viewTitle', 'View Template')
                 : editingTemplate
                   ? t('templateManagement.dialog.editTitle', 'Edit Template')
-                  : t('templateManagement.dialog.createTitle', 'Create Template')}
+                  : t(
+                      'templateManagement.dialog.createTitle',
+                      'Create Template'
+                    )}
             </DialogTitle>
             <DialogDescription>
               {isViewOnly
-                ? t('templateManagement.dialog.viewDescription', 'Template details (Read-only)')
+                ? t(
+                    'templateManagement.dialog.viewDescription',
+                    'Template details (Read-only)'
+                  )
                 : editingTemplate
                   ? t(
-                    'templateManagement.dialog.updateDescription',
-                    'Update existing template'
-                  )
+                      'templateManagement.dialog.updateDescription',
+                      'Update existing template'
+                    )
                   : t(
-                    'templateManagement.dialog.createDescription',
-                    'Add a new resource template'
-                  )}
+                      'templateManagement.dialog.createDescription',
+                      'Add a new resource template'
+                    )}
             </DialogDescription>
           </DialogHeader>
 
@@ -345,7 +354,9 @@ export function TemplateManagement() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              {isViewOnly ? t('common.close', 'Close') : t('common.cancel', 'Cancel')}
+              {isViewOnly
+                ? t('common.close', 'Close')
+                : t('common.cancel', 'Cancel')}
             </Button>
             {!isViewOnly && (
               <Button onClick={handleSubmit}>{t('common.save', 'Save')}</Button>

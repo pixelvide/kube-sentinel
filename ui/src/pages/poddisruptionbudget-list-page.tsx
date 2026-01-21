@@ -70,16 +70,13 @@ export function PodDisruptionBudgetListPage() {
     [columnHelper]
   )
 
-  const filter = useCallback(
-    (item: PodDisruptionBudget, query: string) => {
-      const queryLower = query.toLowerCase()
-      return (
-        item.metadata!.name!.toLowerCase().includes(queryLower) ||
-        (item.metadata!.namespace?.toLowerCase() || '').includes(queryLower)
-      )
-    },
-    []
-  )
+  const filter = useCallback((item: PodDisruptionBudget, query: string) => {
+    const queryLower = query.toLowerCase()
+    return (
+      item.metadata!.name!.toLowerCase().includes(queryLower) ||
+      (item.metadata!.namespace?.toLowerCase() || '').includes(queryLower)
+    )
+  }, [])
 
   return (
     <ResourceTable

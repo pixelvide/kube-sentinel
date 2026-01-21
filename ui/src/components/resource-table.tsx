@@ -28,6 +28,7 @@ import { toast } from 'sonner'
 
 import { ResourceType } from '@/types/api'
 import { deleteResource, useResources, useResourcesWatch } from '@/lib/api'
+import { useCluster } from '@/hooks/use-cluster'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -62,7 +63,6 @@ import { ConnectionIndicator } from './connection-indicator'
 import { ErrorMessage } from './error-message'
 import { ResourceTableView } from './resource-table-view'
 import { NamespaceSelector } from './selector/namespace-selector'
-import { useCluster } from '@/hooks/use-cluster'
 
 export interface ResourceTableProps<T> {
   resourceName: string
@@ -177,7 +177,7 @@ export function ResourceTable<T>({
     {
       reduce: true,
       enabled: useSSE,
-      clusterName: currentCluster || undefined // Pass cluster from URL context
+      clusterName: currentCluster || undefined, // Pass cluster from URL context
     }
   )
 

@@ -195,10 +195,10 @@ export function ClusterManagement() {
     onError: (error: Error) => {
       toast.error(
         error.message ||
-        t(
-          'clusterManagement.messages.createError',
-          'Failed to create cluster'
-        )
+          t(
+            'clusterManagement.messages.createError',
+            'Failed to create cluster'
+          )
       )
     },
   })
@@ -218,10 +218,10 @@ export function ClusterManagement() {
     onError: (error: Error) => {
       toast.error(
         error.message ||
-        t(
-          'clusterManagement.messages.updateError',
-          'Failed to update cluster'
-        )
+          t(
+            'clusterManagement.messages.updateError',
+            'Failed to update cluster'
+          )
       )
     },
   })
@@ -239,10 +239,10 @@ export function ClusterManagement() {
     onError: (error: Error) => {
       toast.error(
         error.message ||
-        t(
-          'clusterManagement.messages.deleteError',
-          'Failed to delete cluster'
-        )
+          t(
+            'clusterManagement.messages.deleteError',
+            'Failed to delete cluster'
+          )
       )
     },
   })
@@ -252,16 +252,33 @@ export function ClusterManagement() {
     mutationFn: importClusters,
     onSuccess: (data: { message?: string } | void) => {
       queryClient.invalidateQueries({ queryKey: ['cluster-list'] })
-      toast.success(data?.message || t('clusterManagement.messages.imported', 'Clusters imported successfully'))
+      toast.success(
+        data?.message ||
+          t(
+            'clusterManagement.messages.imported',
+            'Clusters imported successfully'
+          )
+      )
       setShowClusterDialog(false)
       setIsImportMode(false)
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('clusterManagement.messages.importError', 'Failed to import clusters'))
+      toast.error(
+        error.message ||
+          t(
+            'clusterManagement.messages.importError',
+            'Failed to import clusters'
+          )
+      )
     },
   })
 
-  const handleSubmitCluster = (clusterData: ClusterCreateRequest | ClusterUpdateRequest | ImportClustersRequest) => {
+  const handleSubmitCluster = (
+    clusterData:
+      | ClusterCreateRequest
+      | ClusterUpdateRequest
+      | ImportClustersRequest
+  ) => {
     if (isImportMode) {
       importMutation.mutate(clusterData as ImportClustersRequest)
       return

@@ -1,11 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { Cluster } from '@/types/api'
 import { withSubPath } from '@/lib/subpath'
+
 import { useAuth } from './auth-context'
 
 interface ClusterContextType {
@@ -91,7 +92,8 @@ export const ClusterProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // If URL has an invalid cluster, redirect to default
         if (urlCluster) {
-          const defaultCluster = clusters.find((c) => c.isDefault) || clusters[0]
+          const defaultCluster =
+            clusters.find((c) => c.isDefault) || clusters[0]
           if (defaultCluster) {
             navigate(`/c/${defaultCluster.name}/dashboard`, { replace: true })
           }
@@ -109,14 +111,18 @@ export const ClusterProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // If admin is logged in and no clusters are found, redirect to settings
   useEffect(() => {
-    if (!isLoading && !isAuthLoading && clusters.length === 0 && user?.isAdmin()) {
+    if (
+      !isLoading &&
+      !isAuthLoading &&
+      clusters.length === 0 &&
+      user?.isAdmin()
+    ) {
       // Avoid infinite redirect loop if already on settings
       if (!location.pathname.startsWith('/settings')) {
         navigate('/settings?tab=clusters')
       }
     }
   }, [isLoading, isAuthLoading, clusters, user, location.pathname, navigate])
-
 
   const setCurrentCluster = (clusterName: string) => {
     if (clusterName === currentCluster) return
@@ -146,13 +152,15 @@ export const ClusterProvider: React.FC<{ children: React.ReactNode }> = ({
         if (location.pathname.startsWith('/c/')) {
           // Replace cluster part
           // /c/old/foo -> /c/new/foo
-          const newPath = location.pathname.replace(/^\/c\/[^/]+/, `/c/${clusterName}`)
+          const newPath = location.pathname.replace(
+            /^\/c\/[^/]+/,
+            `/c/${clusterName}`
+          )
           navigate(newPath)
         } else {
           // From global page -> go to dashboard of new cluster
           navigate(`/c/${clusterName}/dashboard`)
         }
-
       }, 300)
     } catch (error) {
       console.error('Failed to switch cluster:', error)

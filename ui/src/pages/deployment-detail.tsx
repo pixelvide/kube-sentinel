@@ -32,6 +32,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { ResponsiveTabs } from '@/components/ui/responsive-tabs'
+import { ResourceAnomalies } from '@/components/anomaly-table'
 import { ContainerTable } from '@/components/container-table'
 import { DeploymentStatusIcon } from '@/components/deployment-status-icon'
 import { DescribeDialog } from '@/components/describe-dialog'
@@ -47,8 +48,6 @@ import { ResourceHistoryTable } from '@/components/resource-history-table'
 import { Terminal } from '@/components/terminal'
 import { VolumeTable } from '@/components/volume-table'
 import { YamlEditor } from '@/components/yaml-editor'
-import { ResourceAnomalies } from '@/components/anomaly-table'
-
 
 export function DeploymentDetail(props: { namespace: string; name: string }) {
   const { namespace, name } = props
@@ -77,8 +76,8 @@ export function DeploymentDetail(props: { namespace: string; name: string }) {
 
   const labelSelector = deployment?.spec?.selector.matchLabels
     ? Object.entries(deployment.spec.selector.matchLabels)
-      .map(([key, value]) => `${key}=${value}`)
-      .join(',')
+        .map(([key, value]) => `${key}=${value}`)
+        .join(',')
     : undefined
   const { data: relatedPods, isLoading: isLoadingPods } = useResourcesWatch(
     'pods',
@@ -511,7 +510,7 @@ export function DeploymentDetail(props: { namespace: string; name: string }) {
 
                 {deployment.spec?.template.spec?.initContainers?.length &&
                   deployment.spec?.template.spec?.initContainers?.length >
-                  0 && (
+                    0 && (
                     <Card>
                       <CardHeader>
                         <CardTitle>
@@ -598,8 +597,8 @@ export function DeploymentDetail(props: { namespace: string; name: string }) {
                             <span className="text-xs text-muted-foreground ml-auto">
                               {formatDate(
                                 condition.lastTransitionTime ||
-                                condition.lastUpdateTime ||
-                                ''
+                                  condition.lastUpdateTime ||
+                                  ''
                               )}
                             </span>
                           </div>
@@ -627,62 +626,62 @@ export function DeploymentDetail(props: { namespace: string; name: string }) {
           },
           ...(relatedPods
             ? [
-              {
-                value: 'pods',
-                label: (
-                  <>
-                    Pods{' '}
-                    {relatedPods && (
-                      <Badge variant="secondary">{relatedPods.length}</Badge>
-                    )}
-                  </>
-                ),
-                content: (
-                  <PodTable
-                    pods={relatedPods}
-                    isLoading={isLoadingPods}
-                    labelSelector={labelSelector}
-                  />
-                ),
-              },
-              {
-                value: 'logs',
-                label: 'Logs',
-                content: (
-                  <div className="space-y-6">
-                    <LogViewer
-                      namespace={namespace}
+                {
+                  value: 'pods',
+                  label: (
+                    <>
+                      Pods{' '}
+                      {relatedPods && (
+                        <Badge variant="secondary">{relatedPods.length}</Badge>
+                      )}
+                    </>
+                  ),
+                  content: (
+                    <PodTable
                       pods={relatedPods}
-                      containers={deployment.spec?.template.spec?.containers}
-                      initContainers={
-                        deployment.spec?.template.spec?.initContainers
-                      }
+                      isLoading={isLoadingPods}
                       labelSelector={labelSelector}
                     />
-                  </div>
-                ),
-              },
-              {
-                value: 'terminal',
-                label: 'Terminal',
-                content: (
-                  <div className="space-y-6">
-                    {relatedPods && relatedPods.length > 0 && (
-                      <Terminal
+                  ),
+                },
+                {
+                  value: 'logs',
+                  label: 'Logs',
+                  content: (
+                    <div className="space-y-6">
+                      <LogViewer
                         namespace={namespace}
                         pods={relatedPods}
-                        containers={
-                          deployment.spec?.template.spec?.containers
-                        }
+                        containers={deployment.spec?.template.spec?.containers}
                         initContainers={
                           deployment.spec?.template.spec?.initContainers
                         }
+                        labelSelector={labelSelector}
                       />
-                    )}
-                  </div>
-                ),
-              },
-            ]
+                    </div>
+                  ),
+                },
+                {
+                  value: 'terminal',
+                  label: 'Terminal',
+                  content: (
+                    <div className="space-y-6">
+                      {relatedPods && relatedPods.length > 0 && (
+                        <Terminal
+                          namespace={namespace}
+                          pods={relatedPods}
+                          containers={
+                            deployment.spec?.template.spec?.containers
+                          }
+                          initContainers={
+                            deployment.spec?.template.spec?.initContainers
+                          }
+                        />
+                      )}
+                    </div>
+                  ),
+                },
+              ]
             : []),
           {
             value: 'Related',
@@ -709,29 +708,29 @@ export function DeploymentDetail(props: { namespace: string; name: string }) {
           },
           ...(deployment.spec?.template?.spec?.volumes
             ? [
-              {
-                value: 'volumes',
-                label: (
-                  <>
-                    Volumes{' '}
-                    <Badge variant="secondary">
-                      {deployment.spec.template.spec.volumes.length}
-                    </Badge>
-                  </>
-                ),
-                content: (
-                  <VolumeTable
-                    namespace={namespace}
-                    volumes={deployment.spec?.template?.spec?.volumes}
-                    containers={toSimpleContainer(
-                      deployment.spec?.template?.spec?.initContainers,
-                      deployment.spec?.template?.spec?.containers
-                    )}
-                    isLoading={isLoadingDeployment}
-                  />
-                ),
-              },
-            ]
+                {
+                  value: 'volumes',
+                  label: (
+                    <>
+                      Volumes{' '}
+                      <Badge variant="secondary">
+                        {deployment.spec.template.spec.volumes.length}
+                      </Badge>
+                    </>
+                  ),
+                  content: (
+                    <VolumeTable
+                      namespace={namespace}
+                      volumes={deployment.spec?.template?.spec?.volumes}
+                      containers={toSimpleContainer(
+                        deployment.spec?.template?.spec?.initContainers,
+                        deployment.spec?.template?.spec?.containers
+                      )}
+                      isLoading={isLoadingDeployment}
+                    />
+                  ),
+                },
+              ]
             : []),
           {
             value: 'events',
@@ -763,7 +762,10 @@ export function DeploymentDetail(props: { namespace: string; name: string }) {
               <>
                 Anomalies
                 {analysis?.anomalies && analysis.anomalies.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                  >
                     {analysis.anomalies.length}
                   </Badge>
                 )}

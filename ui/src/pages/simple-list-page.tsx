@@ -16,9 +16,7 @@ export interface ResourceTableProps {
 
 export function SimpleListPage<
   T extends Exclude<keyof ResourceTypeMap, 'helmreleases'>,
->({
-  resourceType,
-}: ResourceTableProps) {
+>({ resourceType }: ResourceTableProps) {
   // Define column helper outside of any hooks
   const columnHelper = createColumnHelper<ResourceTypeMap[T]>()
   const isClusterScope =

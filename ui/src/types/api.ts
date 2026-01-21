@@ -19,6 +19,7 @@ import {
   HorizontalPodAutoscalerList,
 } from 'kubernetes-types/autoscaling/v2'
 import { CronJob, CronJobList, Job, JobList } from 'kubernetes-types/batch/v1'
+import { Lease, LeaseList } from 'kubernetes-types/coordination/v1'
 import {
   ConfigMap,
   ConfigMapList,
@@ -40,6 +41,11 @@ import {
   ServiceList,
 } from 'kubernetes-types/core/v1'
 import { Ingress, IngressList } from 'kubernetes-types/networking/v1'
+import { RuntimeClass, RuntimeClassList } from 'kubernetes-types/node/v1'
+import {
+  PodDisruptionBudget,
+  PodDisruptionBudgetList,
+} from 'kubernetes-types/policy/v1'
 import {
   ClusterRole,
   ClusterRoleBinding,
@@ -51,9 +57,9 @@ import {
   RoleList,
 } from 'kubernetes-types/rbac/v1'
 import {
-  PodDisruptionBudget,
-  PodDisruptionBudgetList,
-} from 'kubernetes-types/policy/v1'
+  PriorityClass,
+  PriorityClassList,
+} from 'kubernetes-types/scheduling/v1'
 import { StorageClass, StorageClassList } from 'kubernetes-types/storage/v1'
 
 export interface CustomResource {
@@ -117,6 +123,9 @@ export type ResourceType =
   | 'clusterrolebindings'
   | 'horizontalpodautoscalers'
   | 'poddisruptionbudgets'
+  | 'priorityclasses'
+  | 'runtimeclasses'
+  | 'leases'
   | 'helmreleases'
 
 export const clusterScopeResources: ResourceType[] = [
@@ -127,6 +136,8 @@ export const clusterScopeResources: ResourceType[] = [
   'storageclasses',
   'clusterroles',
   'clusterrolebindings',
+  'priorityclasses',
+  'runtimeclasses',
 ]
 
 type listMetadataType = {
@@ -175,6 +186,9 @@ export interface ResourcesTypeMap {
   clusterrolebindings: ClusterRoleBindingList
   horizontalpodautoscalers: HorizontalPodAutoscalerList
   poddisruptionbudgets: PodDisruptionBudgetList
+  priorityclasses: PriorityClassList
+  runtimeclasses: RuntimeClassList
+  leases: LeaseList
   helmreleases: {
     items: HelmRelease[]
   }
@@ -246,6 +260,9 @@ export interface ResourceTypeMap {
   clusterrolebindings: ClusterRoleBinding
   horizontalpodautoscalers: HorizontalPodAutoscaler
   poddisruptionbudgets: PodDisruptionBudget
+  priorityclasses: PriorityClass
+  runtimeclasses: RuntimeClass
+  leases: Lease
   helmreleases: HelmRelease
 }
 

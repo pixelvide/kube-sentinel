@@ -3,7 +3,11 @@ import { IconEdit, IconServer } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 
 import { Cluster } from '@/types/api'
-import { ClusterCreateRequest, ClusterUpdateRequest, ImportClustersRequest } from '@/lib/api'
+import {
+  ClusterCreateRequest,
+  ClusterUpdateRequest,
+  ImportClustersRequest,
+} from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -29,7 +33,12 @@ interface ClusterDialogProps {
   onOpenChange: (open: boolean) => void
   cluster?: Cluster | null
   isImportMode?: boolean
-  onSubmit: (clusterData: ClusterCreateRequest | ClusterUpdateRequest | ImportClustersRequest) => void
+  onSubmit: (
+    clusterData:
+      | ClusterCreateRequest
+      | ClusterUpdateRequest
+      | ImportClustersRequest
+  ) => void
 }
 
 export function ClusterDialog({

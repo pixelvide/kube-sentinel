@@ -4,16 +4,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Pod } from 'kubernetes-types/core/v1'
 
+// Resource Analysis API
 import {
   AuditLogResponse,
   Cluster,
   FetchUserListResponse,
+  GitlabHost,
   ImageTagInfo,
   OAuthProvider,
   OverviewData,
   PersonalAccessToken,
   PodMetrics,
   RelatedResources,
+  ResourceAnalysis,
   ResourceHistoryResponse,
   ResourcesTypeMap,
   ResourceTemplate,
@@ -21,10 +24,9 @@ import {
   ResourceTypeMap,
   ResourceUsageHistory,
   Role,
-  UserItem,
-  UserGitlabConfig,
-  GitlabHost,
   UserAWSConfig,
+  UserGitlabConfig,
+  UserItem,
 } from '@/types/api'
 
 import { API_BASE_URL, apiClient } from './api-client'
@@ -254,8 +256,8 @@ export const resizePod = async (
 
 type DeepPartial<T> = T extends object
   ? {
-    [P in keyof T]?: DeepPartial<T[P]>
-  }
+      [P in keyof T]?: DeepPartial<T[P]>
+    }
   : T
 export const patchResource = async <T extends ResourceType>(
   resource: T,
@@ -411,7 +413,8 @@ export function useResourcesWatch<T extends ResourceType>(
       params.append('fieldSelector', options.fieldSelector)
 
     // Prioritize passed cluster name, fallback to storage (legacy/transition)
-    const cluster = options?.clusterName || localStorage.getItem('current-cluster')
+    const cluster =
+      options?.clusterName || localStorage.getItem('current-cluster')
     if (cluster) params.append('x-cluster-name', cluster)
     return withSubPath(
       `${API_BASE_URL}/${resource}/${ns}/watch?${params.toString()}`
@@ -422,7 +425,7 @@ export function useResourcesWatch<T extends ResourceType>(
     options?.reduce,
     options?.labelSelector,
     options?.fieldSelector,
-    options?.clusterName
+    options?.clusterName,
   ])
 
   const disconnect = useCallback(() => {
@@ -696,9 +699,6 @@ export const useDescribe = (
   })
 }
 
-// Resource Analysis API
-import { ResourceAnalysis } from '@/types/api'
-
 export const fetchResourceAnalysis = async (
   resourceType: string,
   name: string,
@@ -803,7 +803,8 @@ export const createLogsSSEStream = (
   }
 
   // Use passed cluster name or fallback to storage
-  const currentCluster = options?.clusterName || localStorage.getItem('current-cluster')
+  const currentCluster =
+    options?.clusterName || localStorage.getItem('current-cluster')
   if (currentCluster) {
     params.append('x-cluster-name', currentCluster)
   }
@@ -1326,7 +1327,8 @@ export const useLogsWebSocket = (
       params.append('labelSelector', options.labelSelector)
     }
 
-    const currentCluster = options?.clusterName || localStorage.getItem('current-cluster')
+    const currentCluster =
+      options?.clusterName || localStorage.getItem('current-cluster')
     if (currentCluster) {
       params.append('x-cluster-name', currentCluster)
     }
@@ -1802,9 +1804,9 @@ export interface APIKeyCreateRequest {
 }
 
 export const fetchAPIKeyList = async (): Promise<PersonalAccessToken[]> => {
-  return fetchAPI<{ apiKeys: PersonalAccessToken[] }>('/settings/api-keys/').then(
-    (response) => response.apiKeys
-  )
+  return fetchAPI<{ apiKeys: PersonalAccessToken[] }>(
+    '/settings/api-keys/'
+  ).then((response) => response.apiKeys)
 }
 
 export const useAPIKeyList = (options?: { staleTime?: number }) => {
@@ -1868,15 +1870,17 @@ export const useGitlabHosts = () => {
   })
 }
 
-export const upsertUserGitlabConfig = async (
-  data: { gitlab_host_id: number; token: string }
-): Promise<UserGitlabConfig> => {
-  return await apiClient.post<UserGitlabConfig>('/settings/gitlab-configs/', data)
+export const upsertUserGitlabConfig = async (data: {
+  gitlab_host_id: number
+  token: string
+}): Promise<UserGitlabConfig> => {
+  return await apiClient.post<UserGitlabConfig>(
+    '/settings/gitlab-configs/',
+    data
+  )
 }
 
-export const deleteUserGitlabConfig = async (
-  id: number
-): Promise<void> => {
+export const deleteUserGitlabConfig = async (id: number): Promise<void> => {
   return await apiClient.delete(`/settings/gitlab-configs/${id}`)
 }
 
@@ -1899,4 +1903,3 @@ export const updateUserAWSConfig = async (data: {
 }): Promise<UserAWSConfig> => {
   return await apiClient.post<UserAWSConfig>('/settings/aws-config/', data)
 }
-
