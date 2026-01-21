@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
@@ -9,14 +10,23 @@ import (
 )
 
 func ListHelmReleases(c *gin.Context) {
-	namespace := c.Param("namespace")
-	if namespace == "_all" {
-		namespace = ""
+	rawNamespace := c.Param("namespace")
+	var namespaces []string
+	if rawNamespace != "" && rawNamespace != "_all" {
+		namespaces = strings.Split(rawNamespace, ",")
 	}
 
 	cs := c.MustGet("cluster").(*cluster.ClientSet)
 
-	releases, err := helm.ListReleases(cs.Configuration, namespace)
+	// Determine the namespace to query Helm with.
+	// If single namespace, query efficienty.
+	// If multiple or all, query all and filter.
+	queryNamespace := ""
+	if len(namespaces) == 1 {
+		queryNamespace = namespaces[0]
+	}
+
+	releases, err := helm.ListReleases(cs.Configuration, queryNamespace)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -35,6 +45,20 @@ func ListHelmReleases(c *gin.Context) {
 
 	var response []Release
 	for _, r := range releases {
+		// Filter by namespace if multiple namespaces were requested
+		if queryNamespace == "" && len(namespaces) > 1 {
+			found := false
+			for _, ns := range namespaces {
+				if r.Namespace == ns {
+					found = true
+					break
+				}
+			}
+			if !found {
+				continue
+			}
+		}
+
 		response = append(response, Release{
 			Name:       r.Name,
 			Namespace:  r.Namespace,
