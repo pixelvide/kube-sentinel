@@ -14,6 +14,16 @@ RUN git clone --depth 1 --branch v0.7.10 https://github.com/kubernetes-sigs/aws-
     cd /tmp/aws-iam-authenticator && \
     GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /go/bin/aws-iam-authenticator ./cmd/aws-iam-authenticator
 
+# Download helm client
+FROM --platform=$BUILDPLATFORM alpine:3.19 AS helm-builder
+ARG TARGETOS TARGETARCH
+ENV HELM_VERSION=v3.17.0
+RUN apk add --no-cache curl tar && \
+    curl -fsSL https://get.helm.sh/helm-${HELM_VERSION}-${TARGETOS}-${TARGETARCH}.tar.gz -o helm.tar.gz && \
+    tar -zxvf helm.tar.gz && \
+    mv ${TARGETOS}-${TARGETARCH}/helm /usr/local/bin/helm && \
+    chmod +x /usr/local/bin/helm
+
 FROM gcr.io/distroless/static
 ARG TARGETARCH
 
@@ -22,6 +32,7 @@ WORKDIR /app
 COPY bin/cloud-sentinel-k8s-$TARGETARCH ./cloud-sentinel-k8s
 COPY --from=glab-builder /go/bin/glab /usr/local/bin/glab
 COPY --from=aws-iam-authenticator-builder /go/bin/aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
+COPY --from=helm-builder /usr/local/bin/helm /usr/local/bin/helm
 
 EXPOSE 8080
 
