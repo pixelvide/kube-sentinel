@@ -9,6 +9,7 @@ import {
 import * as React from 'react'
 import {
   Icon,
+  IconAnchor,
   IconArrowsHorizontal,
   IconBell,
   IconBox,
@@ -22,6 +23,7 @@ import {
   IconLock,
   IconMap,
   IconNetwork,
+  IconPackage,
   IconPlayerPlay,
   IconProps,
   IconRocket,
@@ -71,6 +73,8 @@ const iconMap = {
   IconBell,
   IconCode,
   IconArrowsHorizontal,
+  IconAnchor,
+  IconPackage,
 }
 
 const getIconName = (iconComponent: React.ComponentType): string => {
@@ -168,6 +172,10 @@ const defaultMenus: DefaultMenus = {
       url: '/horizontalpodautoscalers',
       icon: IconArrowsHorizontal,
     },
+  ],
+  'sidebar.groups.helm': [
+    { titleKey: 'nav.helm_releases', url: '/helm-releases', icon: IconAnchor },
+    { titleKey: 'nav.helm_charts', url: '/helm-charts', icon: IconPackage },
   ],
   'sidebar.groups.security': [
     {
