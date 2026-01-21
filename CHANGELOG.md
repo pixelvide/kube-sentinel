@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.3.0...v0.3.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* Exclude "v0.0.0" tag from the list of versions used to build documentation. ([2cce097](https://github.com/pixelvide/cloud-sentinel-k8s/commit/2cce097e2898c3c8202d308a20eaef3b4e74d3e4))
+
 ## [0.3.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.2.0...v0.3.0) (2026-01-21)
 
 
