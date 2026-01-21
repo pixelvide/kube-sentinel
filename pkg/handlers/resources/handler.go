@@ -12,6 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -81,6 +82,7 @@ func RegisterRoutes(group *gin.RouterGroup) {
 		"gateways":                 NewGenericResourceHandler[*gatewayapiv1.Gateway, *gatewayapiv1.GatewayList]("gateways", false, false),
 		"httproutes":               NewGenericResourceHandler[*gatewayapiv1.HTTPRoute, *gatewayapiv1.HTTPRouteList]("httproutes", false, false),
 		"horizontalpodautoscalers": NewGenericResourceHandler[*autoscalingv2.HorizontalPodAutoscaler, *autoscalingv2.HorizontalPodAutoscalerList]("horizontalpodautoscalers", false, true),
+		"poddisruptionbudgets":     NewGenericResourceHandler[*policyv1.PodDisruptionBudget, *policyv1.PodDisruptionBudgetList]("poddisruptionbudgets", false, true),
 	}
 
 	for name, handler := range handlers {
