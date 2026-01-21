@@ -24,6 +24,7 @@ import {
   IconMap,
   IconNetwork,
   IconPackage,
+  IconPercentage,
   IconPlayerPlay,
   IconProps,
   IconRocket,
@@ -75,6 +76,7 @@ const iconMap = {
   IconArrowsHorizontal,
   IconAnchor,
   IconPackage,
+  IconPercentage,
 }
 
 const getIconName = (iconComponent: React.ComponentType): string => {
@@ -171,6 +173,11 @@ const defaultMenus: DefaultMenus = {
       titleKey: 'nav.horizontalpodautoscalers',
       url: '/horizontalpodautoscalers',
       icon: IconArrowsHorizontal,
+    },
+    {
+      titleKey: 'nav.poddisruptionbudgets',
+      url: '/poddisruptionbudgets',
+      icon: IconPercentage,
     },
   ],
   'sidebar.groups.helm': [

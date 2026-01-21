@@ -50,6 +50,10 @@ import {
   RoleBindingList,
   RoleList,
 } from 'kubernetes-types/rbac/v1'
+import {
+  PodDisruptionBudget,
+  PodDisruptionBudgetList,
+} from 'kubernetes-types/policy/v1'
 import { StorageClass, StorageClassList } from 'kubernetes-types/storage/v1'
 
 export interface CustomResource {
@@ -112,6 +116,7 @@ export type ResourceType =
   | 'clusterroles'
   | 'clusterrolebindings'
   | 'horizontalpodautoscalers'
+  | 'poddisruptionbudgets'
   | 'helmreleases'
 
 export const clusterScopeResources: ResourceType[] = [
@@ -169,6 +174,7 @@ export interface ResourcesTypeMap {
   clusterroles: ClusterRoleList
   clusterrolebindings: ClusterRoleBindingList
   horizontalpodautoscalers: HorizontalPodAutoscalerList
+  poddisruptionbudgets: PodDisruptionBudgetList
   helmreleases: {
     items: HelmRelease[]
   }
@@ -239,6 +245,7 @@ export interface ResourceTypeMap {
   clusterroles: ClusterRole
   clusterrolebindings: ClusterRoleBinding
   horizontalpodautoscalers: HorizontalPodAutoscaler
+  poddisruptionbudgets: PodDisruptionBudget
   helmreleases: HelmRelease
 }
 

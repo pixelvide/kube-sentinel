@@ -92,6 +92,7 @@
     "clusterroles": "Cluster Roles",
     "clusterrolebindings": "Cluster Role Bindings",
     "horizontalpodautoscalers": "HPA",
+    "poddisruptionbudgets": "Pod Disruption Budgets",
     "helm_releases": "Helm Releases",
     "helm_charts": "Helm Charts"
   },

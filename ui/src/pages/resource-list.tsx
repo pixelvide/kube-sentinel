@@ -18,6 +18,7 @@ import { JobListPage } from './job-list-page'
 import { NamespaceListPage } from './namespace-list-page'
 import { NodeListPage } from './node-list-page'
 import { PodListPage } from './pod-list-page'
+import { PodDisruptionBudgetListPage } from './poddisruptionbudget-list-page'
 import { PVListPage } from './pv-list-page'
 import { PVCListPage } from './pvc-list-page'
 import { SecretListPage } from './secret-list-page'
@@ -71,6 +72,8 @@ export function ResourceList() {
       return <HTTPRouteListPage />
     case 'horizontalpodautoscalers':
       return <HorizontalPodAutoscalerListPage />
+    case 'poddisruptionbudgets':
+      return <PodDisruptionBudgetListPage />
     case 'events':
       return <EventListPage />
     case 'helmreleases':
