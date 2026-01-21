@@ -1,18 +1,18 @@
 import { useMemo } from 'react'
+import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from 'react-i18next'
 
 import { usePageTitle } from '@/hooks/use-page-title'
 import { ResponsiveTabs } from '@/components/ui/responsive-tabs'
 import { APIKeyManagement } from '@/components/settings/apikey-management'
 import { AuditLog } from '@/components/settings/audit-log'
+import { AWSConfigManagement } from '@/components/settings/aws-config-management'
 import { ClusterManagement } from '@/components/settings/cluster-management'
+import { GitlabConfigManagement } from '@/components/settings/gitlab-config-management'
 import { OAuthProviderManagement } from '@/components/settings/oauth-provider-management'
 import { RBACManagement } from '@/components/settings/rbac-management'
 import { TemplateManagement } from '@/components/settings/template-management'
 import { UserManagement } from '@/components/settings/user-management'
-import { GitlabConfigManagement } from '@/components/settings/gitlab-config-management'
-import { AWSConfigManagement } from '@/components/settings/aws-config-management'
-import { useAuth } from '@/contexts/auth-context'
 
 export function SettingsPage() {
   const { t } = useTranslation()

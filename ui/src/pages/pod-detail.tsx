@@ -12,7 +12,12 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import { resizePod, updateResource, useResource, useResourceAnalysis } from '@/lib/api'
+import {
+  resizePod,
+  updateResource,
+  useResource,
+  useResourceAnalysis,
+} from '@/lib/api'
 import { getOwnerInfo, getPodErrorMessage, getPodStatus } from '@/lib/k8s'
 import { withSubPath } from '@/lib/subpath'
 import { formatDate, translateError } from '@/lib/utils'
@@ -30,6 +35,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { ResponsiveTabs } from '@/components/ui/responsive-tabs'
+import { ResourceAnomalies } from '@/components/anomaly-table'
 import { ContainerTable } from '@/components/container-table'
 import { DescribeDialog } from '@/components/describe-dialog'
 import { ResourceEditor } from '@/components/editors/resource-editor'
@@ -46,8 +52,6 @@ import { ContainerSelector } from '@/components/selector/container-selector'
 import { Terminal } from '@/components/terminal'
 import { VolumeTable } from '@/components/volume-table'
 import { YamlEditor } from '@/components/yaml-editor'
-import { ResourceAnomalies } from '@/components/anomaly-table'
-
 
 export function PodDetail(props: { namespace: string; name: string }) {
   const { namespace, name } = props
@@ -601,7 +605,10 @@ export function PodDetail(props: { namespace: string; name: string }) {
               <>
                 Anomalies
                 {analysis?.anomalies && analysis.anomalies.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                  >
                     {analysis.anomalies.length}
                   </Badge>
                 )}

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/auth-context'
-import { CaseSensitive, Check, LogOut, Palette, Key } from 'lucide-react'
+import { CaseSensitive, Check, Key, LogOut, Palette } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -95,8 +95,9 @@ export function UserMenu() {
                   onClick={() => setColorTheme(key as ColorTheme)}
                   role="menuitemradio"
                   aria-checked={isSelected}
-                  className={`flex items-center justify-between gap-2 cursor-pointer ${isSelected ? 'font-medium text-foreground' : ''
-                    }`}
+                  className={`flex items-center justify-between gap-2 cursor-pointer ${
+                    isSelected ? 'font-medium text-foreground' : ''
+                  }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="capitalize">{key}</span>
@@ -118,8 +119,9 @@ export function UserMenu() {
               onClick={() => setFont('system')}
               role="menuitemradio"
               aria-checked={font === 'system'}
-              className={`flex items-center justify-between gap-2 cursor-pointer ${font === 'system' ? 'font-medium text-foreground' : ''
-                }`}
+              className={`flex items-center justify-between gap-2 cursor-pointer ${
+                font === 'system' ? 'font-medium text-foreground' : ''
+              }`}
             >
               <span>System</span>
               {font === 'system' && <Check className="h-4 w-4 text-primary" />}
@@ -128,8 +130,9 @@ export function UserMenu() {
               onClick={() => setFont('maple')}
               role="menuitemradio"
               aria-checked={font === 'maple'}
-              className={`flex items-center justify-between gap-2 cursor-pointer ${font === 'maple' ? 'font-medium text-foreground' : ''
-                }`}
+              className={`flex items-center justify-between gap-2 cursor-pointer ${
+                font === 'maple' ? 'font-medium text-foreground' : ''
+              }`}
             >
               <span>Maple</span>
               {font === 'maple' && <Check className="h-4 w-4 text-primary" />}
@@ -138,8 +141,9 @@ export function UserMenu() {
               onClick={() => setFont('jetbrains')}
               role="menuitemradio"
               aria-checked={font === 'jetbrains'}
-              className={`flex items-center justify-between gap-2 cursor-pointer ${font === 'jetbrains' ? 'font-medium text-foreground' : ''
-                }`}
+              className={`flex items-center justify-between gap-2 cursor-pointer ${
+                font === 'jetbrains' ? 'font-medium text-foreground' : ''
+              }`}
             >
               <span>JetBrains Mono</span>
               {font === 'jetbrains' && (

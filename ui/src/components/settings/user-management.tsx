@@ -362,7 +362,7 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t('userManagement.messages.deleteError', 'Failed to delete user')
+          t('userManagement.messages.deleteError', 'Failed to delete user')
       )
     },
   })
@@ -378,7 +378,7 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t('userManagement.messages.createError', 'Failed to create user')
+          t('userManagement.messages.createError', 'Failed to create user')
       )
     },
   })
@@ -395,10 +395,10 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t(
-          'userManagement.messages.resetPasswordError',
-          'Failed to reset password'
-        )
+          t(
+            'userManagement.messages.resetPasswordError',
+            'Failed to reset password'
+          )
       )
     },
   })
@@ -414,7 +414,7 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t('userManagement.messages.updateError', 'Failed to update user')
+          t('userManagement.messages.updateError', 'Failed to update user')
       )
     },
   })

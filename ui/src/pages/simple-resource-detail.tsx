@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { ResponsiveTabs } from '@/components/ui/responsive-tabs'
+import { ResourceAnomalies } from '@/components/anomaly-table'
 import { DescribeDialog } from '@/components/describe-dialog'
 import { ErrorMessage } from '@/components/error-message'
 import { EventTable } from '@/components/event-table'
@@ -22,16 +23,10 @@ import { RelatedResourcesTable } from '@/components/related-resource-table'
 import { ResourceDeleteConfirmationDialog } from '@/components/resource-delete-confirmation-dialog'
 import { ResourceHistoryTable } from '@/components/resource-history-table'
 import { YamlEditor } from '@/components/yaml-editor'
-import { ResourceAnomalies } from '@/components/anomaly-table'
-
 
 export function SimpleResourceDetail<
   T extends Exclude<ResourceType, 'helmreleases'>,
->(props: {
-  resourceType: T
-  name: string
-  namespace?: string
-}) {
+>(props: { resourceType: T; name: string; namespace?: string }) {
   const { namespace, name, resourceType } = props
   const [yamlContent, setYamlContent] = useState('')
   const [isSavingYaml, setIsSavingYaml] = useState(false)
@@ -263,7 +258,10 @@ export function SimpleResourceDetail<
               <>
                 Anomalies
                 {analysis?.anomalies && analysis.anomalies.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                  >
                     {analysis.anomalies.length}
                   </Badge>
                 )}
@@ -277,7 +275,6 @@ export function SimpleResourceDetail<
               />
             ),
           },
-
         ]}
       />
 

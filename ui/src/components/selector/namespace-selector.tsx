@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Check, ChevronsUpDown, Filter } from 'lucide-react'
 
 import { useResources } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -16,7 +17,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
 
 export function NamespaceSelector({
   selectedNamespace,
@@ -32,17 +32,23 @@ export function NamespaceSelector({
   const [open, setOpen] = useState(false)
   const { data } = useResources('namespaces')
 
-  const selectedNamespaces = !selectedNamespace || selectedNamespace === '_all'
-    ? []
-    : selectedNamespace.split(',').filter(Boolean)
+  const selectedNamespaces =
+    !selectedNamespace || selectedNamespace === '_all'
+      ? []
+      : selectedNamespace.split(',').filter(Boolean)
 
-  const sortedNamespaces = data?.sort((a, b) => {
-    const nameA = a.metadata?.name?.toLowerCase() || ''
-    const nameB = b.metadata?.name?.toLowerCase() || ''
-    return nameA.localeCompare(nameB)
-  }) || []
+  const sortedNamespaces =
+    data?.sort((a, b) => {
+      const nameA = a.metadata?.name?.toLowerCase() || ''
+      const nameB = b.metadata?.name?.toLowerCase() || ''
+      return nameA.localeCompare(nameB)
+    }) || []
 
-  const isAllActive = !selectedNamespace || selectedNamespace === '_all' || (sortedNamespaces.length > 0 && selectedNamespaces.length === sortedNamespaces.length)
+  const isAllActive =
+    !selectedNamespace ||
+    selectedNamespace === '_all' ||
+    (sortedNamespaces.length > 0 &&
+      selectedNamespaces.length === sortedNamespaces.length)
 
   const toggleNamespace = (nsName: string) => {
     if (!multiple) {
@@ -55,14 +61,18 @@ export function NamespaceSelector({
     if (nsName === '_all') {
       newSelected = ['_all']
     } else {
-      const current = selectedNamespaces.filter(n => n !== '_all')
+      const current = selectedNamespaces.filter((n) => n !== '_all')
       if (current.includes(nsName)) {
         newSelected = current.filter((n) => n !== nsName)
       } else {
         newSelected = [...current, nsName]
       }
 
-      if (newSelected.length === 0 || (sortedNamespaces.length > 0 && newSelected.length === sortedNamespaces.length)) {
+      if (
+        newSelected.length === 0 ||
+        (sortedNamespaces.length > 0 &&
+          newSelected.length === sortedNamespaces.length)
+      ) {
         newSelected = ['_all']
       }
     }
@@ -132,7 +142,9 @@ export function NamespaceSelector({
                   <Check
                     className={cn(
                       'h-4 w-4',
-                      isSelected(ns.metadata!.name!) ? 'opacity-100' : 'opacity-0'
+                      isSelected(ns.metadata!.name!)
+                        ? 'opacity-100'
+                        : 'opacity-0'
                     )}
                   />
                   <span>{ns.metadata!.name}</span>

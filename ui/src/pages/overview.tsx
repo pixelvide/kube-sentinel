@@ -50,8 +50,9 @@ export function Overview() {
       </div>
 
       <ClusterStatsCards stats={overview} isLoading={isLoading} />
-      {!isDismissed &&
-        user?.roles?.some((role) => role.name === 'admin') && <SettingsHint />}
+      {!isDismissed && user?.roles?.some((role) => role.name === 'admin') && (
+        <SettingsHint />
+      )}
 
       <div className="grid grid-cols-1 gap-4 @5xl/main:grid-cols-2">
         <ResourceCharts

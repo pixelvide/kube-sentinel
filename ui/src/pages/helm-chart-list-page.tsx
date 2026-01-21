@@ -9,7 +9,10 @@ export function HelmChartListPage() {
 
       <div className="p-8 text-center text-muted-foreground border rounded-lg bg-muted/20">
         <h3 className="text-lg font-medium mb-2">Coming Soon</h3>
-        <p>Helm chart repository management and installation will be available in a future update.</p>
+        <p>
+          Helm chart repository management and installation will be available in
+          a future update.
+        </p>
       </div>
     </div>
   )

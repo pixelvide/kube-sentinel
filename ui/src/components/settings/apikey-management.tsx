@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react'
 import {
+  IconCheck,
+  IconCopy,
   IconKey,
   IconPlus,
   IconShieldCheck,
   IconTrash,
-  IconCopy,
-  IconCheck,
 } from '@tabler/icons-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
@@ -17,13 +17,12 @@ import { createAPIKey, deleteAPIKey, useAPIKeyList } from '@/lib/api'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 
 import { Action, ActionTable } from '../action-table'
 import { APIKeyDialog } from './apikey-dialog'
 import UserRoleAssignment from './user-role-assignment'
-
-import { Input } from '@/components/ui/input'
 
 export function APIKeyManagement() {
   const { t } = useTranslation()
@@ -32,9 +31,16 @@ export function APIKeyManagement() {
   const { data: apiKeys = [], isLoading, error } = useAPIKeyList()
 
   const [showDialog, setShowDialog] = useState(false)
-  const [deletingKey, setDeletingKey] = useState<PersonalAccessToken | null>(null)
-  const [assigningKey, setAssigningKey] = useState<PersonalAccessToken | null>(null)
-  const [generatedToken, setGeneratedToken] = useState<{ name: string, token: string } | null>(null)
+  const [deletingKey, setDeletingKey] = useState<PersonalAccessToken | null>(
+    null
+  )
+  const [assigningKey, setAssigningKey] = useState<PersonalAccessToken | null>(
+    null
+  )
+  const [generatedToken, setGeneratedToken] = useState<{
+    name: string
+    token: string
+  } | null>(null)
   const [search, setSearch] = useState('')
 
   const filteredKeys = useMemo(() => {
@@ -47,7 +53,6 @@ export function APIKeyManagement() {
         String(k.userId).includes(s)
     )
   }, [apiKeys, search])
-
 
   const copyToClipboard = useCallback(
     (text: string) => {
@@ -65,7 +70,9 @@ export function APIKeyManagement() {
         cell: ({ row: { original: apiKey } }) => (
           <div className="flex flex-col">
             <span className="font-medium">{apiKey.name}</span>
-            <span className="text-xs text-muted-foreground">Owner: {apiKey.user?.username || apiKey.userId}</span>
+            <span className="text-xs text-muted-foreground">
+              Owner: {apiKey.user?.username || apiKey.userId}
+            </span>
           </div>
         ),
       },
@@ -108,7 +115,9 @@ export function APIKeyManagement() {
           const expiry = new Date(apiKey.expiresAt)
           const isExpired = expiry < new Date()
           return (
-            <span className={`text-sm ${isExpired ? 'text-destructive font-medium' : ''}`}>
+            <span
+              className={`text-sm ${isExpired ? 'text-destructive font-medium' : ''}`}
+            >
               {expiry.toLocaleDateString()}
               {isExpired && ` (${t('apikeyManagement.expired', 'Expired')})`}
             </span>
@@ -201,7 +210,7 @@ export function APIKeyManagement() {
   })
 
   const handleCreate = useCallback(
-    (data: { name: string, expiresAt?: string }) => {
+    (data: { name: string; expiresAt?: string }) => {
       createMutation.mutate(data)
     },
     [createMutation]
@@ -232,7 +241,10 @@ export function APIKeyManagement() {
           <CardHeader>
             <CardTitle className="text-primary flex items-center gap-2">
               <IconCheck className="h-5 w-5" />
-              {t('apikeyManagement.generated.title', 'Key Generated Successfully')}
+              {t(
+                'apikeyManagement.generated.title',
+                'Key Generated Successfully'
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -288,7 +300,10 @@ export function APIKeyManagement() {
             {apiKeys.length > 0 && (
               <div className="flex items-center gap-2">
                 <Input
-                  placeholder={t('apikeyManagement.searchPlaceholder', 'Filter by name or owner...')}
+                  placeholder={t(
+                    'apikeyManagement.searchPlaceholder',
+                    'Filter by name or owner...'
+                  )}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="max-w-sm"
@@ -312,7 +327,11 @@ export function APIKeyManagement() {
               </p>
             </div>
           ) : (
-            <ActionTable columns={columns} data={filteredKeys} actions={actions} />
+            <ActionTable
+              columns={columns}
+              data={filteredKeys}
+              actions={actions}
+            />
           )}
         </CardContent>
       </Card>
@@ -329,7 +348,11 @@ export function APIKeyManagement() {
         onOpenChange={(open: boolean) => !open && setAssigningKey(null)}
         subject={
           assigningKey
-            ? { type: 'user', name: assigningKey.user?.username || String(assigningKey.userId) }
+            ? {
+                type: 'user',
+                name:
+                  assigningKey.user?.username || String(assigningKey.userId),
+              }
             : undefined
         }
       />

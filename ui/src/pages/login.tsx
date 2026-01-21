@@ -178,21 +178,21 @@ export function LoginPage() {
                   {/* Additional actions for permission errors */}
                   {(searchParams.get('reason') === 'insufficient_permissions' ||
                     error === 'insufficient_permissions') && (
-                      <div className="text-center space-y-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            window.location.href = withSubPath('/login')
-                          }}
-                          className="w-full"
-                        >
-                          {t('login.tryAgainDifferentAccount')}
-                        </Button>
-                        <p className="text-xs text-gray-500">
-                          {t('login.tryAgainHint')}
-                        </p>
-                      </div>
-                    )}
+                    <div className="text-center space-y-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          window.location.href = withSubPath('/login')
+                        }}
+                        className="w-full"
+                      >
+                        {t('login.tryAgainDifferentAccount')}
+                      </Button>
+                      <p className="text-xs text-gray-500">
+                        {t('login.tryAgainHint')}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 

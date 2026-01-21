@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
 
 import { useVersionInfo } from '@/lib/api'
+import { useCluster } from '@/hooks/use-cluster'
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +23,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { useCluster } from '@/hooks/use-cluster'
 
 import { ClusterSelector } from './cluster-selector'
 import { Collapsible, CollapsibleTrigger } from './ui/collapsible'
@@ -73,7 +73,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isActive = (url: string) => {
     const targetUrl = getClusterUrl(url)
     if (targetUrl === `/c/${currentCluster}/dashboard` || url === '/') {
-      return location.pathname === targetUrl || location.pathname === `/c/${currentCluster}`
+      return (
+        location.pathname === targetUrl ||
+        location.pathname === `/c/${currentCluster}`
+      )
     }
     // Handle CRDs parent route highlighting if needed, logic might vary
     if (url === '/crds') {
@@ -99,8 +102,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link to={homeUrl} onClick={handleMenuItemClick}>
-                  <img src={Icon} alt="Cloud Sentinel K8s Logo" className="ml-1 h-8 w-8" />
-                  <span className="text-base font-semibold">Cloud Sentinel K8s</span>
+                  <img
+                    src={Icon}
+                    alt="Cloud Sentinel K8s Logo"
+                    className="ml-1 h-8 w-8"
+                  />
+                  <span className="text-base font-semibold">
+                    Cloud Sentinel K8s
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -127,7 +136,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link to={homeUrl} onClick={handleMenuItemClick}>
                 <div className="relative flex items-center justify-between w-full">
                   <div className="flex items-center gap-2">
-                    <img src={Icon} alt="Cloud Sentinel K8s Logo" className="h-8 w-8" />
+                    <img
+                      src={Icon}
+                      alt="Cloud Sentinel K8s Logo"
+                      className="h-8 w-8"
+                    />
                     <div className="flex flex-col">
                       <span className="text-base font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                         Cloud Sentinel
@@ -199,7 +212,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         asChild
                         isActive={isActive(item.url)}
                       >
-                        <Link to={getClusterUrl(item.url)} onClick={handleMenuItemClick}>
+                        <Link
+                          to={getClusterUrl(item.url)}
+                          onClick={handleMenuItemClick}
+                        >
                           <IconComponent className="text-sidebar-primary" />
                           <span>{title}</span>
                         </Link>
@@ -244,7 +260,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             asChild
                             isActive={isActive(item.url)}
                           >
-                            <Link to={getClusterUrl(item.url)} onClick={handleMenuItemClick}>
+                            <Link
+                              to={getClusterUrl(item.url)}
+                              onClick={handleMenuItemClick}
+                            >
                               <IconComponent className="text-sidebar-primary" />
                               <span>{title}</span>
                             </Link>

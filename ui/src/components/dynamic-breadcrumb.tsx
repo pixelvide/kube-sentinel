@@ -75,7 +75,8 @@ export function DynamicBreadcrumb() {
         return
       }
 
-      let href: string | undefined = `/${pathSegments.slice(0, index + 1).join('/')}`
+      let href: string | undefined =
+        `/${pathSegments.slice(0, index + 1).join('/')}`
 
       // Special handling for nested routes
       if (isClusterContext) {

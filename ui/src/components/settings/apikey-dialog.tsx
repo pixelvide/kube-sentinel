@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label'
 interface APIKeyDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (data: { name: string, expiresAt?: string }) => void
+  onSubmit: (data: { name: string; expiresAt?: string }) => void
   isLoading?: boolean
 }
 
@@ -92,18 +92,28 @@ export function APIKeyDialog({
 
             <div className="space-y-2">
               <Label htmlFor="expiresAt">
-                {t('apikeyManagement.dialog.expiresAt', 'Expiry Date (Optional)')}
+                {t(
+                  'apikeyManagement.dialog.expiresAt',
+                  'Expiry Date (Optional)'
+                )}
               </Label>
               <Input
                 id="expiresAt"
                 type="date"
                 value={expiresAt}
                 min={new Date().toISOString().split('T')[0]}
-                max={new Date(new Date().setDate(new Date().getDate() + 365)).toISOString().split('T')[0]}
+                max={
+                  new Date(new Date().setDate(new Date().getDate() + 365))
+                    .toISOString()
+                    .split('T')[0]
+                }
                 onChange={(e) => setExpiresAt(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                {t('apikeyManagement.dialog.expiryHint', 'Maximum 365 days from creation')}
+                {t(
+                  'apikeyManagement.dialog.expiryHint',
+                  'Maximum 365 days from creation'
+                )}
               </p>
             </div>
           </div>
