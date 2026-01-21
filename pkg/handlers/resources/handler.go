@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
 	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
+	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	batchv1 "k8s.io/api/batch/v1"
@@ -89,6 +90,8 @@ func RegisterRoutes(group *gin.RouterGroup) {
 		"priorityclasses":          NewGenericResourceHandler[*schedulingv1.PriorityClass, *schedulingv1.PriorityClassList]("priorityclasses", true, false),
 		"runtimeclasses":           NewGenericResourceHandler[*nodev1.RuntimeClass, *nodev1.RuntimeClassList]("runtimeclasses", true, false),
 		"leases":                   NewGenericResourceHandler[*coordinationv1.Lease, *coordinationv1.LeaseList]("leases", false, false),
+		"mutatingwebhookconfigurations":   NewGenericResourceHandler[*admissionregistrationv1.MutatingWebhookConfiguration, *admissionregistrationv1.MutatingWebhookConfigurationList]("mutatingwebhookconfigurations", true, false),
+		"validatingwebhookconfigurations": NewGenericResourceHandler[*admissionregistrationv1.ValidatingWebhookConfiguration, *admissionregistrationv1.ValidatingWebhookConfigurationList]("validatingwebhookconfigurations", true, false),
 	}
 
 	for name, handler := range handlers {
