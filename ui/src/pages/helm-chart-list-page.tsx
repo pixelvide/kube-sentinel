@@ -1,8 +1,4 @@
-import { useTranslation } from 'react-i18next'
-
 export function HelmChartListPage() {
-  const { t } = useTranslation()
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

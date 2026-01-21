@@ -101,7 +101,7 @@ export function HelmReleaseListPage() {
   }
 
   if (error) {
-    return <ErrorMessage error={error} refetch={refetch} />
+    return <ErrorMessage error={error} refetch={refetch} resourceName="Helm Releases" />
   }
 
   return (
