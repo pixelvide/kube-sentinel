@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.2.0...v0.3.0) (2026-01-21)
+
+
+### Features
+
+* Bump cloud-sentinel-k8s chart and app versions to 0.2.0, update documentation, and enhance the release script with improved `sed` compatibility and workflow ([460ad2d](https://github.com/pixelvide/cloud-sentinel-k8s/commit/460ad2d5319b6ba5dacc9a34ddd00bc86afc1bff))
+
 ## [0.2.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.1.0...v0.2.0) (2026-01-21)
 
 
