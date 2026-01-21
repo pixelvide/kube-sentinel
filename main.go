@@ -211,6 +211,9 @@ func setupAPIRouter(r *gin.RouterGroup, cm *cluster.ClusterManager, authHandler 
 
 		api.GET("/image/tags", handlers.GetImageTags)
 
+		api.GET("/helm/releases/:namespace", handlers.ListHelmReleases)
+		api.GET("/helm/releases", handlers.ListHelmReleases)
+
 		proxyHandler := handlers.NewProxyHandler()
 		proxyHandler.RegisterRoutes(api)
 

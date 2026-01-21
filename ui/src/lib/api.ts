@@ -1870,3 +1870,37 @@ export const updateUserAWSConfig = async (data: {
 }): Promise<UserAWSConfig> => {
   return await apiClient.post<UserAWSConfig>('/settings/aws-config/', data)
 }
+
+// Helm API
+export interface HelmRelease {
+  name: string
+  namespace: string
+  revision: number
+  status: string
+  chart: string
+  app_version: string
+  updated: string
+}
+
+export interface HelmReleaseListResponse {
+  items: HelmRelease[]
+}
+
+export const fetchHelmReleases = async (
+  namespace: string = ''
+): Promise<HelmRelease[]> => {
+  const endpoint = `/helm/releases${namespace ? `/${namespace}` : ''}`
+  return fetchAPI<{ items: HelmRelease[] }>(endpoint).then((res) => res.items)
+}
+
+export const useHelmReleases = (
+  namespace: string = '',
+  options?: { enabled?: boolean; staleTime?: number }
+) => {
+  return useQuery({
+    queryKey: ['helm-releases', namespace],
+    queryFn: () => fetchHelmReleases(namespace),
+    enabled: options?.enabled ?? true,
+    staleTime: options?.staleTime || 30000,
+  })
+}

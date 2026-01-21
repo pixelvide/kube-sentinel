@@ -12,6 +12,8 @@ import { Overview } from './pages/overview'
 import { ResourceDetail } from './pages/resource-detail'
 import { ResourceList } from './pages/resource-list'
 import { SettingsPage } from './pages/settings'
+import { HelmReleaseListPage } from './pages/helm-release-list-page'
+import { HelmChartListPage } from './pages/helm-chart-list-page'
 
 const subPath = getSubPath()
 
@@ -57,6 +59,14 @@ export const router = createBrowserRouter(
             {
               path: 'dashboard',
               element: <Overview />,
+            },
+            {
+              path: 'helm-releases',
+              element: <HelmReleaseListPage />,
+            },
+            {
+              path: 'helm-charts',
+              element: <HelmChartListPage />,
             },
             {
               path: 'crds/:crd',

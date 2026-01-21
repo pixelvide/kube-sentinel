@@ -14,15 +14,19 @@ export function VersionInfo() {
     window.open(commitUrl, '_blank')
   }
 
+  // Safely access properties
+  const version = versionInfo.version || ''
+  const commitId = versionInfo.commitId || ''
+
   return (
     <div className="text-[10px] text-muted-foreground/60 font-mono leading-none">
-      v{versionInfo.version.replace(/^v/, '')} •{' '}
+      v{version.replace(/^v/, '')} •{' '}
       <button
         onClick={handleCommitClick}
         className="hover:text-primary/80 hover:underline transition-colors cursor-pointer"
-        title={`View commit ${versionInfo.commitId} on GitHub`}
+        title={`View commit ${commitId} on GitHub`}
       >
-        {versionInfo.commitId.slice(0, 7)}
+        {commitId.slice(0, 7)}
       </button>
     </div>
   )
