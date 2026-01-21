@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   cloud-sentinel-k8s:
   - apiVersion: v2
+    appVersion: v0.8.0
+    created: "2026-01-21T19:19:48.894999102Z"
+    description: A Helm chart for Kubernetes
+    digest: 4985d23512c388240e37c0f53a4537fbe166a1198ac19003d44934e58474f734
+    name: cloud-sentinel-k8s
+    type: application
+    urls:
+    - https://github.com/pixelvide/cloud-sentinel-k8s/releases/download/v0.8.0/cloud-sentinel-k8s-0.8.0.tgz
+    version: 0.8.0
+  - apiVersion: v2
     appVersion: v0.7.0
     created: "2026-01-21T16:34:48.871171025Z"
     description: A Helm chart for Kubernetes
@@ -41,4 +51,4 @@ entries:
     urls:
     - https://github.com/pixelvide/cloud-sentinel-k8s/releases/download/v0.5.0/cloud-sentinel-k8s-0.5.0.tgz
     version: 0.5.0
-generated: "2026-01-21T16:34:48.859442869Z"
+generated: "2026-01-21T19:19:48.888059711Z"
