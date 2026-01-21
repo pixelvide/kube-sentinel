@@ -13,14 +13,16 @@ fi
 echo "🚀 Syncing version $VERSION..."
 
 if command -v gsed >/dev/null 2>&1; then
-  SED_CMD="gsed -i -E"
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_CMD="sed -i '' -E"
+  SED_CMD="gsed -i.bak -E"
 else
-  SED_CMD="sed -i -E"
+  # Works on both GNU and BSD sed (macOS) if extension is provided immediately
+  SED_CMD="sed -i.bak -E"
 fi
 
 CHART_DIR="charts/cloud-sentinel-k8s"
+
+# Cleanup backup files on exit
+trap 'find . -name "*.bak" -type f -delete' EXIT
 
 # 1. Update README.md (root) - Example: replacing image tags or links
 # Assuming we want to replace existing version occurrences.
