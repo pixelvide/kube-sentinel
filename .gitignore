@@ -46,3 +46,7 @@ cloud-sentinel-k8s
 
 # Environment variables
 .env
+
+# E2E artifacts
+e2e.db
+e2e/kubeconfig.yaml

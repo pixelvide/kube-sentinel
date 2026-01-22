@@ -9,6 +9,7 @@ export PATH=$(pwd)/bin:$PATH
 
 KIND_CONFIG="e2e/kind-config.yaml"
 KUBECONFIG_FILE="e2e/kubeconfig.yaml"
+DB_FILE="e2e/e2e.db"
 
 # Create kind cluster if not exists
 if ! sudo $(pwd)/bin/kind get clusters | grep -q "^kind$"; then
@@ -30,7 +31,7 @@ sudo chown $(id -u):$(id -g) "$KUBECONFIG_FILE"
 export KUBECONFIG=$(pwd)/"$KUBECONFIG_FILE"
 
 # Set other env vars
-export DB_DSN="e2e.db"
+export DB_DSN="$DB_FILE"
 export CLOUD_SENTINEL_K8S_USERNAME=admin
 export CLOUD_SENTINEL_K8S_PASSWORD=admin
 
