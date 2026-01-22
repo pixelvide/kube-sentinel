@@ -16,6 +16,10 @@ type AISettings struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+func (AISettings) TableName() string {
+	return "k8s_ai_settings"
+}
+
 type ChatSession struct {
 	ID        string         `json:"id" gorm:"primaryKey"` // UUID
 	UserID    uint           `json:"userID" gorm:"index"`
@@ -24,6 +28,10 @@ type ChatSession struct {
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 	Messages  []ChatMessage  `json:"messages" gorm:"foreignKey:SessionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+
+func (ChatSession) TableName() string {
+	return "k8s_chat_sessions"
 }
 
 type ChatMessage struct {
@@ -35,4 +43,8 @@ type ChatMessage struct {
 	ToolID    string         `json:"toolID,omitempty"`                     // For tool messages
 	CreatedAt time.Time      `json:"createdAt"`
 	DeletedAt gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+}
+
+func (ChatMessage) TableName() string {
+	return "k8s_chat_messages"
 }
