@@ -107,6 +107,16 @@
     "helm_releases": "Helm Releases",
     "helm_charts": "Helm Charts"
   },
+  "helm_release": {
+    "revision": "Revision",
+    "chart": "Chart",
+    "app_version": "App Version",
+    "rollback": "Rollback",
+    "rollback_title": "Rollback Release",
+    "rollback_description": "Are you sure you want to rollback to revision {{revision}}?",
+    "rollback_success": "Rollback successful to revision {{revision}}",
+    "rollback_failed": "Rollback failed: {{error}}"
+  },
   "overview": {
     "title": "Overview",
     "clusterStats": "Cluster Statistics",

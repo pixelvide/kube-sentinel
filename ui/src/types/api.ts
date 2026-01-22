@@ -322,6 +322,9 @@ export interface HelmRelease {
   chart: string
   app_version: string
   updated: string
+  values?: string
+  notes?: string
+  manifest?: string
 }
 
 export interface RecentEvent {

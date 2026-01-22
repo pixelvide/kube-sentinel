@@ -68,13 +68,6 @@ export const fetchResources = <T>(
 ): Promise<T> => {
   let endpoint = namespace ? `/${resource}/${namespace}` : `/${resource}`
 
-  // Special handling for Helm releases
-  if (resource === 'helmreleases') {
-    endpoint =
-      namespace && namespace !== '_all'
-        ? `/helm/releases/${namespace}`
-        : '/helm/releases'
-  }
   const params = new URLSearchParams()
 
   if (opts?.limit) {
@@ -294,12 +287,7 @@ export const deleteResource = async <T extends ResourceType>(
   if (opts?.wait === false) {
     params.append('wait', 'false')
   }
-  let endpoint = `/${resource}/${namespace || '_all'}/${name}?${params.toString()}`
-
-  // Special handling for Helm releases
-  if (resource === 'helmreleases') {
-    endpoint = `/helm/releases/${namespace || '_all'}/${name}?${params.toString()}`
-  }
+  const endpoint = `/${resource}/${namespace || '_all'}/${name}?${params.toString()}`
 
   await apiClient.delete(endpoint)
 }
@@ -547,14 +535,9 @@ export const fetchResource = <T>(
   name: string,
   namespace?: string
 ): Promise<T> => {
-  let endpoint = namespace
+  const endpoint = namespace
     ? `/${resource}/${namespace}/${name}`
     : `/${resource}/${name}`
-
-  // Special handling for Helm releases
-  if (resource === 'helmreleases') {
-    endpoint = `/helm/releases/${namespace || '_all'}/${name}`
-  }
 
   return fetchAPI<T>(endpoint)
 }

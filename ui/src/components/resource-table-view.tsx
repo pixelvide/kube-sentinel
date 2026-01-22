@@ -37,6 +37,7 @@ interface ResourceTableViewProps<T> {
   searchQuery: string
   pagination: PaginationState
   setPagination: React.Dispatch<React.SetStateAction<PaginationState>>
+  disablePagination?: boolean
 }
 
 export function ResourceTableView<T>({
@@ -54,6 +55,7 @@ export function ResourceTableView<T>({
   searchQuery,
   pagination,
   setPagination,
+  disablePagination = false,
 }: ResourceTableViewProps<T>) {
   const renderRows = () => {
     const rows = table.getRowModel().rows
@@ -150,7 +152,7 @@ export function ResourceTableView<T>({
         </div>
       </div>
 
-      {dataLength > 0 && (
+      {dataLength > 0 && !disablePagination && (
         <div className="flex items-center justify-between px-2 py-1">
           <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
             {hasActiveFilters ? (

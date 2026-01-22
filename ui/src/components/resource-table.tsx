@@ -75,6 +75,10 @@ export interface ResourceTableProps<T> {
   onCreateClick?: () => void // Callback for create button click
   extraToolbars?: React.ReactNode[] // Additional toolbar components
   defaultHiddenColumns?: string[] // Columns to hide by default
+  data?: T[] // External data (skips internal fetching if provided)
+  isLoading?: boolean // Loading state for external data
+  hideFilter?: boolean // Hide filter controls
+  disablePagination?: boolean // Disable pagination controls
 }
 
 export function ResourceTable<T>({
@@ -87,6 +91,10 @@ export function ResourceTable<T>({
   onCreateClick,
   extraToolbars = [],
   defaultHiddenColumns = [],
+  data: externalData,
+  isLoading: externalLoading = false,
+  hideFilter = false,
+  disablePagination = false,
 }: ResourceTableProps<T>) {
   const { t } = useTranslation()
   const { currentCluster } = useCluster()
@@ -158,7 +166,7 @@ export function ResourceTable<T>({
     {
       refreshInterval: useSSE ? 0 : refreshInterval, // disable polling when SSE
       reduce: true, // Fetch reduced data for performance
-      disable: useSSE, // do not query when using SSE
+      disable: useSSE || !!externalData, // do not query when using SSE or external data provided
     }
   )
 
@@ -319,15 +327,30 @@ export function ResourceTable<T>({
   }, [columns, clusterScope, selectedNamespace, t])
 
   const data = useMemo(() => {
+    if (externalData) return externalData
     if (useSSE) return watchData
     return queryData
-  }, [useSSE, watchData, queryData])
-  const isLoading = useSSE ? watchLoading : queryLoading
-  const isError = useSSE ? Boolean(watchError) : queryIsError
-  const error = useSSE
-    ? (watchError as Error | null)
-    : (queryError as unknown as Error | null)
-  const refetch = useSSE ? reconnectSSE : queryRefetch
+  }, [useSSE, watchData, queryData, externalData])
+  const isLoading = externalData
+    ? (externalLoading ?? false)
+    : useSSE
+      ? watchLoading
+      : queryLoading
+  const isError = externalData
+    ? false
+    : useSSE
+      ? Boolean(watchError)
+      : queryIsError
+  const error = externalData
+    ? null
+    : useSSE
+      ? (watchError as Error | null)
+      : (queryError as unknown as Error | null)
+  const refetch = externalData
+    ? () => {}
+    : useSSE
+      ? reconnectSSE
+      : queryRefetch
 
   const memoizedData = useMemo(() => (data || []) as T[], [data])
 
@@ -600,31 +623,33 @@ export function ResourceTable<T>({
               </div>
             )}
             {/* Refresh interval selector */}
-            <Select
-              value={refreshInterval.toString()}
-              onValueChange={(value) => {
-                setRefreshInterval(Number(value))
-                if (Number(value) > 0) {
-                  setUseSSE(false)
-                }
-              }}
-              disabled={useSSE}
-            >
-              <SelectTrigger className="max-w-[140px]">
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  <SelectValue />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">Off</SelectItem>
-                <SelectItem value="1000">1s</SelectItem>
-                <SelectItem value="5000">5s</SelectItem>
-                <SelectItem value="10000">10s</SelectItem>
-                <SelectItem value="30000">30s</SelectItem>
-              </SelectContent>
-            </Select>
-            {!clusterScope && (
+            {!hideFilter && (
+              <Select
+                value={refreshInterval.toString()}
+                onValueChange={(value) => {
+                  setRefreshInterval(Number(value))
+                  if (Number(value) > 0) {
+                    setUseSSE(false)
+                  }
+                }}
+                disabled={useSSE}
+              >
+                <SelectTrigger className="max-w-[140px]">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    <SelectValue />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Off</SelectItem>
+                  <SelectItem value="1000">1s</SelectItem>
+                  <SelectItem value="5000">5s</SelectItem>
+                  <SelectItem value="10000">10s</SelectItem>
+                  <SelectItem value="30000">30s</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+            {!clusterScope && !hideFilter && (
               <NamespaceSelector
                 selectedNamespace={selectedNamespace}
                 handleNamespaceChange={handleNamespaceChange}
@@ -633,81 +658,84 @@ export function ResourceTable<T>({
               />
             )}
             {/* Column Filters */}
-            {table
-              .getAllColumns()
-              .filter((column) => {
-                const columnDef = column.columnDef as ColumnDef<T> & {
-                  enableColumnFilter?: boolean
-                }
-                return columnDef.enableColumnFilter && column.getCanFilter()
-              })
-              .map((column) => {
-                const columnDef = column.columnDef as ColumnDef<T> & {
-                  enableColumnFilter?: boolean
-                }
-                const uniqueValues = column.getFacetedUniqueValues()
-                const filterValue = column.getFilterValue() as string
+            {!hideFilter &&
+              table
+                .getAllColumns()
+                .filter((column) => {
+                  const columnDef = column.columnDef as ColumnDef<T> & {
+                    enableColumnFilter?: boolean
+                  }
+                  return columnDef.enableColumnFilter && column.getCanFilter()
+                })
+                .map((column) => {
+                  const columnDef = column.columnDef as ColumnDef<T> & {
+                    enableColumnFilter?: boolean
+                  }
+                  const uniqueValues = column.getFacetedUniqueValues()
+                  const filterValue = column.getFilterValue() as string
 
-                return (
-                  <Select
-                    key={column.id}
-                    value={filterValue || ''}
-                    onValueChange={(value) =>
-                      column.setFilterValue(value === 'all' ? '' : value)
-                    }
-                  >
-                    <SelectTrigger className="min-w-32">
-                      <SelectValue
-                        placeholder={`Filter ${typeof columnDef.header === 'string' ? columnDef.header : 'Column'}`}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        All{' '}
-                        {typeof columnDef.header === 'string'
-                          ? columnDef.header
-                          : 'Values'}
-                      </SelectItem>
-                      {Array.from(uniqueValues.keys())
-                        .sort()
-                        .map((value) =>
-                          value ? (
-                            <SelectItem
-                              key={String(value)}
-                              value={String(value)}
-                            >
-                              {String(value)} ({uniqueValues.get(value)})
-                            </SelectItem>
-                          ) : null
-                        )}
-                    </SelectContent>
-                  </Select>
-                )
-              })}
+                  return (
+                    <Select
+                      key={column.id}
+                      value={filterValue || ''}
+                      onValueChange={(value) =>
+                        column.setFilterValue(value === 'all' ? '' : value)
+                      }
+                    >
+                      <SelectTrigger className="min-w-32">
+                        <SelectValue
+                          placeholder={`Filter ${typeof columnDef.header === 'string' ? columnDef.header : 'Column'}`}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          All{' '}
+                          {typeof columnDef.header === 'string'
+                            ? columnDef.header
+                            : 'Values'}
+                        </SelectItem>
+                        {Array.from(uniqueValues.keys())
+                          .sort()
+                          .map((value) =>
+                            value ? (
+                              <SelectItem
+                                key={String(value)}
+                                value={String(value)}
+                              >
+                                {String(value)} ({uniqueValues.get(value)})
+                              </SelectItem>
+                            ) : null
+                          )}
+                      </SelectContent>
+                    </Select>
+                  )
+                })}
           </div>
 
           {/* Search bar */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative w-full sm:w-auto">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={`Search ${resourceName.toLowerCase()}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 w-full sm:w-[100px] md:w-[200px]"
-              />
+          {!hideFilter && (
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder={`Search ${resourceName.toLowerCase()}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-4 w-full sm:w-[100px] md:w-[200px]"
+                />
+              </div>
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSearchQuery('')}
+                  className="h-9 w-9"
+                >
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearchQuery('')}
-                className="h-9 w-9"
-              >
-                <XCircle className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          )}
           {/* Batch delete button */}
           {table.getSelectedRowModel().rows.length > 0 && (
             <Button
@@ -775,6 +803,7 @@ export function ResourceTable<T>({
         searchQuery={searchQuery}
         pagination={pagination}
         setPagination={setPagination}
+        disablePagination={disablePagination}
       />
 
       {/* Delete Confirmation Dialog */}

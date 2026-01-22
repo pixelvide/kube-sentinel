@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 import { HelmRelease } from '@/types/api'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +17,15 @@ export function HelmReleaseListPage() {
     () => [
       columnHelper.accessor('name', {
         header: t('common.name'),
-        cell: (info) => <div className="font-medium">{info.getValue()}</div>,
+        cell: ({ row }) => (
+          <div className="font-medium text-blue-500 hover:underline">
+            <Link
+              to={`/helmreleases/${row.original.namespace}/${row.original.name}`}
+            >
+              {row.original.name}
+            </Link>
+          </div>
+        ),
       }),
       columnHelper.accessor('revision', {
         header: 'Revision',

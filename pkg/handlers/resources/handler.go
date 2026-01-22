@@ -97,6 +97,7 @@ func RegisterRoutes(group *gin.RouterGroup) {
 		"leases":                          NewGenericResourceHandler[*coordinationv1.Lease, *coordinationv1.LeaseList]("leases", false, false),
 		"mutatingwebhookconfigurations":   NewGenericResourceHandler[*admissionregistrationv1.MutatingWebhookConfiguration, *admissionregistrationv1.MutatingWebhookConfigurationList]("mutatingwebhookconfigurations", true, false),
 		"validatingwebhookconfigurations": NewGenericResourceHandler[*admissionregistrationv1.ValidatingWebhookConfiguration, *admissionregistrationv1.ValidatingWebhookConfigurationList]("validatingwebhookconfigurations", true, false),
+		"helmreleases":                    NewHelmHandler(),
 	}
 
 	for name, handler := range handlers {
