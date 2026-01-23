@@ -1037,7 +1037,7 @@ func (t *ListResourcesTool) listClusterRoleBindings(ctx context.Context, cs *clu
 	return results, nil
 }
 
-func (t *ListResourcesTool) listGateways(ctx context.Context, cs *cluster.ClientSet, ns, filter string, opts metav1.ListOptions) ([]string, error) {
+func buildListOptions(ns string, opts metav1.ListOptions) ([]client.ListOption, error) {
 	var listUpdates []client.ListOption
 	if ns != "" {
 		listUpdates = append(listUpdates, client.InNamespace(ns))
@@ -1048,6 +1048,24 @@ func (t *ListResourcesTool) listGateways(ctx context.Context, cs *cluster.Client
 			return nil, fmt.Errorf("invalid label selector: %w", err)
 		}
 		listUpdates = append(listUpdates, client.MatchingLabelsSelector{Selector: selector})
+	}
+	return listUpdates, nil
+}
+
+func shouldIncludeResource(name, itemNs, requestNs, filter string) bool {
+	if requestNs != "" && itemNs != requestNs {
+		return false
+	}
+	if filter != "" && !strings.Contains(strings.ToLower(name), strings.ToLower(filter)) {
+		return false
+	}
+	return true
+}
+
+func (t *ListResourcesTool) listGateways(ctx context.Context, cs *cluster.ClientSet, ns, filter string, opts metav1.ListOptions) ([]string, error) {
+	listUpdates, err := buildListOptions(ns, opts)
+	if err != nil {
+		return nil, err
 	}
 
 	var list gatewayapiv1.GatewayList
@@ -1056,12 +1074,10 @@ func (t *ListResourcesTool) listGateways(ctx context.Context, cs *cluster.Client
 	}
 	var results []string
 	for _, item := range list.Items {
-		if ns != "" && item.Namespace != ns {
+		if !shouldIncludeResource(item.Name, item.Namespace, ns, filter) {
 			continue
 		}
-		if filter != "" && !strings.Contains(strings.ToLower(item.Name), strings.ToLower(filter)) {
-			continue
-		}
+
 		gatewayClassName := string(item.Spec.GatewayClassName)
 		results = append(results, fmt.Sprintf("%s/%s (GatewayClass: %s, Listeners: %d)",
 			item.Namespace, item.Name, gatewayClassName, len(item.Spec.Listeners)))
@@ -1070,16 +1086,9 @@ func (t *ListResourcesTool) listGateways(ctx context.Context, cs *cluster.Client
 }
 
 func (t *ListResourcesTool) listHTTPRoutes(ctx context.Context, cs *cluster.ClientSet, ns, filter string, opts metav1.ListOptions) ([]string, error) {
-	var listUpdates []client.ListOption
-	if ns != "" {
-		listUpdates = append(listUpdates, client.InNamespace(ns))
-	}
-	if opts.LabelSelector != "" {
-		selector, err := labels.Parse(opts.LabelSelector)
-		if err != nil {
-			return nil, fmt.Errorf("invalid label selector: %w", err)
-		}
-		listUpdates = append(listUpdates, client.MatchingLabelsSelector{Selector: selector})
+	listUpdates, err := buildListOptions(ns, opts)
+	if err != nil {
+		return nil, err
 	}
 
 	var list gatewayapiv1.HTTPRouteList
@@ -1088,12 +1097,10 @@ func (t *ListResourcesTool) listHTTPRoutes(ctx context.Context, cs *cluster.Clie
 	}
 	var results []string
 	for _, item := range list.Items {
-		if ns != "" && item.Namespace != ns {
+		if !shouldIncludeResource(item.Name, item.Namespace, ns, filter) {
 			continue
 		}
-		if filter != "" && !strings.Contains(strings.ToLower(item.Name), strings.ToLower(filter)) {
-			continue
-		}
+
 		parentRefs := len(item.Spec.ParentRefs)
 		results = append(results, fmt.Sprintf("%s/%s (ParentRefs: %d, Rules: %d)",
 			item.Namespace, item.Name, parentRefs, len(item.Spec.Rules)))
