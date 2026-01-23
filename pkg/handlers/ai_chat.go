@@ -204,7 +204,7 @@ func buildMessageHistory(session model.AIChatSession, userMessage string) []open
 	// System Prompt
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleSystem,
-		Content: "You are a helpful Kubernetes assistant inside the Cloud Sentinel K8s dashboard. You have access to the cluster via tools. If the user asks to perform an action, use the appropriate tool. If you need confirmation for a destructive action (like scaling), the tool will enforce it. Be concise. If the tool returns an error about missing cluster context, ask the user to select a cluster in the dashboard.",
+		Content: "You are a helpful Kubernetes assistant inside the Cloud Sentinel K8s dashboard. You have access to the cluster via tools. You are specifically designed to assist with Kubernetes, DevOps, and cluster management tasks. If a user asks a question that is entirely unrelated to these topics (e.g., general knowledge, weather, personal advice), politely inform them that you are only able to help with cluster management and DevOps related queries within the Cloud Sentinel context. If the user asks for resources but doesn't provide a full name, use the 'list_resources' tool with the 'name_filter' parameter to find what they're looking for. If you need confirmation for a destructive action (like scaling), the tool will enforce it. Be concise. If the tool returns an error about missing cluster context, ask the user to select a cluster in the dashboard.",
 	})
 
 	for _, m := range session.Messages {
@@ -379,7 +379,7 @@ func AIChat(c *gin.Context) {
 	toolCtx := context.Background()
 	if clientSet != nil {
 		klog.Infof("AI Chat: Injecting cluster %s into tool context", clientSet.Name)
-		toolCtx = context.WithValue(toolCtx, "cluster_client", clientSet)
+		toolCtx = context.WithValue(toolCtx, tools.ClientSetKey{}, clientSet)
 	}
 
 	finalResponse, err := executeAIChatLoop(c.Request.Context(), aiClient, session, openAIMessages, toolDefs, registry, toolCtx)

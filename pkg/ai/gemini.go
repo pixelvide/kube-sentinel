@@ -102,9 +102,10 @@ func (g *GeminiAdapter) ChatCompletion(ctx context.Context, messages []openai.Ch
 		}
 
 		role := "user"
-		if m.Role == openai.ChatMessageRoleAssistant {
+		switch m.Role {
+		case openai.ChatMessageRoleAssistant:
 			role = "model"
-		} else if m.Role == openai.ChatMessageRoleTool {
+		case openai.ChatMessageRoleTool:
 			role = "user" // Tool responses must come from 'user' role in Gemini SDK
 		}
 

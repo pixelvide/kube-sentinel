@@ -152,6 +152,7 @@ func InitDB() {
 		LocalLoginEnabledKey: "true",
 		AIAllowUserKeys:      "true",
 		AIForceUserKeys:      "false",
+		AIAllowUserOverride:  "true",
 	}
 	for key, value := range defaultConfigs {
 		if _, err := GetAppConfig(CurrentApp.ID, key); err != nil {
