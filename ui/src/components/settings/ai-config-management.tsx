@@ -57,9 +57,8 @@ export function AIConfigManagement() {
       await checkAuth()
       setEditingConfig(null)
       toast.success(t('aiConfig.saved', 'AI configuration saved successfully'))
-    } catch (error) {
+    } catch {
       toast.error(t('aiConfig.saveError', 'Failed to save configuration'))
-      console.error(error)
     } finally {
       setSaving(false)
     }
@@ -70,7 +69,7 @@ export function AIConfigManagement() {
       await updateAIConfig({ ...config, isDefault: true })
       await loadData()
       toast.success(t('aiConfig.defaultSet', 'Default profile updated'))
-    } catch (error) {
+    } catch {
       toast.error(t('aiConfig.saveError', 'Failed to update default profile'))
     }
   }, [loadData, t])
@@ -83,7 +82,7 @@ export function AIConfigManagement() {
       await deleteAIConfig(id)
       await loadData()
       toast.success(t('aiConfig.deleted', 'Configuration removed'))
-    } catch (error) {
+    } catch {
       toast.error(t('aiConfig.deleteError', 'Failed to remove configuration'))
     }
   }, [loadData, t])

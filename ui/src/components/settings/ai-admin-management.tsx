@@ -62,7 +62,7 @@ export function AIAdminManagement() {
                 allow_user_override: adminConfig.allow_user_override,
             })
             toast.success('AI Governance updated')
-        } catch (err) {
+        } catch {
             toast.error('Failed to update AI governance')
         }
     }
@@ -76,7 +76,7 @@ export function AIAdminManagement() {
             })
             loadData()
             toast.success('Profile created')
-        } catch (err) {
+        } catch {
             toast.error('Failed to create profile')
         }
     }
@@ -85,7 +85,7 @@ export function AIAdminManagement() {
         try {
             await updateAIProfile(profile.id, profile)
             toast.success('Profile updated')
-        } catch (err) {
+        } catch {
             toast.error('Failed to update profile')
         }
     }
@@ -96,7 +96,7 @@ export function AIAdminManagement() {
             await deleteAIProfile(id)
             loadData()
             toast.success('Profile deleted')
-        } catch (err) {
+        } catch {
             toast.error('Failed to delete profile')
         }
     }
@@ -108,7 +108,7 @@ export function AIAdminManagement() {
                 prev.map((p) => (p.id === id ? updated : p))
             )
             toast.success(updated.isEnabled ? 'Profile enabled' : 'Profile disabled')
-        } catch (err) {
+        } catch {
             toast.error('Failed to toggle profile')
         }
     }
@@ -207,7 +207,7 @@ export function AIAdminManagement() {
                                     <Label>Provider Type</Label>
                                     <Select
                                         value={profile.provider}
-                                        onValueChange={(v: any) => {
+                                        onValueChange={(v: 'gemini' | 'openai' | 'azure' | 'custom') => {
                                             const newProfiles = profiles.map((p) =>
                                                 p.id === profile.id ? { ...p, provider: v } : p
                                             )

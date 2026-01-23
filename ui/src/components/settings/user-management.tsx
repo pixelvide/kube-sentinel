@@ -123,8 +123,9 @@ export function UserManagement() {
         await toggleUserAIChat(u.id, enabled)
         queryClient.invalidateQueries({ queryKey: ['user-list'] })
         toast.success(t('userManagement.messages.updated', 'User updated'))
-      } catch (err: any) {
-        toast.error(err.message || 'Failed to update AI chat status')
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to update AI chat status'
+        toast.error(message)
       }
     },
     [queryClient, t]
