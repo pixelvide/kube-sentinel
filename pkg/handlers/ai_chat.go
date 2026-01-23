@@ -240,7 +240,7 @@ func executeAIChatLoop(ctx context.Context, aiClient ai.AIClient, session *model
 	for i := 0; i < maxIterations; i++ {
 		resp, err := aiClient.ChatCompletion(ctx, messages, toolDefs)
 		if err != nil {
-			return "", fmt.Errorf("AI Provider error: %v", err)
+			return "", fmt.Errorf("AI Provider error: %w", err)
 		}
 
 		if len(resp.Choices) == 0 {
