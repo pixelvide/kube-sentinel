@@ -254,3 +254,209 @@ func (t *DescribeResourceTool) Execute(ctx context.Context, args string) (string
 	}
 	return string(bytes), nil
 }
+
+// --- List Resources Tool ---
+
+type ListResourcesTool struct{}
+
+func (t *ListResourcesTool) Name() string { return "list_resources" }
+
+func (t *ListResourcesTool) Definition() openai.Tool {
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        "list_resources",
+			Description: "List Kubernetes resources of a specific kind in a namespace, optionally filtered by labels.",
+			Parameters: json.RawMessage(`{
+				"type": "object",
+				"properties": {
+					"kind": {
+						"type": "string",
+						"description": "The kind of resource to list (Pod, Service, Deployment, ReplicaSet, StatefulSet, DaemonSet, Job, CronJob, ConfigMap, Secret, Namespace, Node, Ingress, Event)."
+					},
+					"namespace": {
+						"type": "string",
+						"description": "The namespace to list resources from. If empty, lists from all namespaces (if applicable)."
+					},
+					"label_selector": {
+						"type": "string",
+						"description": "Optional label selector to filter results (e.g., 'app=nginx')."
+					}
+				},
+				"required": ["kind"]
+			}`),
+		},
+	}
+}
+
+func (t *ListResourcesTool) Execute(ctx context.Context, args string) (string, error) {
+	var params struct {
+		Kind          string `json:"kind"`
+		Namespace     string `json:"namespace"`
+		LabelSelector string `json:"label_selector"`
+	}
+	if err := json.Unmarshal([]byte(args), &params); err != nil {
+		return "", err
+	}
+
+	cs, err := GetClientSet(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	opts := metav1.ListOptions{
+		LabelSelector: params.LabelSelector,
+	}
+
+	var results []string
+	kind := strings.ToLower(params.Kind)
+
+	switch kind {
+	case "pod", "pods":
+		list, err := cs.K8sClient.ClientSet.CoreV1().Pods(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Status: %s)", item.Namespace, item.Name, item.Status.Phase))
+			}
+		} else {
+			return "", err
+		}
+	case "service", "services", "svc":
+		list, err := cs.K8sClient.ClientSet.CoreV1().Services(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Type: %s, ClusterIP: %s)", item.Namespace, item.Name, item.Spec.Type, item.Spec.ClusterIP))
+			}
+		} else {
+			return "", err
+		}
+	case "deployment", "deployments", "deploy":
+		list, err := cs.K8sClient.ClientSet.AppsV1().Deployments(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Ready: %d/%d)", item.Namespace, item.Name, item.Status.ReadyReplicas, item.Status.Replicas))
+			}
+		} else {
+			return "", err
+		}
+	case "replicaset", "replicasets", "rs":
+		list, err := cs.K8sClient.ClientSet.AppsV1().ReplicaSets(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Replicas: %d)", item.Namespace, item.Name, item.Status.Replicas))
+			}
+		} else {
+			return "", err
+		}
+	case "statefulset", "statefulsets", "sts":
+		list, err := cs.K8sClient.ClientSet.AppsV1().StatefulSets(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Ready: %d/%d)", item.Namespace, item.Name, item.Status.ReadyReplicas, item.Status.Replicas))
+			}
+		} else {
+			return "", err
+		}
+	case "daemonset", "daemonsets", "ds":
+		list, err := cs.K8sClient.ClientSet.AppsV1().DaemonSets(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Desired: %d, Ready: %d)", item.Namespace, item.Name, item.Status.DesiredNumberScheduled, item.Status.NumberReady))
+			}
+		} else {
+			return "", err
+		}
+	case "job", "jobs":
+		list, err := cs.K8sClient.ClientSet.BatchV1().Jobs(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Succeeded: %d)", item.Namespace, item.Name, item.Status.Succeeded))
+			}
+		} else {
+			return "", err
+		}
+	case "cronjob", "cronjobs":
+		list, err := cs.K8sClient.ClientSet.BatchV1().CronJobs(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Schedule: %s)", item.Namespace, item.Name, item.Spec.Schedule))
+			}
+		} else {
+			return "", err
+		}
+	case "configmap", "configmaps", "cm":
+		list, err := cs.K8sClient.ClientSet.CoreV1().ConfigMaps(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s", item.Namespace, item.Name))
+			}
+		} else {
+			return "", err
+		}
+	case "secret", "secrets":
+		list, err := cs.K8sClient.ClientSet.CoreV1().Secrets(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (Type: %s)", item.Namespace, item.Name, item.Type))
+			}
+		} else {
+			return "", err
+		}
+	case "namespace", "namespaces", "ns":
+		list, err := cs.K8sClient.ClientSet.CoreV1().Namespaces().List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s (Status: %s)", item.Name, item.Status.Phase))
+			}
+		} else {
+			return "", err
+		}
+	case "node", "nodes", "no":
+		list, err := cs.K8sClient.ClientSet.CoreV1().Nodes().List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				status := "NotReady"
+				for _, cond := range item.Status.Conditions {
+					if cond.Type == corev1.NodeReady && cond.Status == corev1.ConditionTrue {
+						status = "Ready"
+						break
+					}
+				}
+				results = append(results, fmt.Sprintf("%s (Status: %s, Version: %s)", item.Name, status, item.Status.NodeInfo.KubeletVersion))
+			}
+		} else {
+			return "", err
+		}
+	case "ingress", "ingresses", "ing":
+		list, err := cs.K8sClient.ClientSet.NetworkingV1().Ingresses(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s", item.Namespace, item.Name))
+			}
+		} else {
+			return "", err
+		}
+	case "event", "events", "ev":
+		list, err := cs.K8sClient.ClientSet.CoreV1().Events(params.Namespace).List(ctx, opts)
+		if err == nil {
+			for _, item := range list.Items {
+				results = append(results, fmt.Sprintf("%s/%s (%s: %s)", item.Namespace, item.InvolvedObject.Name, item.Type, item.Message))
+			}
+		} else {
+			return "", err
+		}
+	default:
+		return "", fmt.Errorf("unsupported resource kind for listing: %s", params.Kind)
+	}
+
+	if len(results) == 0 {
+		return fmt.Sprintf("No %s found.", params.Kind), nil
+	}
+
+	// Limit output to prevent token overflow
+	if len(results) > 100 {
+		return strings.Join(results[:100], "\n") + fmt.Sprintf("\n... and %d more", len(results)-100), nil
+	}
+
+	return strings.Join(results, "\n"), nil
+}

@@ -3,7 +3,7 @@ import { IconRobot, IconStar, IconStarFilled, IconTrash, IconPlus } from '@table
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { fetchAIProfiles, listAIConfigs, updateAIConfig, deleteAIConfig } from '@/lib/api'
+import { fetchAIProfiles, listAIConfigs, updateAIConfig, deleteAIConfig, fetchAdminAIConfig } from '@/lib/api'
 import { AIProviderProfile, AISettings } from '@/types/ai'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
@@ -28,13 +28,15 @@ export function AIConfigManagement() {
   const [profiles, setProfiles] = useState<AIProviderProfile[]>([])
   const [userConfigs, setUserConfigs] = useState<AISettings[]>([])
   const [editingConfig, setEditingConfig] = useState<Partial<AISettings> | null>(null)
+  const [allowOverride, setAllowOverride] = useState(true)
 
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const [p, c] = await Promise.all([fetchAIProfiles(), listAIConfigs()])
+      const [p, c, g] = await Promise.all([fetchAIProfiles(), listAIConfigs(), fetchAdminAIConfig()])
       setProfiles(p)
       setUserConfigs(c)
+      setAllowOverride(g.allow_user_override !== 'false')
     } catch (err) {
       console.error(err)
     } finally {
@@ -87,6 +89,26 @@ export function AIConfigManagement() {
   }, [loadData, t])
 
   if (loading) return <div>Loading AI Settings...</div>
+
+  if (!allowOverride) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-muted-foreground italic">
+            <IconRobot className="h-5 w-5" />
+            {t('aiConfig.title', 'AI Assistant Profiles')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-10 bg-muted/20 border border-dashed rounded-lg">
+            <p className="text-muted-foreground italic">
+              {t('aiConfig.overrideDisabled', 'AI configuration override has been disabled by the administrator. System-wide default settings will be used.')}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   const selectedProfile = profiles.find((p) => p.id === editingConfig?.profileID)
 

@@ -31,6 +31,7 @@ export function AIAdminManagement() {
     const [adminConfig, setAdminConfig] = useState<{
         allow_user_keys: string
         force_user_keys: string
+        allow_user_override: string
         system_profile: AIProviderProfile | null
     } | null>(null)
 
@@ -58,6 +59,7 @@ export function AIAdminManagement() {
             await updateAIGovernance({
                 allow_user_keys: adminConfig.allow_user_keys,
                 force_user_keys: adminConfig.force_user_keys,
+                allow_user_override: adminConfig.allow_user_override,
             })
             toast.success('AI Governance updated')
         } catch (err) {
@@ -152,6 +154,23 @@ export function AIAdminManagement() {
                             onCheckedChange={(v) =>
                                 setAdminConfig((prev) =>
                                     prev ? { ...prev, force_user_keys: v ? 'true' : 'false' } : null
+                                )
+                            }
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                            <Label>Allow User AI Override</Label>
+                            <p className="text-sm text-muted-foreground">
+                                Enable or disable user-level AI configuration entirely. If disabled, users cannot see or manage their AI settings.
+                            </p>
+                        </div>
+                        <Switch
+                            checked={adminConfig?.allow_user_override !== 'false'}
+                            onCheckedChange={(v) =>
+                                setAdminConfig((prev) =>
+                                    prev ? { ...prev, allow_user_override: v ? 'true' : 'false' } : null
                                 )
                             }
                         />

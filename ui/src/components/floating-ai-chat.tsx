@@ -6,13 +6,24 @@ import {
     IconX,
     IconMinimize,
     IconMaximize,
+    IconHistory,
+    IconChevronLeft,
+    IconTrash,
+    IconPlus,
 } from '@tabler/icons-react'
 import { clsx } from 'clsx'
+import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { AIChatMessage, AIModelsResponse } from '@/types/ai'
-import { sendAIChatMessage, fetchAIModels } from '@/lib/api'
+import { AIChatMessage, AIModelsResponse, AIChatSession } from '@/types/ai'
+import {
+    sendAIChatMessage,
+    fetchAIModels,
+    listAIChatSessions,
+    getAIChatSession,
+    deleteAIChatSession,
+} from '@/lib/api'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -38,6 +49,9 @@ export function FloatingAIChat() {
     const [selectedModel, setSelectedModel] = useState('')
     const [availableModels, setAvailableModels] = useState<string[]>([])
     const [configMessage, setConfigMessage] = useState<string | null>(null)
+    const [showHistory, setShowHistory] = useState(false)
+    const [sessions, setSessions] = useState<AIChatSession[]>([])
+    const [loadingSessions, setLoadingSessions] = useState(false)
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -111,6 +125,52 @@ export function FloatingAIChat() {
         }
     }
 
+    const loadSessions = async () => {
+        setLoadingSessions(true)
+        try {
+            const data = await listAIChatSessions()
+            setSessions(data)
+        } catch (error) {
+            console.error('Failed to load sessions', error)
+        } finally {
+            setLoadingSessions(false)
+        }
+    }
+
+    const handleSelectSession = async (session: AIChatSession) => {
+        try {
+            const fullSession = await getAIChatSession(session.id)
+            setMessages(fullSession.messages || [])
+            setSessionId(session.id)
+            setShowHistory(false)
+        } catch (error) {
+            console.error('Failed to load session details', error)
+            toast.error(t('aiChat.errors.loadSession', 'Failed to load session'))
+        }
+    }
+
+    const handleDeleteSession = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation()
+        try {
+            await deleteAIChatSession(id)
+            setSessions((prev) => prev.filter((s) => s.id !== id))
+            if (sessionId === id) {
+                setSessionId(null)
+                setMessages([])
+            }
+            toast.success(t('aiChat.sessionDeleted', 'Session deleted'))
+        } catch (error) {
+            console.error('Failed to delete session', error)
+            toast.error(t('aiChat.errors.deleteSession', 'Failed to delete session'))
+        }
+    }
+
+    const handleNewChat = () => {
+        setSessionId(null)
+        setMessages([])
+        setShowHistory(false)
+    }
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
@@ -130,10 +190,51 @@ export function FloatingAIChat() {
             {/* Header */}
             <div className="p-3 bg-primary text-primary-foreground flex items-center justify-between cursor-pointer" onClick={() => setIsMinimized(!isMinimized)}>
                 <div className="flex items-center gap-2">
-                    <IconRobot className="h-5 w-5" />
-                    <span className="font-semibold text-sm">Cloud Sentinel AI</span>
+                    {showHistory ? (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-primary-foreground hover:bg-primary-foreground/10"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                setShowHistory(false)
+                            }}
+                        >
+                            <IconChevronLeft className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <IconRobot className="h-5 w-5" />
+                    )}
+                    <span className="font-semibold text-sm">
+                        {showHistory ? t('aiChat.history', 'History') : 'Cloud Sentinel AI'}
+                    </span>
                 </div>
                 <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    {!showHistory && !isMinimized && (
+                        <>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                title={t('aiChat.newChat', 'New Chat')}
+                                className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/10"
+                                onClick={handleNewChat}
+                            >
+                                <IconPlus className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                title={t('aiChat.viewHistory', 'View History')}
+                                className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/10"
+                                onClick={() => {
+                                    setShowHistory(true)
+                                    loadSessions()
+                                }}
+                            >
+                                <IconHistory className="h-4 w-4" />
+                            </Button>
+                        </>
+                    )}
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setIsMinimized(!isMinimized)}>
                         {isMinimized ? <IconMaximize className="h-4 w-4" /> : <IconMinimize className="h-4 w-4" />}
                     </Button>
@@ -143,7 +244,54 @@ export function FloatingAIChat() {
                 </div>
             </div>
 
-            {!isMinimized && (
+            {!isMinimized && showHistory && (
+                <div className="flex-1 overflow-hidden flex flex-col">
+                    <ScrollArea className="flex-1 p-2">
+                        {loadingSessions ? (
+                            <div className="flex justify-center p-10">
+                                <span className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                            </div>
+                        ) : sessions.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center p-10 text-muted-foreground">
+                                <IconHistory className="h-10 w-10 mb-2 opacity-20" />
+                                <p className="text-xs">{t('aiChat.noHistory', 'No history found')}</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-1">
+                                {sessions.map((session) => (
+                                    <div
+                                        key={session.id}
+                                        onClick={() => handleSelectSession(session)}
+                                        className={clsx(
+                                            "group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors",
+                                            sessionId === session.id ? "bg-primary/10 border border-primary/20" : "hover:bg-muted"
+                                        )}
+                                    >
+                                        <div className="flex flex-col gap-0.5 overflow-hidden">
+                                            <span className="text-sm font-medium truncate pr-4">
+                                                {session.title || t('aiChat.newChat', 'New Chat')}
+                                            </span>
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {format(new Date(session.updatedAt), 'MMM d, yyyy HH:mm')}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
+                                            onClick={(e) => handleDeleteSession(e, session.id)}
+                                        >
+                                            <IconTrash className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </ScrollArea>
+                </div>
+            )}
+
+            {!isMinimized && !showHistory && (
                 <>
                     {/* Messages */}
                     <div className="flex-1 overflow-hidden">

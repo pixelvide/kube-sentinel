@@ -40,6 +40,7 @@ const (
 	LocalLoginEnabledKey = "LOCAL_LOGIN_ENABLED"
 	AIAllowUserKeys      = "AI_ALLOW_USER_KEYS"
 	AIForceUserKeys      = "AI_FORCE_USER_KEYS"
+	AIAllowUserOverride  = "AI_ALLOW_USER_OVERRIDE"
 )
 
 var (
@@ -159,6 +160,25 @@ func IsLocalLoginEnabled() bool {
 		return false
 	}
 	return config.Value == "true"
+}
+
+func IsAIAllowUserOverrideEnabled() bool {
+	var appID uint
+	if CurrentApp != nil {
+		appID = CurrentApp.ID
+	} else {
+		app, err := GetApp(common.AppName)
+		if err != nil {
+			return true // Default to true
+		}
+		appID = app.ID
+	}
+
+	config, err := GetAppConfig(appID, AIAllowUserOverride)
+	if err != nil {
+		return true // Default to true
+	}
+	return config.Value != "false" // Default to true if not explicitly "false"
 }
 
 func CheckOrInitializeUserAccess(userID uint) (bool, error) {

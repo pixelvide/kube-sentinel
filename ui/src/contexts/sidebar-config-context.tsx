@@ -34,7 +34,6 @@ import {
   IconPoint,
   IconProps,
   IconRepeat,
-  IconRobot,
   IconRocket,
   IconRoute,
   IconRouter,
@@ -100,7 +99,6 @@ const iconMap = {
   IconShieldLock,
   IconCopy,
   IconRepeat,
-  IconRobot,
 }
 
 const getIconName = (iconComponent: React.ComponentType): string => {
@@ -176,9 +174,6 @@ const defaultMenus: DefaultMenus = {
     },
     { titleKey: 'nav.jobs', url: '/jobs', icon: IconPlayerPlay },
     { titleKey: 'nav.cronjobs', url: '/cronjobs', icon: IconClockHour4 },
-  ],
-  'sidebar.groups.ai': [
-    { titleKey: 'nav.ai_chat', url: '/ai/chat', icon: IconRobot },
   ],
   'sidebar.groups.traffic': [
     { titleKey: 'nav.ingresses', url: '/ingresses', icon: IconRouter },

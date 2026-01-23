@@ -66,6 +66,11 @@ func UpdateAIConfig(c *gin.Context) {
 		return
 	}
 
+	if !model.IsAIAllowUserOverrideEnabled() {
+		c.JSON(http.StatusForbidden, gin.H{"error": "AI configuration override is disabled by administrator"})
+		return
+	}
+
 	var input model.AISettings
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -106,6 +111,11 @@ func DeleteAIConfig(c *gin.Context) {
 	user := getUser(c)
 	if user == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if !model.IsAIAllowUserOverrideEnabled() {
+		c.JSON(http.StatusForbidden, gin.H{"error": "AI configuration override is disabled by administrator"})
 		return
 	}
 
@@ -212,15 +222,20 @@ func GetAvailableModels(c *gin.Context) {
 	//    - If false, use system default models list.
 
 	var userSettings model.AISettings
-	err := model.DB.Where("user_id = ? AND is_default = ?", user.ID, true).First(&userSettings).Error
-	if err != nil {
-		err = model.DB.Where("user_id = ? AND is_active = ?", user.ID, true).First(&userSettings).Error
+	hasUserSettings := false
+
+	if model.IsAIAllowUserOverrideEnabled() {
+		err := model.DB.Where("user_id = ? AND is_default = ?", user.ID, true).First(&userSettings).Error
 		if err != nil {
-			err = model.DB.Where("user_id = ?", user.ID).First(&userSettings).Error
+			err = model.DB.Where("user_id = ? AND is_active = ?", user.ID, true).First(&userSettings).Error
+			if err != nil {
+				err = model.DB.Where("user_id = ?", user.ID).First(&userSettings).Error
+			}
 		}
+		hasUserSettings = err == nil
 	}
 
-	if err == nil {
+	if hasUserSettings {
 		// Use user settings
 		var profile model.AIProviderProfile
 		if err := model.DB.Where("is_enabled = ?", true).First(&profile, userSettings.ProfileID).Error; err == nil {

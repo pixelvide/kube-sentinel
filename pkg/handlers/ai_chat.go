@@ -29,24 +29,13 @@ type ChatResponse struct {
 	Message   string `json:"message"` // The assistant's reply
 }
 
-func AIChat(c *gin.Context) {
-	var req ChatRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// --- Helpers ---
 
-	user := getUser(c)
-	if user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
+func resolveAIConfig(user *model.User) (*ai.AIConfig, error) {
 	// 1. Authorization and Resolution Logic
 	userConfig, err := model.GetUserConfig(user.ID)
 	if err != nil || !userConfig.IsAIChatEnabled {
-		c.JSON(http.StatusForbidden, gin.H{"error": "AI Chat is disabled for your account."})
-		return
+		return nil, fmt.Errorf("AI Chat is disabled for your account")
 	}
 
 	// Load AppConfigs for AI governance
@@ -62,25 +51,30 @@ func AIChat(c *gin.Context) {
 		aiForceUserKeys = aiForceUserKeysCfg.Value
 	}
 
+	overrideEnabled := model.IsAIAllowUserOverrideEnabled()
+
 	var resolvedConfig *ai.AIConfig
 
 	// Attempt to find user settings
 	var userSettings model.AISettings
-	// Priority: 1. Default, 2. Active, 3. Any
-	err = model.DB.Where("user_id = ? AND is_default = ?", user.ID, true).First(&userSettings).Error
-	if err != nil {
-		err = model.DB.Where("user_id = ? AND is_active = ?", user.ID, true).First(&userSettings).Error
+	hasUserSettings := false
+
+	if overrideEnabled {
+		// Priority: 1. Default, 2. Active, 3. Any
+		err = model.DB.Where("user_id = ? AND is_default = ?", user.ID, true).First(&userSettings).Error
 		if err != nil {
-			err = model.DB.Where("user_id = ?", user.ID).First(&userSettings).Error
+			err = model.DB.Where("user_id = ? AND is_active = ?", user.ID, true).First(&userSettings).Error
+			if err != nil {
+				err = model.DB.Where("user_id = ?", user.ID).First(&userSettings).Error
+			}
 		}
+		hasUserSettings = err == nil
 	}
-	hasUserSettings := err == nil
 
 	// Fallback Logic
 	if aiForceUserKeys == "true" {
 		if !hasUserSettings || userSettings.APIKey == "" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Administrator requires you to provide your own AI API key in settings."})
-			return
+			return nil, fmt.Errorf("administrator requires you to provide your own AI API key in settings")
 		}
 	}
 
@@ -130,100 +124,85 @@ func AIChat(c *gin.Context) {
 	}
 
 	if resolvedConfig == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "AI is not configured by the administrator."})
+		return nil, fmt.Errorf("AI is not configured by the administrator")
+	}
+
+	return resolvedConfig, nil
+}
+
+func validateAndOverrideModel(resolvedConfig *ai.AIConfig, requestedModel string, user *model.User) {
+	if requestedModel == "" {
 		return
 	}
 
-	// 1.5 Override model if requested specifically in chat
-	if req.Model != "" {
-		// If we use system profile, we should check its allowed models
-		// If we use user profile, we already checked its allowed models for userSettings.ModelOverride,
-		// but we still need to check it for req.Model.
+	// Fetch profile to check allowed models
+	var profile model.AIProviderProfile
+	var userSettings model.AISettings
+	err := model.DB.Where("user_id = ? AND (is_default = ? OR is_active = ?)", user.ID, true, true).First(&userSettings).Error
 
-		// We need to fetch the profile again or keep track of it to check AllowedModels.
-		// Since we want to be efficient, let's just fetch it if it has AllowedModels.
-		var profile model.AIProviderProfile
-		// Find which profile we are using. If we have profileID in userSettings, use that, else use system.
-		profileID := uint(0)
-		if hasUserSettings && userSettings.ProfileID != 0 {
-			profileID = userSettings.ProfileID
-		}
-
-		if profileID != 0 {
-			model.DB.First(&profile, profileID)
-		} else {
-			model.DB.Where("is_system = ?", true).First(&profile)
-		}
-
-		if len(profile.AllowedModels) > 0 {
-			found := false
-			for _, m := range profile.AllowedModels {
-				if m == req.Model {
-					found = true
-					break
-				}
-			}
-			if found {
-				resolvedConfig.Model = req.Model
-			} else {
-				klog.Warningf("Chat: requested model %s is not in allowed list for profile %d", req.Model, profile.ID)
-			}
-		} else {
-			resolvedConfig.Model = req.Model
-		}
+	profileID := uint(0)
+	if err == nil && userSettings.ProfileID != 0 {
+		profileID = userSettings.ProfileID
 	}
 
-	// 2. Get ClientSet (for tools)
-	val, _ := c.Get("cluster")
-	var clientSet *cluster.ClientSet
-	if val != nil {
-		clientSet = val.(*cluster.ClientSet)
+	if profileID != 0 {
+		model.DB.First(&profile, profileID)
+	} else {
+		model.DB.Where("is_system = ?", true).First(&profile)
 	}
 
-	// 3. Load/Create Session
+	if !model.IsAIAllowUserOverrideEnabled() {
+		// User override is disabled, force use of default model for the profile
+		resolvedConfig.Model = profile.DefaultModel
+		return
+	}
+
+	if len(profile.AllowedModels) > 0 {
+		found := false
+		for _, m := range profile.AllowedModels {
+			if m == requestedModel {
+				found = true
+				break
+			}
+		}
+		if found {
+			resolvedConfig.Model = requestedModel
+		} else {
+			klog.Warningf("Chat: requested model %s is not in allowed list for profile %d", requestedModel, profile.ID)
+		}
+	} else {
+		resolvedConfig.Model = requestedModel
+	}
+}
+
+func getOrCreateSession(sessionID string, userID uint) (*model.AIChatSession, error) {
 	var session model.AIChatSession
-	if req.SessionID != "" {
+	if sessionID != "" {
 		if err := model.DB.Preload("Messages", func(db *gorm.DB) *gorm.DB {
 			return db.Order("created_at asc")
-		}).Where("id = ? AND user_id = ?", req.SessionID, user.ID).First(&session).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Session not found"})
-			return
+		}).Where("id = ? AND user_id = ?", sessionID, userID).First(&session).Error; err != nil {
+			return nil, err
 		}
 	} else {
 		session = model.AIChatSession{
 			ID:        uuid.NewString(),
-			UserID:    user.ID,
+			UserID:    userID,
 			Title:     "New Chat",
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
 		if err := model.DB.Create(&session).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
-			return
+			return nil, err
 		}
 	}
+	return &session, nil
+}
 
-	// 4. Prepare Context & Tools
-	aiClient, err := ai.NewClient(resolvedConfig)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create AI client: " + err.Error()})
-		return
-	}
-
-	registry := tools.NewRegistry()
-	registry.Register(&tools.ListPodsTool{})
-	registry.Register(&tools.GetPodLogsTool{})
-	registry.Register(&tools.DescribeResourceTool{})
-	registry.Register(&tools.ScaleDeploymentTool{})
-	registry.Register(&tools.AnalyzeSecurityTool{})
-
-	toolDefs := registry.GetDefinitions()
-
-	// 5. Construct Message History
-	var openAIMessages []openai.ChatCompletionMessage
+func buildMessageHistory(session model.AIChatSession, userMessage string) []openai.ChatCompletionMessage {
+	var messages []openai.ChatCompletionMessage
 
 	// System Prompt
-	openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleSystem,
 		Content: "You are a helpful Kubernetes assistant inside the Cloud Sentinel K8s dashboard. You have access to the cluster via tools. If the user asks to perform an action, use the appropriate tool. If you need confirmation for a destructive action (like scaling), the tool will enforce it. Be concise. If the tool returns an error about missing cluster context, ask the user to select a cluster in the dashboard.",
 	})
@@ -242,53 +221,36 @@ func AIChat(c *gin.Context) {
 		if m.ToolID != "" {
 			msg.ToolCallID = m.ToolID
 		}
-		openAIMessages = append(openAIMessages, msg)
+		messages = append(messages, msg)
 	}
 
 	// Add current user message
-	userMsg := openai.ChatCompletionMessage{
+	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
-		Content: req.Message,
-	}
-	openAIMessages = append(openAIMessages, userMsg)
-
-	// Save user message to DB
-	model.DB.Create(&model.AIChatMessage{
-		SessionID: session.ID,
-		Role:      openai.ChatMessageRoleUser,
-		Content:   req.Message,
-		CreatedAt: time.Now(),
+		Content: userMessage,
 	})
 
-	// 6. Loop for Tool Execution
+	return messages
+}
+
+func executeAIChatLoop(ctx context.Context, aiClient ai.AIClient, session *model.AIChatSession, messages []openai.ChatCompletionMessage, toolDefs []openai.Tool, registry *tools.Registry, toolCtx context.Context) (string, error) {
 	maxIterations := 5
 	var finalResponse string
 
-	// Context for tools
-	toolCtx := context.Background()
-	if clientSet != nil {
-		klog.Infof("AI Chat: Injecting cluster %s into tool context", clientSet.Name)
-		toolCtx = context.WithValue(toolCtx, "cluster_client", clientSet)
-	} else {
-		klog.Warningf("AI Chat: No cluster context found in Gin context")
-	}
-
 	for i := 0; i < maxIterations; i++ {
-		resp, err := aiClient.ChatCompletion(c.Request.Context(), openAIMessages, toolDefs)
+		resp, err := aiClient.ChatCompletion(ctx, messages, toolDefs)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "AI Provider error: " + err.Error()})
-			return
+			return "", fmt.Errorf("AI Provider error: %v", err)
 		}
 
 		if len(resp.Choices) == 0 {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Empty response from AI"})
-			return
+			return "", fmt.Errorf("empty response from AI")
 		}
 
 		choice := resp.Choices[0]
 		msg := choice.Message
 
-		openAIMessages = append(openAIMessages, msg)
+		messages = append(messages, msg)
 
 		// Save assistant message
 		dbMsg := model.AIChatMessage{
@@ -311,7 +273,7 @@ func AIChat(c *gin.Context) {
 				klog.Infof("AI executing tool: %s args: %s", tc.Function.Name, tc.Function.Arguments)
 
 				var result string
-				if clientSet == nil {
+				if val := toolCtx.Value("cluster_client"); val == nil {
 					result = "Error: No active cluster context. Please select a cluster in the dashboard."
 				} else {
 					klog.Infof("AI executing tool: %s", tc.Function.Name)
@@ -330,7 +292,7 @@ func AIChat(c *gin.Context) {
 					Content:    result,
 					ToolCallID: tc.ID,
 				}
-				openAIMessages = append(openAIMessages, toolMsg)
+				messages = append(messages, toolMsg)
 
 				model.DB.Create(&model.AIChatMessage{
 					SessionID: session.ID,
@@ -340,13 +302,90 @@ func AIChat(c *gin.Context) {
 					CreatedAt: time.Now(),
 				})
 			}
-			// Loop again
 			continue
 		} else {
-			// Final response
 			finalResponse = msg.Content
 			break
 		}
+	}
+	return finalResponse, nil
+}
+
+func AIChat(c *gin.Context) {
+	var req ChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user := getUser(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// 1. Resolve Config
+	resolvedConfig, err := resolveAIConfig(user)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 1.5 Override model if requested specifically in chat
+	validateAndOverrideModel(resolvedConfig, req.Model, user)
+
+	// 2. Get ClientSet (for tool context)
+	var clientSet *cluster.ClientSet
+	if val, ok := c.Get("cluster"); ok && val != nil {
+		clientSet = val.(*cluster.ClientSet)
+	}
+
+	// 3. Load/Create Session
+	session, err := getOrCreateSession(req.SessionID, user.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Session not found"})
+		return
+	}
+
+	// 4. Prepare Client & Registry
+	aiClient, err := ai.NewClient(resolvedConfig)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create AI client: " + err.Error()})
+		return
+	}
+
+	registry := tools.NewRegistry()
+	registry.Register(&tools.ListPodsTool{})
+	registry.Register(&tools.GetPodLogsTool{})
+	registry.Register(&tools.DescribeResourceTool{})
+	registry.Register(&tools.ScaleDeploymentTool{})
+	registry.Register(&tools.AnalyzeSecurityTool{})
+	registry.Register(&tools.ListResourcesTool{})
+
+	toolDefs := registry.GetDefinitions()
+
+	// 5. Build Message History
+	openAIMessages := buildMessageHistory(*session, req.Message)
+
+	// Save user message to DB
+	model.DB.Create(&model.AIChatMessage{
+		SessionID: session.ID,
+		Role:      openai.ChatMessageRoleUser,
+		Content:   req.Message,
+		CreatedAt: time.Now(),
+	})
+
+	// 6. Execute Chat Loop
+	toolCtx := context.Background()
+	if clientSet != nil {
+		klog.Infof("AI Chat: Injecting cluster %s into tool context", clientSet.Name)
+		toolCtx = context.WithValue(toolCtx, "cluster_client", clientSet)
+	}
+
+	finalResponse, err := executeAIChatLoop(c.Request.Context(), aiClient, session, openAIMessages, toolDefs, registry, toolCtx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	// Update session timestamp

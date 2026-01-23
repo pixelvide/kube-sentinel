@@ -1931,6 +1931,7 @@ export const toggleAIProfile = (id: number): Promise<AIProviderProfile> => {
 export const fetchAdminAIConfig = (): Promise<{
   allow_user_keys: string
   force_user_keys: string
+  allow_user_override: string
   system_profile: AIProviderProfile | null
 }> => {
   return fetchAPI('/admin/ai/config')
@@ -1940,6 +1941,7 @@ export const fetchAdminAIConfig = (): Promise<{
 export const updateAIGovernance = (data: {
   allow_user_keys: string
   force_user_keys: string
+  allow_user_override: string
 }): Promise<{ status: string }> => {
   return apiClient.post('/admin/ai/governance', data)
 }

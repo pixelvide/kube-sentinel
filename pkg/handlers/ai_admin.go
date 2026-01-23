@@ -103,16 +103,22 @@ func ToggleAIProfile(c *gin.Context) {
 
 func GetAdminAIConfig(c *gin.Context) {
 	// 1. App Level Configs
-	allowKeys, _ := model.GetAppConfig(model.CurrentApp.ID, model.AIAllowUserKeys)
-	forceKeys, _ := model.GetAppConfig(model.CurrentApp.ID, model.AIForceUserKeys)
+	var allowValue, forceValue, overrideValue string
+	if allowKeys, err := model.GetAppConfig(model.CurrentApp.ID, model.AIAllowUserKeys); err == nil && allowKeys != nil {
+		allowValue = allowKeys.Value
+	}
+	if forceKeys, err := model.GetAppConfig(model.CurrentApp.ID, model.AIForceUserKeys); err == nil && forceKeys != nil {
+		forceValue = forceKeys.Value
+	}
+	if overrideKeys, err := model.GetAppConfig(model.CurrentApp.ID, model.AIAllowUserOverride); err == nil && overrideKeys != nil {
+		overrideValue = overrideKeys.Value
+	} else {
+		overrideValue = "true" // Default
+	}
 
 	// 2. Global System Settings (Profile with IsSystem = true)
 	var profile model.AIProviderProfile
-	model.DB.Where("is_system = ?", true).First(&profile)
-
-	// For backward compatibility or if we still want to return a "settings" like object
-	// we can construct it if needed, or just return the profile.
-	// But let's return it separately for clarity.
+	_ = model.DB.Where("is_system = ?", true).First(&profile).Error
 
 	// Mask system profile key if not admin
 	user := getUser(c)
@@ -123,16 +129,18 @@ func GetAdminAIConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"allow_user_keys": allowKeys.Value,
-		"force_user_keys": forceKeys.Value,
-		"system_profile":  profile,
+		"allow_user_keys":     allowValue,
+		"force_user_keys":     forceValue,
+		"allow_user_override": overrideValue,
+		"system_profile":      profile,
 	})
 }
 
 func UpdateAIGovernance(c *gin.Context) {
 	var input struct {
-		AllowUserKeys string `json:"allow_user_keys"`
-		ForceUserKeys string `json:"force_user_keys"`
+		AllowUserKeys     string `json:"allow_user_keys"`
+		ForceUserKeys     string `json:"force_user_keys"`
+		AllowUserOverride string `json:"allow_user_override"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -141,8 +149,18 @@ func UpdateAIGovernance(c *gin.Context) {
 	}
 
 	// Update AppConfigs
-	model.SetAppConfig(model.CurrentApp.ID, model.AIAllowUserKeys, input.AllowUserKeys)
-	model.SetAppConfig(model.CurrentApp.ID, model.AIForceUserKeys, input.ForceUserKeys)
+	if err := model.SetAppConfig(model.CurrentApp.ID, model.AIAllowUserKeys, input.AllowUserKeys); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update AI governance (allow keys)"})
+		return
+	}
+	if err := model.SetAppConfig(model.CurrentApp.ID, model.AIForceUserKeys, input.ForceUserKeys); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update AI governance (force keys)"})
+		return
+	}
+	if err := model.SetAppConfig(model.CurrentApp.ID, model.AIAllowUserOverride, input.AllowUserOverride); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update AI governance (user override)"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "updated"})
 }

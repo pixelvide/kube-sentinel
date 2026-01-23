@@ -13,6 +13,12 @@ export interface AIProviderProfile {
   updatedAt: string
 }
 
+export interface AIGovernanceSettings {
+  allow_user_keys: string
+  force_user_keys: string
+  allow_user_override: string
+}
+
 export interface AISettings {
   id?: number
   userID: number
