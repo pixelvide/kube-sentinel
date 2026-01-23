@@ -10,8 +10,11 @@ import (
 	"github.com/pixelvide/cloud-sentinel-k8s/pkg/helm"
 	openai "github.com/sashabaranov/go-openai"
 	corev1 "k8s.io/api/core/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
@@ -270,13 +273,13 @@ func (t *ListResourcesTool) Definition() openai.Tool {
 		Type: openai.ToolTypeFunction,
 		Function: &openai.FunctionDefinition{
 			Name:        "list_resources",
-			Description: "List Kubernetes resources of a specific kind in a namespace, optionally filtered by labels. This tool also can be used to list the Helm Release by passing on of helmrelease|helmreleases|hr| as kind.",
+			Description: "List Kubernetes resources of a specific kind in a namespace, optionally filtered by labels. This tool also support listing CustomResourceDefinition (CRD) and HelmRelease.",
 			Parameters: json.RawMessage(`{
 				"type": "object",
 				"properties": {
 					"kind": {
 						"type": "string",
-						"description": "The kind of resource to list (Pod, Service, Deployment, ReplicaSet, StatefulSet, DaemonSet, Job, CronJob, ConfigMap, Secret, Namespace, Node, Ingress, Event)."
+						"description": "The kind of resource to list (Pod, Service, Deployment, ReplicaSet, StatefulSet, DaemonSet, Job, CronJob, ConfigMap, Secret, Namespace, Node, Ingress, Event, CustomResourceDefinition, HelmRelease)."
 					},
 					"namespace": {
 						"type": "string",
@@ -510,6 +513,12 @@ func (t *ListResourcesTool) getListHandler(kind string) listFunc {
 		"helmrelease":  t.listHelmReleases,
 		"helmreleases": t.listHelmReleases,
 		"hr":           t.listHelmReleases,
+
+		// custom resource definitions
+		"customresourcedefinition":  t.listCRDs,
+		"customresourcedefinitions": t.listCRDs,
+		"crd":                       t.listCRDs,
+		"crds":                      t.listCRDs,
 	}
 
 	return handlers[kind]
@@ -521,12 +530,14 @@ func (t *ListResourcesTool) listByKind(ctx context.Context, cs *cluster.ClientSe
 
 	// 1. Look up the handler
 	handler := t.getListHandler(kind)
-	if handler == nil {
-		return nil, fmt.Errorf("unsupported resource kind: %s", kind)
+	if handler != nil {
+		// 2. Call the handler
+		results, err = handler(ctx, cs, ns, filter, opts)
+	} else {
+		// 3. Try dynamic listing
+		results, err = t.listDynamicResources(ctx, cs, kind, ns, filter, opts)
 	}
 
-	// 2. Call the handler
-	results, err = handler(ctx, cs, ns, filter, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -1106,6 +1117,110 @@ func (t *ListResourcesTool) listHTTPRoutes(ctx context.Context, cs *cluster.Clie
 			item.Namespace, item.Name, parentRefs, len(item.Spec.Rules)))
 	}
 	return results, nil
+}
+
+func (t *ListResourcesTool) listCRDs(ctx context.Context, cs *cluster.ClientSet, ns, filter string, opts metav1.ListOptions) ([]string, error) {
+	// CRDs are cluster-scoped, so we ignore namespace in the request but respect it if provided in options (which shouldn't happen for CRDs usually)
+	listUpdates, err := buildListOptions("", opts)
+	if err != nil {
+		return nil, err
+	}
+
+	var list apiextensionsv1.CustomResourceDefinitionList
+	if err := cs.K8sClient.List(ctx, &list, listUpdates...); err != nil {
+		return nil, err
+	}
+	var results []string
+	for _, item := range list.Items {
+		if !shouldIncludeResource(item.Name, "", "", filter) {
+			continue
+		}
+
+		results = append(results, fmt.Sprintf("%s (Group: %s, Version: %s, Scope: %s)",
+			item.Name, item.Spec.Group, item.Spec.Versions[0].Name, item.Spec.Scope))
+	}
+	return results, nil
+}
+
+func (t *ListResourcesTool) listDynamicResources(ctx context.Context, cs *cluster.ClientSet, kind, ns, filter string, opts metav1.ListOptions) ([]string, error) {
+	// 1. Verify availability and resolve GVK
+	gvk, err := t.resolveGVK(cs, kind)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Build list options
+	listUpdates, err := buildListOptions(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. List resources
+	var uList unstructured.UnstructuredList
+	uList.SetGroupVersionKind(gvk)
+
+	if err := cs.K8sClient.List(ctx, &uList, listUpdates...); err != nil {
+		return nil, err
+	}
+
+	var results []string
+	for _, item := range uList.Items {
+		if !shouldIncludeResource(item.GetName(), item.GetNamespace(), ns, filter) {
+			continue
+		}
+		results = append(results, fmt.Sprintf("%s/%s (Kind: %s)", item.GetNamespace(), item.GetName(), item.GetKind()))
+	}
+	return results, nil
+}
+
+func (t *ListResourcesTool) resolveGVK(cs *cluster.ClientSet, kind string) (schema.GroupVersionKind, error) {
+	// Discovery
+	apiResourceLists, err := cs.K8sClient.ClientSet.Discovery().ServerPreferredResources()
+	if err != nil {
+		return schema.GroupVersionKind{}, fmt.Errorf("failed to discover resources: %w", err)
+	}
+
+	var bestMatch *metav1.APIResource
+	var bestMatchGV string
+
+	lowerKind := strings.ToLower(kind)
+	found := false
+
+	// Find the resource
+	for _, list := range apiResourceLists {
+		for _, resource := range list.APIResources {
+			if strings.ToLower(resource.Kind) == lowerKind || strings.ToLower(resource.Name) == lowerKind || strings.ToLower(resource.SingularName) == lowerKind || containsString(resource.ShortNames, lowerKind) {
+				r := resource
+				bestMatch = &r
+				bestMatchGV = list.GroupVersion
+				found = true
+				break
+			}
+		}
+		if found {
+			break
+		}
+	}
+
+	if !found {
+		return schema.GroupVersionKind{}, fmt.Errorf("unsupported resource kind: %s (CRD not found or not available)", kind)
+	}
+
+	gv, err := schema.ParseGroupVersion(bestMatchGV)
+	if err != nil {
+		return schema.GroupVersionKind{}, err
+	}
+
+	return gv.WithKind(bestMatch.Kind), nil
+}
+
+func containsString(slice []string, val string) bool {
+	for _, s := range slice {
+		if strings.ToLower(s) == val {
+			return true
+		}
+	}
+	return false
 }
 
 // --- Get Cluster Info Tool ---
