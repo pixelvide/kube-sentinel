@@ -273,7 +273,7 @@ func executeAIChatLoop(ctx context.Context, aiClient ai.AIClient, session *model
 				klog.Infof("AI executing tool: %s args: %s", tc.Function.Name, tc.Function.Arguments)
 
 				var result string
-				if val := toolCtx.Value("cluster_client"); val == nil {
+				if val := toolCtx.Value(tools.ClientSetKey{}); val == nil {
 					result = "Error: No active cluster context. Please select a cluster in the dashboard."
 				} else {
 					klog.Infof("AI executing tool: %s", tc.Function.Name)
@@ -361,6 +361,7 @@ func AIChat(c *gin.Context) {
 	registry.Register(&tools.ScaleDeploymentTool{})
 	registry.Register(&tools.AnalyzeSecurityTool{})
 	registry.Register(&tools.ListResourcesTool{})
+	registry.Register(&tools.GetClusterInfoTool{})
 
 	toolDefs := registry.GetDefinitions()
 

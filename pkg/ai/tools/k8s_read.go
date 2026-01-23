@@ -603,3 +603,61 @@ func (t *ListResourcesTool) listEvents(ctx context.Context, cs *cluster.ClientSe
 	}
 	return results, nil
 }
+
+// --- Get Cluster Info Tool ---
+
+type GetClusterInfoTool struct{}
+
+func (t *GetClusterInfoTool) Name() string { return "get_cluster_info" }
+
+func (t *GetClusterInfoTool) Definition() openai.Tool {
+	return openai.Tool{
+		Type: openai.ToolTypeFunction,
+		Function: &openai.FunctionDefinition{
+			Name:        "get_cluster_info",
+			Description: "Get general information about the Kubernetes cluster, including server version and capacity (nodes, CPU, memory).",
+			Parameters:  json.RawMessage(`{"type": "object", "properties": {}}`),
+		},
+	}
+}
+
+func (t *GetClusterInfoTool) Execute(ctx context.Context, args string) (string, error) {
+	cs, err := GetClientSet(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	// 1. Get Version
+	version, err := cs.K8sClient.ClientSet.Discovery().ServerVersion()
+	if err != nil {
+		return "", fmt.Errorf("failed to get cluster version: %w", err)
+	}
+
+	// 2. Get Nodes for Capacity
+	nodes, err := cs.K8sClient.ClientSet.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to list nodes: %w", err)
+	}
+
+	var totalCPU int64
+	var totalMem int64
+	nodeCount := len(nodes.Items)
+
+	for _, node := range nodes.Items {
+		totalCPU += node.Status.Capacity.Cpu().MilliValue()
+		totalMem += node.Status.Capacity.Memory().Value()
+	}
+
+	info := fmt.Sprintf("Cluster Information:\n"+
+		"- Kubernetes Version: %s\n"+
+		"- Node Count: %d\n"+
+		"- Total CPU Capacity: %dm\n"+
+		"- Total Memory Capacity: %d MiB",
+		version.GitVersion,
+		nodeCount,
+		totalCPU,
+		totalMem/(1024*1024),
+	)
+
+	return info, nil
+}
