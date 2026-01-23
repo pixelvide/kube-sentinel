@@ -11,7 +11,9 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
@@ -749,7 +751,7 @@ func (t *ListResourcesTool) listEvents(ctx context.Context, cs *cluster.ClientSe
 	return results, nil
 }
 
-func (t *ListResourcesTool) listHelmReleases(ctx context.Context, cs *cluster.ClientSet, ns, filter string, _ metav1.ListOptions) ([]string, error) {
+func (t *ListResourcesTool) listHelmReleases(_ context.Context, cs *cluster.ClientSet, ns, filter string, _ metav1.ListOptions) ([]string, error) {
 	releases, err := helm.ListReleases(cs.Configuration, ns)
 	if err != nil {
 		return nil, err
@@ -1036,8 +1038,20 @@ func (t *ListResourcesTool) listClusterRoleBindings(ctx context.Context, cs *clu
 }
 
 func (t *ListResourcesTool) listGateways(ctx context.Context, cs *cluster.ClientSet, ns, filter string, opts metav1.ListOptions) ([]string, error) {
+	var listUpdates []client.ListOption
+	if ns != "" {
+		listUpdates = append(listUpdates, client.InNamespace(ns))
+	}
+	if opts.LabelSelector != "" {
+		selector, err := labels.Parse(opts.LabelSelector)
+		if err != nil {
+			return nil, fmt.Errorf("invalid label selector: %w", err)
+		}
+		listUpdates = append(listUpdates, client.MatchingLabelsSelector{Selector: selector})
+	}
+
 	var list gatewayapiv1.GatewayList
-	if err := cs.K8sClient.List(ctx, &list); err != nil {
+	if err := cs.K8sClient.List(ctx, &list, listUpdates...); err != nil {
 		return nil, err
 	}
 	var results []string
@@ -1056,8 +1070,20 @@ func (t *ListResourcesTool) listGateways(ctx context.Context, cs *cluster.Client
 }
 
 func (t *ListResourcesTool) listHTTPRoutes(ctx context.Context, cs *cluster.ClientSet, ns, filter string, opts metav1.ListOptions) ([]string, error) {
+	var listUpdates []client.ListOption
+	if ns != "" {
+		listUpdates = append(listUpdates, client.InNamespace(ns))
+	}
+	if opts.LabelSelector != "" {
+		selector, err := labels.Parse(opts.LabelSelector)
+		if err != nil {
+			return nil, fmt.Errorf("invalid label selector: %w", err)
+		}
+		listUpdates = append(listUpdates, client.MatchingLabelsSelector{Selector: selector})
+	}
+
 	var list gatewayapiv1.HTTPRouteList
-	if err := cs.K8sClient.List(ctx, &list); err != nil {
+	if err := cs.K8sClient.List(ctx, &list, listUpdates...); err != nil {
 		return nil, err
 	}
 	var results []string
