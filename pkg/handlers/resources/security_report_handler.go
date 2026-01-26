@@ -9,6 +9,7 @@ import (
 	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
 	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -133,6 +134,49 @@ func (h *SecurityReportHandler) ListReports(c *gin.Context) {
 			}
 		}
 		list.Items = filteredItems
+
+	case workloadKind == "Pod":
+		// For Pods, we need to find the owner (workload) that controls it
+		// because Trivy usually attaches reports to the workload (RS, DS, STS, etc.)
+		var pod corev1.Pod
+		if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Namespace: namespace, Name: workloadName}, &pod); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "pod not found"})
+			return
+		}
+
+		ownerKind := ""
+		ownerName := ""
+
+		// Check for controller owner
+		for _, owner := range pod.OwnerReferences {
+			if owner.Controller != nil && *owner.Controller {
+				ownerKind = owner.Kind
+				ownerName = owner.Name
+				break
+			}
+		}
+
+		switch ownerKind {
+		case "":
+			// Standalone pod? Try direct lookup
+			ownerKind = "Pod"
+			ownerName = workloadName
+		case "ReplicaSet":
+			// If owner is ReplicaSet, use RS logic.
+			// Currently, we just look up reports for the RS.
+		}
+
+		// Now query with the resolved owner
+		labels := client.MatchingLabels{
+			"trivy-operator.resource.kind": ownerKind,
+			"trivy-operator.resource.name": ownerName,
+		}
+		opts = append(opts, labels)
+
+		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list vulnerability reports: %v", err)})
+			return
+		}
 
 	case workloadKind != "" && workloadName != "":
 		labels := client.MatchingLabels{
