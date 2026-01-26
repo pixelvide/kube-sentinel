@@ -263,17 +263,6 @@ export function ServiceDetail(props: { name: string; namespace?: string }) {
             ),
           },
           {
-            value: 'events',
-            label: 'Events',
-            content: (
-              <EventTable
-                resource={'services'}
-                namespace={namespace}
-                name={name}
-              />
-            ),
-          },
-          {
             value: 'history',
             label: 'History',
             content: (
@@ -282,6 +271,17 @@ export function ServiceDetail(props: { name: string; namespace?: string }) {
                 name={name}
                 namespace={namespace}
                 currentResource={data}
+              />
+            ),
+          },
+          {
+            value: 'events',
+            label: 'Events',
+            content: (
+              <EventTable
+                resource={'services'}
+                namespace={namespace}
+                name={name}
               />
             ),
           },
