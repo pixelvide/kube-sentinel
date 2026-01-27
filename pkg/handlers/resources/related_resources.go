@@ -365,55 +365,48 @@ func GetRelatedResources(c *gin.Context) {
 	}
 
 	if v, ok := resource.(client.Object); ok {
-		// Generic owner reference check (excluding what we already handled explicitly if need be, but harmless to double check if not duplicate)
-		// We already handled ReplicaSet -> Deployment explicitly above for better control, but let's keep the generic one
-		// or exclude it if it causes duplicates. The generic one below handles "ReplicaSet" owners (Logic seems to be trying to find owner of a ReplicaSet if the current resource IS a replica set owner?? No wait logic is: if V has an owner that IS a ReplicaSet...)
-
-		for _, owner := range v.GetOwnerReferences() {
-			// Logic: If I am owned by a ReplicaSet (e.g. I am a Pod), then find that RS, and then find who owns that RS (e.g. Deployment)
-			if owner.Kind == "ReplicaSet" {
-				// get the owner of the ReplicaSet
-				rs := &appsv1.ReplicaSet{}
-				if err := cs.K8sClient.Get(ctx, client.ObjectKey{Namespace: v.GetNamespace(), Name: owner.Name}, rs); err != nil {
-					// logs or ignore?
-				} else if len(rs.OwnerReferences) > 0 {
-					for _, rsOwner := range rs.OwnerReferences {
-						// Avoid adding duplicate if we are processing a ReplicaSet itself (handled above)
-						// But here v is likely a Pod.
-						result = append(result, common.RelatedResource{
-							Type:      strings.ToLower(rsOwner.Kind) + "s",
-							Name:      rsOwner.Name,
-							Namespace: v.GetNamespace(),
-						})
-					}
-				}
-			}
-			// Add the direct owner (e.g. Pod -> ReplicaSet)
-			// But avoid adding Deployment here if we already added it in the specific case above to avoid dups?
-			// The specific case above was for when `res` IS a ReplicaSet.
-			// Here `v` IS `res`.
-			// If `v` is a ReplicaSet, we already added Deployment above.
-			// If `v` is a Pod, we add the ReplicaSet here.
-
-			// Simple check to avoid duplicates if possible, or just let frontend handle distinct?
-			// Frontend SimpleTable doesn't dedupe usually.
-			isDup := false
-			if _, isRS := resource.(*appsv1.ReplicaSet); isRS && owner.Kind == "Deployment" {
-				isDup = true
-			}
-
-			if !isDup {
-				result = append(result, common.RelatedResource{
-					Type:       strings.ToLower(owner.Kind) + "s",
-					Name:       owner.Name,
-					Namespace:  v.GetNamespace(),
-					APIVersion: owner.APIVersion,
-				})
-			}
-		}
+		// Generic owner reference check
+		owners := discoverOwners(ctx, cs, v)
+		result = append(result, owners...)
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func discoverOwners(ctx context.Context, cs *cluster.ClientSet, resource client.Object) []common.RelatedResource {
+	var result []common.RelatedResource
+	for _, owner := range resource.GetOwnerReferences() {
+		// Logic: If I am owned by a ReplicaSet (e.g. I am a Pod), then find that RS, and then find who owns that RS (e.g. Deployment)
+		if owner.Kind == "ReplicaSet" {
+			// get the owner of the ReplicaSet
+			rs := &appsv1.ReplicaSet{}
+			if err := cs.K8sClient.Get(ctx, client.ObjectKey{Namespace: resource.GetNamespace(), Name: owner.Name}, rs); err == nil && len(rs.OwnerReferences) > 0 {
+				for _, rsOwner := range rs.OwnerReferences {
+					result = append(result, common.RelatedResource{
+						Type:      strings.ToLower(rsOwner.Kind) + "s",
+						Name:      rsOwner.Name,
+						Namespace: resource.GetNamespace(),
+					})
+				}
+			}
+		}
+
+		// Avoid adding duplicate if we are processing a ReplicaSet itself (handled above)
+		isDup := false
+		if _, isRS := resource.(*appsv1.ReplicaSet); isRS && owner.Kind == "Deployment" {
+			isDup = true
+		}
+
+		if !isDup {
+			result = append(result, common.RelatedResource{
+				Type:       strings.ToLower(owner.Kind) + "s",
+				Name:       owner.Name,
+				Namespace:  resource.GetNamespace(),
+				APIVersion: owner.APIVersion,
+			})
+		}
+	}
+	return result
 }
 
 func getHTTPRouteRelatedResouces(res *gatewayapiv1.HTTPRoute, namespace string) []common.RelatedResource {

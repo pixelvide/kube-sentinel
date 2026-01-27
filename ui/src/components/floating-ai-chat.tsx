@@ -508,7 +508,9 @@ export function FloatingAIChat() {
                                                                 )
                                                             } else if (tag.type === 'tool_call') {
                                                                 let callData = { name: 'Unknown', arguments: {} }
-                                                                try { callData = JSON.parse(tag.content) } catch (e) { }
+                                                                try { callData = JSON.parse(tag.content) } catch {
+                                                                    // ignore
+                                                                }
                                                                 return (
                                                                     <div key={i} className="bg-muted/30 rounded-lg border border-primary/10 overflow-hidden mb-1">
                                                                         <div className="px-3 py-1.5 text-[11px] font-medium flex items-center justify-between text-muted-foreground bg-muted/50">

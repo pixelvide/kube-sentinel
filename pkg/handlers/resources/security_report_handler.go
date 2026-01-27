@@ -89,6 +89,93 @@ func (h *SecurityReportHandler) CheckStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, model.SecurityStatusResponse{TrivyInstalled: installed})
 }
 
+// listReportsGeneric is a helper to list and filter reports based on common logic
+func (h *SecurityReportHandler) listReportsGeneric(
+	c *gin.Context,
+	reportGVK schema.GroupVersionKind,
+	crdName string,
+	workloadKind string,
+	workloadName string,
+	namespace string,
+) ([]unstructured.Unstructured, error) {
+	cs := c.MustGet("cluster").(*cluster.ClientSet)
+
+	// Check if CRD exists
+	var crd apiextensionsv1.CustomResourceDefinition
+	if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Name: crdName}, &crd); err != nil {
+		return []unstructured.Unstructured{}, nil //nolint:nilerr // Intentional: if CRD missing, return empty list, no error
+	}
+
+	var list unstructured.UnstructuredList
+	list.SetGroupVersionKind(reportGVK)
+	opts := []client.ListOption{}
+
+	if namespace != "" {
+		opts = append(opts, client.InNamespace(namespace))
+	}
+
+	switch {
+	case workloadKind == "Deployment":
+		var rsList appsv1.ReplicaSetList
+		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
+			return nil, fmt.Errorf("failed to list recyclasets: %w", err)
+		}
+
+		var targetRSNames []string
+		for _, rs := range rsList.Items {
+			for _, owner := range rs.OwnerReferences {
+				if owner.Kind == "Deployment" && owner.Name == workloadName {
+					targetRSNames = append(targetRSNames, rs.Name)
+					break
+				}
+			}
+		}
+
+		if len(targetRSNames) == 0 {
+			return []unstructured.Unstructured{}, nil
+		}
+
+		labels := client.MatchingLabels{
+			"trivy-operator.resource.kind": "ReplicaSet",
+		}
+		opts = append(opts, labels)
+
+		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
+			return nil, fmt.Errorf("failed to list reports: %w", err)
+		}
+
+		filteredItems := []unstructured.Unstructured{}
+		for _, item := range list.Items {
+			lbls := item.GetLabels()
+			reportResourceName := lbls["trivy-operator.resource.name"]
+			for _, target := range targetRSNames {
+				if reportResourceName == target {
+					filteredItems = append(filteredItems, item)
+					break
+				}
+			}
+		}
+		return filteredItems, nil
+
+	case workloadKind != "" && workloadName != "":
+		labels := client.MatchingLabels{
+			"trivy-operator.resource.kind": workloadKind,
+			"trivy-operator.resource.name": workloadName,
+		}
+		opts = append(opts, labels)
+		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
+			return nil, fmt.Errorf("failed to list reports: %w", err)
+		}
+		return list.Items, nil
+
+	default:
+		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
+			return nil, fmt.Errorf("failed to list reports: %w", err)
+		}
+		return list.Items, nil
+	}
+}
+
 // ListReports fetches vulnerability reports, optionally filtered by workload
 func (h *SecurityReportHandler) ListReports(c *gin.Context) {
 	cs := c.MustGet("cluster").(*cluster.ClientSet)
@@ -101,85 +188,36 @@ func (h *SecurityReportHandler) ListReports(c *gin.Context) {
 		return
 	}
 
-	// 1. Check if CRD exists first to avoid confusing errors
-	var crd apiextensionsv1.CustomResourceDefinition
-	if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Name: "vulnerabilityreports.aquasecurity.github.io"}, &crd); err != nil {
-		// If CRD not found, try ClusterVulnerabilityReport just in case, or return empty
-		c.JSON(http.StatusOK, model.VulnerabilityReportList{Items: []model.VulnerabilityReport{}})
-		return
-	}
-
-	// 2. List Reports
-	var list unstructured.UnstructuredList
-	opts := []client.ListOption{}
-
+	// 1. Special handling for Node (ClusterVulnerabilityReport) - separate path
 	if workloadKind == "Node" {
-		list.SetGroupVersionKind(clusterVulnerabilityReportKind)
-		// For ClusterVulnerabilityReport, no namespace
-	} else {
-		list.SetGroupVersionKind(vulnerabilityReportKind)
-		opts = append(opts, client.InNamespace(namespace))
-	}
-
-	// Trivy Operator labels reports with the workload details
-	// labels: trivy-operator.resource.kind, trivy-operator.resource.name
-
-	// Special handling for Deployment: Trivy attaches reports to the ReplicaSet
-	switch {
-	case workloadKind == "Deployment":
-		var rsList appsv1.ReplicaSetList
-		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list recyclasets: %v", err)})
-			return
-		}
-
-		var targetRSNames []string
-		for _, rs := range rsList.Items {
-			for _, owner := range rs.OwnerReferences {
-				if owner.Kind == "Deployment" && owner.Name == workloadName {
-					// Found a ReplicaSet owned by this Deployment
-					targetRSNames = append(targetRSNames, rs.Name)
-					break
-				}
-			}
-		}
-
-		if len(targetRSNames) == 0 {
-			// No RS found (or no RS owned by this deployment yet), return empty
+		// ClusterVulnerabilityReport is cluster-scoped
+		var crd apiextensionsv1.CustomResourceDefinition
+		if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Name: "clustervulnerabilityreports.aquasecurity.github.io"}, &crd); err != nil {
 			c.JSON(http.StatusOK, model.VulnerabilityReportList{Items: []model.VulnerabilityReport{}})
 			return
 		}
+		var list unstructured.UnstructuredList
+		list.SetGroupVersionKind(clusterVulnerabilityReportKind)
 
-		// List ALL reports for ReplicaSets in this namespace, then filter in memory
-		// This is efficient enough for typical namespaces
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": "ReplicaSet",
-		}
-		opts = append(opts, labels)
-
-		// We can't easily set label selector for multiple names ("OR"), so we filter after list
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list vulnerability reports: %v", err)})
+		if err := cs.K8sClient.List(c.Request.Context(), &list); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list cluster vulnerability reports: %v", err)})
 			return
 		}
 
-		// Filter list to keep only those belonging to our target RSs
-		filteredItems := []unstructured.Unstructured{}
-		for _, item := range list.Items {
-			lbls := item.GetLabels()
-			reportResourceName := lbls["trivy-operator.resource.name"]
-			for _, target := range targetRSNames {
-				if reportResourceName == target {
-					filteredItems = append(filteredItems, item)
-					break
-				}
+		reports := make([]model.VulnerabilityReport, 0, len(list.Items))
+		for _, u := range list.Items {
+			var report model.VulnerabilityReport
+			if err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &report); err != nil {
+				continue
 			}
+			reports = append(reports, report)
 		}
-		list.Items = filteredItems
+		c.JSON(http.StatusOK, model.VulnerabilityReportList{Items: reports})
+		return
+	}
 
-	case workloadKind == "Pod":
-		// For Pods, we need to find the owner (workload) that controls it
-		// because Trivy usually attaches reports to the workload (RS, DS, STS, etc.)
+	// 2. Resolve Pod owner if needed
+	if workloadKind == "Pod" {
 		var pod corev1.Pod
 		if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Namespace: namespace, Name: workloadName}, &pod); err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "pod not found"})
@@ -189,7 +227,6 @@ func (h *SecurityReportHandler) ListReports(c *gin.Context) {
 		ownerKind := ""
 		ownerName := ""
 
-		// Check for controller owner
 		for _, owner := range pod.OwnerReferences {
 			if owner.Controller != nil && *owner.Controller {
 				ownerKind = owner.Kind
@@ -200,55 +237,29 @@ func (h *SecurityReportHandler) ListReports(c *gin.Context) {
 
 		switch ownerKind {
 		case "":
-			// Standalone pod? Try direct lookup
 			ownerKind = "Pod"
 			ownerName = workloadName
 		case "ReplicaSet":
-			// If owner is ReplicaSet, use RS logic.
+			// ReplicaSet will be handled by listReportsGeneric if it recurses.
 			// Currently, we just look up reports for the RS.
 		}
 
-		// Now query with the resolved owner
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": ownerKind,
-			"trivy-operator.resource.name": ownerName,
-		}
-		opts = append(opts, labels)
-
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list vulnerability reports: %v", err)})
-			return
-		}
-
-	case workloadKind != "" && workloadName != "":
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": workloadKind,
-			"trivy-operator.resource.name": workloadName,
-		}
-		opts = append(opts, labels)
-
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list vulnerability reports: %v", err)})
-			return
-		}
-
-	default:
-		// No specific workload filter? Just list with existing opts (namespace only)
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list vulnerability reports: %v", err)})
-			return
-		}
+		workloadKind = ownerKind
+		workloadName = ownerName
 	}
 
-	// Skip the original List call since we handled it inside the branches
-	// Proceed to conversion
+	// 3. Use generic helper
+	items, err := h.listReportsGeneric(c, vulnerabilityReportKind, "vulnerabilityreports.aquasecurity.github.io", workloadKind, workloadName, namespace)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	// 3. Convert to typed Helper models
-	reports := make([]model.VulnerabilityReport, 0, len(list.Items))
-	for _, u := range list.Items {
+	reports := make([]model.VulnerabilityReport, 0, len(items))
+	for _, u := range items {
 		var report model.VulnerabilityReport
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &report); err != nil {
-			continue // skip malformed
+			continue
 		}
 		reports = append(reports, report)
 	}
@@ -418,6 +429,8 @@ func (h *SecurityReportHandler) GetTopVulnerableWorkloads(c *gin.Context) {
 }
 
 // GetTopMisconfiguredWorkloads fetches workloads with most misconfigurations
+//
+//nolint:dupl // aggregation logic is similar
 func (h *SecurityReportHandler) GetTopMisconfiguredWorkloads(c *gin.Context) {
 	cs := c.MustGet("cluster").(*cluster.ClientSet)
 
@@ -497,6 +510,8 @@ func (h *SecurityReportHandler) GetTopMisconfiguredWorkloads(c *gin.Context) {
 }
 
 // GetTopRbacRiskyWorkloads fetches workloads with most RBAC risks
+//
+//nolint:dupl // aggregation logic is similar
 func (h *SecurityReportHandler) GetTopRbacRiskyWorkloads(c *gin.Context) {
 	cs := c.MustGet("cluster").(*cluster.ClientSet)
 
@@ -614,8 +629,9 @@ func (h *SecurityReportHandler) GetTopRbacRiskyWorkloads(c *gin.Context) {
 }
 
 // ListConfigAuditReports fetches config audit reports for a workload
+//
+//nolint:dupl // boilerplate code for different report types
 func (h *SecurityReportHandler) ListConfigAuditReports(c *gin.Context) {
-	cs := c.MustGet("cluster").(*cluster.ClientSet)
 	namespace := c.Query("namespace")
 	workloadKind := c.Query("workloadKind")
 	workloadName := c.Query("workloadName")
@@ -625,84 +641,14 @@ func (h *SecurityReportHandler) ListConfigAuditReports(c *gin.Context) {
 		return
 	}
 
-	// Check if CRD exists
-	var crd apiextensionsv1.CustomResourceDefinition
-	if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Name: "configauditreports.aquasecurity.github.io"}, &crd); err != nil {
-		c.JSON(http.StatusOK, model.ConfigAuditReportList{Items: []model.ConfigAuditReport{}})
+	items, err := h.listReportsGeneric(c, configAuditReportKind, "configauditreports.aquasecurity.github.io", workloadKind, workloadName, namespace)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var list unstructured.UnstructuredList
-	list.SetGroupVersionKind(configAuditReportKind)
-
-	opts := []client.ListOption{client.InNamespace(namespace)}
-
-	switch {
-	case workloadKind == "Deployment":
-		var rsList appsv1.ReplicaSetList
-		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list recyclasets: %v", err)})
-			return
-		}
-
-		var targetRSNames []string
-		for _, rs := range rsList.Items {
-			for _, owner := range rs.OwnerReferences {
-				if owner.Kind == "Deployment" && owner.Name == workloadName {
-					targetRSNames = append(targetRSNames, rs.Name)
-					break
-				}
-			}
-		}
-
-		if len(targetRSNames) == 0 {
-			c.JSON(http.StatusOK, model.ConfigAuditReportList{Items: []model.ConfigAuditReport{}})
-			return
-		}
-
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": "ReplicaSet",
-		}
-		opts = append(opts, labels)
-
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list config audit reports: %v", err)})
-			return
-		}
-
-		filteredItems := []unstructured.Unstructured{}
-		for _, item := range list.Items {
-			lbls := item.GetLabels()
-			reportResourceName := lbls["trivy-operator.resource.name"]
-			for _, target := range targetRSNames {
-				if reportResourceName == target {
-					filteredItems = append(filteredItems, item)
-					break
-				}
-			}
-		}
-		list.Items = filteredItems
-
-	case workloadKind != "" && workloadName != "":
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": workloadKind,
-			"trivy-operator.resource.name": workloadName,
-		}
-		opts = append(opts, labels)
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list config audit reports: %v", err)})
-			return
-		}
-
-	default:
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list config audit reports: %v", err)})
-			return
-		}
-	}
-
-	reports := make([]model.ConfigAuditReport, 0, len(list.Items))
-	for _, u := range list.Items {
+	reports := make([]model.ConfigAuditReport, 0, len(items))
+	for _, u := range items {
 		var report model.ConfigAuditReport
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &report); err != nil {
 			continue
@@ -714,8 +660,9 @@ func (h *SecurityReportHandler) ListConfigAuditReports(c *gin.Context) {
 }
 
 // ListInfraAssessmentReports fetches infra assessment reports for a workload
+//
+//nolint:dupl // boilerplate code for different report types
 func (h *SecurityReportHandler) ListInfraAssessmentReports(c *gin.Context) {
-	cs := c.MustGet("cluster").(*cluster.ClientSet)
 	namespace := c.Query("namespace")
 	workloadKind := c.Query("workloadKind")
 	workloadName := c.Query("workloadName")
@@ -725,84 +672,14 @@ func (h *SecurityReportHandler) ListInfraAssessmentReports(c *gin.Context) {
 		return
 	}
 
-	// Check if CRD exists
-	var crd apiextensionsv1.CustomResourceDefinition
-	if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Name: "infraassessmentreports.aquasecurity.github.io"}, &crd); err != nil {
-		c.JSON(http.StatusOK, model.InfraAssessmentReportList{Items: []model.InfraAssessmentReport{}})
+	items, err := h.listReportsGeneric(c, infraAssessmentReportKind, "infraassessmentreports.aquasecurity.github.io", workloadKind, workloadName, namespace)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var list unstructured.UnstructuredList
-	list.SetGroupVersionKind(infraAssessmentReportKind)
-
-	opts := []client.ListOption{client.InNamespace(namespace)}
-
-	switch {
-	case workloadKind == "Deployment":
-		var rsList appsv1.ReplicaSetList
-		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list recyclasets: %v", err)})
-			return
-		}
-
-		var targetRSNames []string
-		for _, rs := range rsList.Items {
-			for _, owner := range rs.OwnerReferences {
-				if owner.Kind == "Deployment" && owner.Name == workloadName {
-					targetRSNames = append(targetRSNames, rs.Name)
-					break
-				}
-			}
-		}
-
-		if len(targetRSNames) == 0 {
-			c.JSON(http.StatusOK, model.InfraAssessmentReportList{Items: []model.InfraAssessmentReport{}})
-			return
-		}
-
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": "ReplicaSet",
-		}
-		opts = append(opts, labels)
-
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list infra assessment reports: %v", err)})
-			return
-		}
-
-		filteredItems := []unstructured.Unstructured{}
-		for _, item := range list.Items {
-			lbls := item.GetLabels()
-			reportResourceName := lbls["trivy-operator.resource.name"]
-			for _, target := range targetRSNames {
-				if reportResourceName == target {
-					filteredItems = append(filteredItems, item)
-					break
-				}
-			}
-		}
-		list.Items = filteredItems
-
-	case workloadKind != "" && workloadName != "":
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": workloadKind,
-			"trivy-operator.resource.name": workloadName,
-		}
-		opts = append(opts, labels)
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list infra assessment reports: %v", err)})
-			return
-		}
-
-	default:
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list infra assessment reports: %v", err)})
-			return
-		}
-	}
-
-	reports := make([]model.InfraAssessmentReport, 0, len(list.Items))
-	for _, u := range list.Items {
+	reports := make([]model.InfraAssessmentReport, 0, len(items))
+	for _, u := range items {
 		var report model.InfraAssessmentReport
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &report); err != nil {
 			continue
@@ -863,8 +740,9 @@ func (h *SecurityReportHandler) ListClusterInfraAssessmentReports(c *gin.Context
 }
 
 // ListExposedSecretReports fetches exposed secret reports for a workload
+//
+//nolint:dupl // boilerplate code for different report types
 func (h *SecurityReportHandler) ListExposedSecretReports(c *gin.Context) {
-	cs := c.MustGet("cluster").(*cluster.ClientSet)
 	namespace := c.Query("namespace")
 	workloadKind := c.Query("workloadKind")
 	workloadName := c.Query("workloadName")
@@ -874,84 +752,14 @@ func (h *SecurityReportHandler) ListExposedSecretReports(c *gin.Context) {
 		return
 	}
 
-	// Check if CRD exists
-	var crd apiextensionsv1.CustomResourceDefinition
-	if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Name: "exposedsecretreports.aquasecurity.github.io"}, &crd); err != nil {
-		c.JSON(http.StatusOK, model.ExposedSecretReportList{Items: []model.ExposedSecretReport{}})
+	items, err := h.listReportsGeneric(c, exposedSecretReportKind, "exposedsecretreports.aquasecurity.github.io", workloadKind, workloadName, namespace)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var list unstructured.UnstructuredList
-	list.SetGroupVersionKind(exposedSecretReportKind)
-
-	opts := []client.ListOption{client.InNamespace(namespace)}
-
-	switch {
-	case workloadKind == "Deployment":
-		var rsList appsv1.ReplicaSetList
-		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list recyclasets: %v", err)})
-			return
-		}
-
-		var targetRSNames []string
-		for _, rs := range rsList.Items {
-			for _, owner := range rs.OwnerReferences {
-				if owner.Kind == "Deployment" && owner.Name == workloadName {
-					targetRSNames = append(targetRSNames, rs.Name)
-					break
-				}
-			}
-		}
-
-		if len(targetRSNames) == 0 {
-			c.JSON(http.StatusOK, model.ExposedSecretReportList{Items: []model.ExposedSecretReport{}})
-			return
-		}
-
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": "ReplicaSet",
-		}
-		opts = append(opts, labels)
-
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list exposed secret reports: %v", err)})
-			return
-		}
-
-		filteredItems := []unstructured.Unstructured{}
-		for _, item := range list.Items {
-			lbls := item.GetLabels()
-			reportResourceName := lbls["trivy-operator.resource.name"]
-			for _, target := range targetRSNames {
-				if reportResourceName == target {
-					filteredItems = append(filteredItems, item)
-					break
-				}
-			}
-		}
-		list.Items = filteredItems
-
-	case workloadKind != "" && workloadName != "":
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": workloadKind,
-			"trivy-operator.resource.name": workloadName,
-		}
-		opts = append(opts, labels)
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list exposed secret reports: %v", err)})
-			return
-		}
-
-	default:
-		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list exposed secret reports: %v", err)})
-			return
-		}
-	}
-
-	reports := make([]model.ExposedSecretReport, 0, len(list.Items))
-	for _, u := range list.Items {
+	reports := make([]model.ExposedSecretReport, 0, len(items))
+	for _, u := range items {
 		var report model.ExposedSecretReport
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &report); err != nil {
 			continue
@@ -995,8 +803,9 @@ func (h *SecurityReportHandler) ListComplianceReports(c *gin.Context) {
 }
 
 // ListRbacAssessmentReports fetches RBAC assessment reports for a workload
+//
+//nolint:dupl // boilerplate code for different report types
 func (h *SecurityReportHandler) ListRbacAssessmentReports(c *gin.Context) {
-	cs := c.MustGet("cluster").(*cluster.ClientSet)
 	namespace := c.Query("namespace")
 	workloadKind := c.Query("workloadKind")
 	workloadName := c.Query("workloadName")
@@ -1006,33 +815,14 @@ func (h *SecurityReportHandler) ListRbacAssessmentReports(c *gin.Context) {
 		return
 	}
 
-	// Check if CRD exists
-	var crd apiextensionsv1.CustomResourceDefinition
-	if err := cs.K8sClient.Get(c.Request.Context(), client.ObjectKey{Name: "rbacassessmentreports.aquasecurity.github.io"}, &crd); err != nil {
-		c.JSON(http.StatusOK, model.RbacAssessmentReportList{Items: []model.RbacAssessmentReport{}})
+	items, err := h.listReportsGeneric(c, rbacAssessmentReportKind, "rbacassessmentreports.aquasecurity.github.io", workloadKind, workloadName, namespace)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var list unstructured.UnstructuredList
-	list.SetGroupVersionKind(rbacAssessmentReportKind)
-
-	opts := []client.ListOption{client.InNamespace(namespace)}
-
-	if workloadKind != "" && workloadName != "" {
-		labels := client.MatchingLabels{
-			"trivy-operator.resource.kind": workloadKind,
-			"trivy-operator.resource.name": workloadName,
-		}
-		opts = append(opts, labels)
-	}
-
-	if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list rbac assessment reports: %v", err)})
-		return
-	}
-
-	reports := make([]model.RbacAssessmentReport, 0, len(list.Items))
-	for _, u := range list.Items {
+	reports := make([]model.RbacAssessmentReport, 0, len(items))
+	for _, u := range items {
 		var report model.RbacAssessmentReport
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &report); err != nil {
 			continue
