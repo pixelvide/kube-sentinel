@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.11.0...v0.12.0) (2026-01-27)
+
+
+### Features
+
+* enhance security dashboard with comprehensive report  ([#64](https://github.com/pixelvide/cloud-sentinel-k8s/issues/64)) ([0091eea](https://github.com/pixelvide/cloud-sentinel-k8s/commit/0091eea588f39c1b2b131add2d258ad6a3e51e71))
+
 ## [0.11.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.10.0...v0.11.0) (2026-01-26)
 
 
