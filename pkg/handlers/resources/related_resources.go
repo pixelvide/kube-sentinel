@@ -330,18 +330,19 @@ func GetRelatedResources(c *gin.Context) {
 		relatedPods := discoverPodsByService(ctx, cs.K8sClient, res)
 		result = append(result, relatedPods...)
 	case *corev1.ConfigMap, *corev1.Secret, *corev1.PersistentVolumeClaim:
-		if workloads, err := discoveryWorkloads(ctx, cs.K8sClient, namespace, name, resourceType); err != nil {
+		workloads, err := discoveryWorkloads(ctx, cs.K8sClient, namespace, name, resourceType)
+		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to discover workloads: " + err.Error()})
 			return
-		} else {
-			if resourceType == "persistentvolumeclaims" {
-				result = append(result, common.RelatedResource{
-					Type: "persistentvolumes",
-					Name: res.(*corev1.PersistentVolumeClaim).Spec.VolumeName,
-				})
-			}
-			result = append(result, workloads...)
 		}
+
+		if resourceType == "persistentvolumeclaims" {
+			result = append(result, common.RelatedResource{
+				Type: "persistentvolumes",
+				Name: res.(*corev1.PersistentVolumeClaim).Spec.VolumeName,
+			})
+		}
+		result = append(result, workloads...)
 	case *gatewayapiv1.HTTPRoute:
 		result = getHTTPRouteRelatedResouces(res, namespace)
 	case *autoscalingv2.HorizontalPodAutoscaler:
@@ -375,17 +376,15 @@ func GetRelatedResources(c *gin.Context) {
 				rs := &appsv1.ReplicaSet{}
 				if err := cs.K8sClient.Get(ctx, client.ObjectKey{Namespace: v.GetNamespace(), Name: owner.Name}, rs); err != nil {
 					// logs or ignore?
-				} else {
-					if len(rs.OwnerReferences) > 0 {
-						for _, rsOwner := range rs.OwnerReferences {
-							// Avoid adding duplicate if we are processing a ReplicaSet itself (handled above)
-							// But here v is likely a Pod.
-							result = append(result, common.RelatedResource{
-								Type:      strings.ToLower(rsOwner.Kind) + "s",
-								Name:      rsOwner.Name,
-								Namespace: v.GetNamespace(),
-							})
-						}
+				} else if len(rs.OwnerReferences) > 0 {
+					for _, rsOwner := range rs.OwnerReferences {
+						// Avoid adding duplicate if we are processing a ReplicaSet itself (handled above)
+						// But here v is likely a Pod.
+						result = append(result, common.RelatedResource{
+							Type:      strings.ToLower(rsOwner.Kind) + "s",
+							Name:      rsOwner.Name,
+							Namespace: v.GetNamespace(),
+						})
 					}
 				}
 			}

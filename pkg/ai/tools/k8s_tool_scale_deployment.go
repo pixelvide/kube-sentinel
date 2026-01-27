@@ -112,7 +112,10 @@ func (t *ScaleDeploymentTool) Execute(ctx context.Context, args string) (string,
 				payload["chatSessionId"] = sessionID
 			}
 
-			payloadBytes, _ := json.Marshal(payload)
+			payloadBytes, err := json.Marshal(payload)
+			if err != nil {
+				payloadBytes = []byte("{}")
+			}
 
 			model.DB.Create(&model.AuditLog{
 				AppID:        model.CurrentApp.ID,

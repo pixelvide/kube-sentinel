@@ -637,7 +637,8 @@ func (h *SecurityReportHandler) ListConfigAuditReports(c *gin.Context) {
 
 	opts := []client.ListOption{client.InNamespace(namespace)}
 
-	if workloadKind == "Deployment" {
+	switch {
+	case workloadKind == "Deployment":
 		var rsList appsv1.ReplicaSetList
 		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list recyclasets: %v", err)})
@@ -682,7 +683,7 @@ func (h *SecurityReportHandler) ListConfigAuditReports(c *gin.Context) {
 		}
 		list.Items = filteredItems
 
-	} else if workloadKind != "" && workloadName != "" {
+	case workloadKind != "" && workloadName != "":
 		labels := client.MatchingLabels{
 			"trivy-operator.resource.kind": workloadKind,
 			"trivy-operator.resource.name": workloadName,
@@ -693,7 +694,7 @@ func (h *SecurityReportHandler) ListConfigAuditReports(c *gin.Context) {
 			return
 		}
 
-	} else {
+	default:
 		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list config audit reports: %v", err)})
 			return
@@ -736,7 +737,8 @@ func (h *SecurityReportHandler) ListInfraAssessmentReports(c *gin.Context) {
 
 	opts := []client.ListOption{client.InNamespace(namespace)}
 
-	if workloadKind == "Deployment" {
+	switch {
+	case workloadKind == "Deployment":
 		var rsList appsv1.ReplicaSetList
 		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list recyclasets: %v", err)})
@@ -781,7 +783,7 @@ func (h *SecurityReportHandler) ListInfraAssessmentReports(c *gin.Context) {
 		}
 		list.Items = filteredItems
 
-	} else if workloadKind != "" && workloadName != "" {
+	case workloadKind != "" && workloadName != "":
 		labels := client.MatchingLabels{
 			"trivy-operator.resource.kind": workloadKind,
 			"trivy-operator.resource.name": workloadName,
@@ -792,7 +794,7 @@ func (h *SecurityReportHandler) ListInfraAssessmentReports(c *gin.Context) {
 			return
 		}
 
-	} else {
+	default:
 		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list infra assessment reports: %v", err)})
 			return
@@ -884,7 +886,8 @@ func (h *SecurityReportHandler) ListExposedSecretReports(c *gin.Context) {
 
 	opts := []client.ListOption{client.InNamespace(namespace)}
 
-	if workloadKind == "Deployment" {
+	switch {
+	case workloadKind == "Deployment":
 		var rsList appsv1.ReplicaSetList
 		if err := cs.K8sClient.List(c.Request.Context(), &rsList, client.InNamespace(namespace)); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list recyclasets: %v", err)})
@@ -929,7 +932,7 @@ func (h *SecurityReportHandler) ListExposedSecretReports(c *gin.Context) {
 		}
 		list.Items = filteredItems
 
-	} else if workloadKind != "" && workloadName != "" {
+	case workloadKind != "" && workloadName != "":
 		labels := client.MatchingLabels{
 			"trivy-operator.resource.kind": workloadKind,
 			"trivy-operator.resource.name": workloadName,
@@ -940,7 +943,7 @@ func (h *SecurityReportHandler) ListExposedSecretReports(c *gin.Context) {
 			return
 		}
 
-	} else {
+	default:
 		if err := cs.K8sClient.List(c.Request.Context(), &list, opts...); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to list exposed secret reports: %v", err)})
 			return
