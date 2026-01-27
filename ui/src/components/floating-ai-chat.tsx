@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation, matchPath, useNavigate } from 'react-router-dom'
 import {
     IconRobot,
     IconSend,
@@ -30,7 +31,7 @@ import {
     getAIChatSession,
     deleteAIChatSession,
 } from '@/lib/api'
-import { withSubPath } from '@/lib/subpath'
+import { getSubPath, withSubPath } from '@/lib/subpath'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -60,6 +61,9 @@ export function FloatingAIChat() {
     const [sessions, setSessions] = useState<AIChatSession[]>([])
     const [loadingSessions, setLoadingSessions] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
+
+    const location = useLocation()
+    const navigate = useNavigate()
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -112,6 +116,59 @@ export function FloatingAIChat() {
         }
     }, [messages, isOpen, isMinimized])
 
+    const getContextFromUrl = () => {
+        let pathname = location.pathname
+        const subPath = getSubPath()
+
+        // Strip subpath if present to match routes correctly
+        if (subPath && subPath !== '/' && pathname.startsWith(subPath)) {
+            pathname = pathname.substring(subPath.length)
+        }
+
+        // Match specific resource: /c/:cluster/:kind/:namespace/:name
+        // e.g. /c/local/pods/default/nginx-123
+        // Note: Our routes are sometimes :resource/:namespace/:name
+        const matchNamespaced = matchPath('/c/:cluster/:kind/:namespace/:name', pathname)
+        if (matchNamespaced) {
+            return {
+                route: pathname,
+                kind: matchNamespaced.params.kind,
+                namespace: matchNamespaced.params.namespace,
+                name: matchNamespaced.params.name
+            }
+        }
+
+        // Match simple resource: /c/:cluster/:kind/:name (e.g. nodes, namespaces)
+        const matchSimple = matchPath('/c/:cluster/:kind/:name', pathname)
+        if (matchSimple) {
+            return {
+                route: pathname,
+                kind: matchSimple.params.kind,
+                name: matchSimple.params.name
+            }
+        }
+
+        // Match list: /c/:cluster/:kind
+        const matchList = matchPath('/c/:cluster/:kind', pathname)
+        if (matchList) {
+            return {
+                route: pathname,
+                kind: matchList.params.kind
+            }
+        }
+
+        // Match cluster root
+        const matchCluster = matchPath('/c/:cluster/dashboard', pathname)
+        if (matchCluster) {
+            return {
+                route: pathname,
+                kind: 'Reviewing Cluster Dashboard'
+            }
+        }
+
+        return { route: pathname }
+    }
+
     const handleSend = async () => {
         if (!inputValue.trim() || sending) return
 
@@ -148,6 +205,7 @@ export function FloatingAIChat() {
                     sessionID: sessionId || '',
                     message: userMsg.content,
                     model: selectedModel,
+                    context: getContextFromUrl(),
                 }),
             })
 
@@ -197,6 +255,31 @@ export function FloatingAIChat() {
                                 } catch {
                                     // Ignore parse errors for incomplete JSON
                                 }
+                            }
+                        }
+
+                        // Check for tool calls in the line for navigation
+                        if (line.includes('<tool_call>')) {
+                            try {
+                                // Simple extraction for now, might need robust parsing if split across lines
+                                // format: <tool_call>JSON</tool_call>
+                                const start = line.indexOf('<tool_call>') + 11
+                                const end = line.indexOf('</tool_call>')
+                                if (end > start) {
+                                    const jsonStr = line.substring(start, end)
+                                    const toolCall = JSON.parse(jsonStr)
+                                    if (toolCall.name === 'navigate_to') {
+                                        const args = JSON.parse(toolCall.arguments)
+                                        if (args.path) {
+                                            navigate(withSubPath(args.path))
+                                        } else if (args.page) {
+                                            const cluster = localStorage.getItem('current-cluster') || 'local'
+                                            navigate(withSubPath(`/c/${cluster}/${args.page}`))
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                // ignore parsing errors during stream
                             }
                         }
                     }

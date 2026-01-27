@@ -54,6 +54,12 @@ export interface ChatRequest {
   sessionID: string
   message: string
   model?: string
+  context?: {
+    route: string
+    kind?: string
+    name?: string
+    namespace?: string
+  }
 }
 
 export interface ChatResponse {

@@ -20,9 +20,17 @@ import (
 )
 
 type ChatRequest struct {
-	SessionID string `json:"sessionID"` // Optional, if empty create new
-	Message   string `json:"message"`
-	Model     string `json:"model"` // Optional model override
+	SessionID string      `json:"sessionID"` // Optional, if empty create new
+	Message   string      `json:"message"`
+	Model     string      `json:"model"` // Optional model override
+	Context   ChatContext `json:"context"`
+}
+
+type ChatContext struct {
+	Route     string `json:"route"`
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type ChatResponse struct {
@@ -199,13 +207,10 @@ func getOrCreateSession(sessionID string, userID uint) (*model.AIChatSession, er
 	return &session, nil
 }
 
-func buildMessageHistory(session model.AIChatSession, userMessage string) []openai.ChatCompletionMessage {
+func buildMessageHistory(session model.AIChatSession, userMessage string, chatCtx ChatContext) []openai.ChatCompletionMessage {
 	var messages []openai.ChatCompletionMessage
 
-	// System Prompt
-	messages = append(messages, openai.ChatCompletionMessage{
-		Role: openai.ChatMessageRoleSystem,
-		Content: `You are a helpful Kubernetes assistant inside the Cloud Sentinel K8s dashboard. You have access to the cluster via tools. You are helping users manage their clusters and debug issues.
+	systemPrompt := `You are a helpful Kubernetes assistant inside the Cloud Sentinel K8s dashboard. You have access to the cluster via tools. You are helping users manage their clusters and debug issues.
 
 **HANDLING MISSING PARAMETERS & AMBIGUITY:**
 1. **Troubleshooting/Investigation (e.g., "Website is down", "503 error", "Slow performance"):**
@@ -237,7 +242,19 @@ When investigating issues:
 - Do NOT auto-run destructive commands.
 
 **REASONING PRIVACY:**
-You MUST provide your internal reasoning or 'thinking' process enclosed in <thought> tags for EVERY turn. This is essential for transparency. After the thought block, provide the final response for the user. Use markdown for your final response.`,
+You MUST provide your internal reasoning or 'thinking' process enclosed in <thought> tags for EVERY turn. This is essential for transparency. After the thought block, provide the final response for the user. Use markdown for your final response.`
+
+	// Inject UI Context
+	if chatCtx.Kind != "" || chatCtx.Name != "" {
+		systemPrompt += fmt.Sprintf("\n\n**USER CONTEXT:**\nThe user is currently viewing the %s '%s' in namespace '%s'.\nIf the user says 'this' or asks context-dependent questions (e.g., 'logs', 'describe', 'yaml'), assume they are referring to this resource.", chatCtx.Kind, chatCtx.Name, chatCtx.Namespace)
+	} else if chatCtx.Namespace != "" {
+		systemPrompt += fmt.Sprintf("\n\n**USER CONTEXT:**\nThe user is currently in namespace '%s'.", chatCtx.Namespace)
+	}
+
+	// System Prompt
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: systemPrompt,
 	})
 
 	for _, m := range session.Messages {
@@ -470,11 +487,12 @@ func AIChat(c *gin.Context) {
 	registry.Register(&tools.CheckImageSecurityTool{})
 	registry.Register(&tools.ListResourcesTool{})
 	registry.Register(&tools.GetClusterInfoTool{})
+	registry.Register(&tools.NavigateToTool{})
 
 	toolDefs := registry.GetDefinitions()
 
 	// 5. Build Message History
-	openAIMessages := buildMessageHistory(*session, req.Message)
+	openAIMessages := buildMessageHistory(*session, req.Message, req.Context)
 
 	// Save user message to DB
 	model.DB.Create(&model.AIChatMessage{
