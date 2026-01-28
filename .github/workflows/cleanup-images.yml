@@ -72,4 +72,4 @@ jobs:
             fi
           done
           
-          echo "Cleanup complete."
+          echo "Cleanup complete. Removed $count versions."
