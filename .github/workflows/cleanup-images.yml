@@ -62,6 +62,10 @@ jobs:
             CREATED_TS=$(date -d "$CREATED_AT" +%s)
             
             if [ $CREATED_TS -lt $CUTOFF_DATE ]; then
+              echo "Deleting version $ID (Created: $CREATED_AT)..."
+              gh api \
+                --method DELETE \
+                "$API_PATH/$ID"
               count=$((count+1))
             else
               echo "Skipping version $ID (Created: $CREATED_AT) - newer than ${{ env.DAYS_OLD }} days."
