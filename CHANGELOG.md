@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.12.0...v0.13.0) (2026-01-27)
+
+
+### Features
+
+* add AI knowledge base and debug tool ([ef34310](https://github.com/pixelvide/cloud-sentinel-k8s/commit/ef34310b398dec8bb869183c1c0dcd620cf48413))
+* add debug_app_connection tool and improve AI chat handling ([d5b6970](https://github.com/pixelvide/cloud-sentinel-k8s/commit/d5b6970ea5204dbba1cb250e75d5496599499d4c))
+
 ## [0.12.0](https://github.com/pixelvide/cloud-sentinel-k8s/compare/v0.11.0...v0.12.0) (2026-01-27)
 
 
