@@ -75,19 +75,19 @@ func (a *CostOptimizationAnalyzer) Analyze(ctx context.Context, c client.Client,
 		cpuReq := container.Resources.Requests.Cpu()
 		cpuLim := container.Resources.Limits.Cpu()
 
-		maxCpuUsageTotal := getMaxUsage(metrics.CPU) // In cores (rate of seconds)
+		maxCPUUsageTotal := getMaxUsage(metrics.CPU) // In cores (rate of seconds)
 		// Average per pod. Note: GetPodMetrics returns SUM of all replicas, so we divide by replica count to get average usage per pod.
-		maxCpuUsage := maxCpuUsageTotal / float64(replicas)
+		maxCPUUsage := maxCPUUsageTotal / float64(replicas)
 
 		if !cpuReq.IsZero() {
 			reqVal := cpuReq.AsApproximateFloat64()
 			// Only flag over-provisioning if usage is really low (e.g. < 50%) AND request is somewhat significant (> 10m) to avoid noise on tiny containers
-			if reqVal > 0.01 && maxCpuUsage < reqVal*0.5 {
+			if reqVal > 0.01 && maxCPUUsage < reqVal*0.5 {
 				anomalies = append(anomalies, Anomaly{
 					Severity:    SeverityLow,
 					Title:       "CPU Over-provisioned",
-					Message:     fmt.Sprintf("Container '%s' requested %s CPU (per pod) but max usage was %.3f cores (avg per pod) (%.0f%% of request).", container.Name, cpuReq.String(), maxCpuUsage, (maxCpuUsage/reqVal)*100),
-					Remediation: fmt.Sprintf("Consider reducing CPU request to around %.3f cores to save cost.", maxCpuUsage*1.2), // Buffer 20%
+					Message:     fmt.Sprintf("Container '%s' requested %s CPU (per pod) but max usage was %.3f cores (avg per pod) (%.0f%% of request).", container.Name, cpuReq.String(), maxCPUUsage, (maxCPUUsage/reqVal)*100),
+					Remediation: fmt.Sprintf("Consider reducing CPU request to around %.3f cores to save cost.", maxCPUUsage*1.2), // Buffer 20%
 					RuleID:      "COST-001",
 				})
 			}
@@ -95,11 +95,11 @@ func (a *CostOptimizationAnalyzer) Analyze(ctx context.Context, c client.Client,
 
 		if !cpuLim.IsZero() {
 			limVal := cpuLim.AsApproximateFloat64()
-			if maxCpuUsage > limVal*0.9 {
+			if maxCPUUsage > limVal*0.9 {
 				anomalies = append(anomalies, Anomaly{
 					Severity:    SeverityMedium,
 					Title:       "CPU Limit Risk",
-					Message:     fmt.Sprintf("Container '%s' usage reached %.3f cores (avg per pod) (%.0f%% of limit %s).", container.Name, maxCpuUsage, (maxCpuUsage/limVal)*100, cpuLim.String()),
+					Message:     fmt.Sprintf("Container '%s' usage reached %.3f cores (avg per pod) (%.0f%% of limit %s).", container.Name, maxCPUUsage, (maxCPUUsage/limVal)*100, cpuLim.String()),
 					Remediation: "Consider increasing CPU limit to avoid throttling.",
 					RuleID:      "PERF-001",
 				})
