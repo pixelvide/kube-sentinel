@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
 	"fmt"
 	"reflect"
 
@@ -14,7 +15,7 @@ type TopologySpreadAnalyzer struct{}
 
 func (t *TopologySpreadAnalyzer) Name() string { return "TopologySpreadConstraints" }
 
-func (t *TopologySpreadAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (t *TopologySpreadAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	// For this port, we don't have a reliable clusterID passed down easily without changing many signatures.
 	// However, we can use the client itself or just context. But wait, `c` IS the client for the cluster.
 	// A simple approach for cache key is just "default" since the analyze call is already scoped to a clientSet in handler.
@@ -92,7 +93,7 @@ type AffinityAnalyzer struct{}
 
 func (a *AffinityAnalyzer) Name() string { return "ConflictingAffinity" }
 
-func (a *AffinityAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *AffinityAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var affinity *corev1.Affinity
 
 	switch o := obj.(type) {
