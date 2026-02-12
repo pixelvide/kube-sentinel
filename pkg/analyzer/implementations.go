@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
 	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -13,7 +14,7 @@ func (a *DefaultNamespaceAnalyzer) Name() string {
 	return "DefaultNamespace"
 }
 
-func (a *DefaultNamespaceAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *DefaultNamespaceAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	if obj.GetNamespace() == "default" {
 		return []Anomaly{
 			{

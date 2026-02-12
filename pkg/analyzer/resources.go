@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
 	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -15,7 +16,7 @@ func (a *ResourceLimitsAnalyzer) Name() string {
 	return "ResourceLimits"
 }
 
-func (a *ResourceLimitsAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *ResourceLimitsAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var containers []corev1.Container
 	var name string
 
