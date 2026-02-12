@@ -74,13 +74,13 @@ secret:
   # If set, the deployment will use this existing secret name instead of the generated one (ignored when `create: true`).
   # must contain all required keys.
   #  JWT_SECRET
-  #  CLOUD_SENTINEL_K8S_ENCRYPT_KEY
+  #  KUBE_SENTINEL_ENCRYPT_KEY
   #  DB_TYPE supported values: sqlite, postgres, mysql (defaults to sqlite if not set)
   #  DB_DSN (not required for sqlite)
   # 
   #  see superUser section for more details
-  #  CLOUD_SENTINEL_K8S_USERNAME (optional for superuser)
-  #  CLOUD_SENTINEL_K8S_PASSWORD (optional for superuser)
+  #  KUBE_SENTINEL_USERNAME (optional for superuser)
+  #  KUBE_SENTINEL_PASSWORD (optional for superuser)
   # if set, the db.dsn and db.type values from the chart will be ignored.
   existingSecret: ""
 

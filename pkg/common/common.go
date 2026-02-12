@@ -69,10 +69,10 @@ func LoadEnvs() {
 		DBType = dbType
 	}
 
-	if key := os.Getenv("CLOUD_SENTINEL_K8S_ENCRYPT_KEY"); key != "" {
+	if key := os.Getenv("KUBE_SENTINEL_ENCRYPT_KEY"); key != "" {
 		KubeSentinelEncryptKey = key
 	} else {
-		klog.Warningf("CLOUD_SENTINEL_K8S_ENCRYPT_KEY is not set, using default key, this is not secure for production!")
+		klog.Warningf("KUBE_SENTINEL_ENCRYPT_KEY is not set, using default key, this is not secure for production!")
 	}
 
 	if v := os.Getenv("HOST"); v != "" {
@@ -86,7 +86,7 @@ func LoadEnvs() {
 		DisableVersionCheck = true
 	}
 
-	if v := os.Getenv("CLOUD_SENTINEL_K8S_BASE"); v != "" {
+	if v := os.Getenv("KUBE_SENTINEL_BASE"); v != "" {
 		if v[0] != '/' {
 			v = "/" + v
 		}

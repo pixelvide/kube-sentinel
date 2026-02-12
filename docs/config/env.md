@@ -6,9 +6,9 @@ Kube Sentinel supports several environment variables to customize its behavior.
 
 - **PORT**: Port on which Kube Sentinel runs, default value is `8080`.
 - **HOST**: Used for generating OAuth 2.0 authorization callback addresses. Usually detected from request headers, but can be set manually (e.g., `https://kube-sentinel.example.com`).
-- **CLOUD_SENTINEL_K8S_BASE**: Base path for the application. If set to `/kube-sentinel`, the application will be accessible at `domain.com/kube-sentinel`.
+- **KUBE_SENTINEL_BASE**: Base path for the application. If set to `/kube-sentinel`, the application will be accessible at `domain.com/kube-sentinel`.
 - **JWT_SECRET**: Secret key used for signing and verifying JWT tokens. **Must be changed in production!**
-- **CLOUD_SENTINEL_K8S_ENCRYPT_KEY**: Secret key used for encrypting sensitive data (user passwords, tokens, kubeconfigs). **Must be changed in production!**
+- **KUBE_SENTINEL_ENCRYPT_KEY**: Secret key used for encrypting sensitive data (user passwords, tokens, kubeconfigs). **Must be changed in production!**
 
 ## Database Configuration
 
@@ -19,8 +19,8 @@ Kube Sentinel supports several environment variables to customize its behavior.
 
 ## Authentication & Authorization
 
-- **CLOUD_SENTINEL_K8S_USERNAME**: Set the initial administrator username during bootstrap.
-- **CLOUD_SENTINEL_K8S_PASSWORD**: Set the initial administrator password during bootstrap.
+- **KUBE_SENTINEL_USERNAME**: Set the initial administrator username during bootstrap.
+- **KUBE_SENTINEL_PASSWORD**: Set the initial administrator password during bootstrap.
 - **KUBECONFIG**: Path to the initial Kubernetes configuration file. Default is `~/.kube/config`. Clusters from this config will be discovered and imported on the first run.
 
 ## Third-party Integrations

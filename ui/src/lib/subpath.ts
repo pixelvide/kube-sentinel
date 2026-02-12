@@ -6,7 +6,7 @@ declare global {
 
 export function getSubPath(): string {
   if (import.meta.env.DEV) {
-    return import.meta.env.CLOUD_SENTINEL_K8S_BASE || ''
+    return import.meta.env.KUBE_SENTINEL_BASE || ''
   }
   return window.__dynamic_base__ || ''
 }

@@ -13,18 +13,18 @@ import (
 )
 
 var (
-	cloudSentinelK8sUsername = os.Getenv("CLOUD_SENTINEL_K8S_USERNAME")
-	cloudSentinelK8sPassword = os.Getenv("CLOUD_SENTINEL_K8S_PASSWORD")
+	kubeSentinelUsername = os.Getenv("KUBE_SENTINEL_USERNAME")
+	kubeSentinelPassword = os.Getenv("KUBE_SENTINEL_PASSWORD")
 )
 
 func loadUser() error {
-	if cloudSentinelK8sUsername != "" && cloudSentinelK8sPassword != "" {
+	if kubeSentinelUsername != "" && kubeSentinelPassword != "" {
 		uc, err := model.CountUsers()
 		if err == nil && uc == 0 {
-			klog.Infof("Creating super user %s from environment variables", cloudSentinelK8sUsername)
+			klog.Infof("Creating super user %s from environment variables", kubeSentinelUsername)
 			u := &model.User{
-				Username: cloudSentinelK8sUsername,
-				Password: cloudSentinelK8sPassword,
+				Username: kubeSentinelUsername,
+				Password: kubeSentinelPassword,
 			}
 			err := model.AddSuperUser(u)
 			if err == nil {

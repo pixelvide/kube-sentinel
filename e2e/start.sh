@@ -32,8 +32,8 @@ export KUBECONFIG=$(pwd)/"$KUBECONFIG_FILE"
 
 # Set other env vars
 export DB_DSN="$DB_FILE"
-export CLOUD_SENTINEL_K8S_USERNAME=admin
-export CLOUD_SENTINEL_K8S_PASSWORD=admin
+export KUBE_SENTINEL_USERNAME=admin
+export KUBE_SENTINEL_PASSWORD=admin
 
 echo "Starting server..."
 go run main.go

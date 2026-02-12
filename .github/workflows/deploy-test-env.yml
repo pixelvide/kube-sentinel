@@ -23,15 +23,15 @@ jobs:
     steps:
       - name: restart kube-sentinel deployment
         env:
-          CLOUD_SENTINEL_K8S_HOST: ${{ secrets.CLOUD_SENTINEL_K8S_TEST_HOST }}
-          CLOUD_SENTINEL_K8S_AUTH: ${{ secrets.CLOUD_SENTINEL_K8S_TEST_AUTH }}
+          KUBE_SENTINEL_HOST: ${{ secrets.KUBE_SENTINEL_TEST_HOST }}
+          KUBE_SENTINEL_AUTH: ${{ secrets.KUBE_SENTINEL_TEST_AUTH }}
         run: |
-          if [ -z "$CLOUD_SENTINEL_K8S_HOST" ] || [ -z "$CLOUD_SENTINEL_K8S_AUTH" ]; then
-            echo "CLOUD_SENTINEL_K8S_HOST or CLOUD_SENTINEL_K8S_AUTH is not set. Skipping deployment."
+          if [ -z "$KUBE_SENTINEL_HOST" ] || [ -z "$KUBE_SENTINEL_AUTH" ]; then
+            echo "KUBE_SENTINEL_HOST or KUBE_SENTINEL_AUTH is not set. Skipping deployment."
             exit 0
           fi
           RESTART_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          curl -X PATCH "$CLOUD_SENTINEL_K8S_HOST/api/v1/deployments/kube-sentinel/kube-sentinel" \
-            -H "Authorization: $CLOUD_SENTINEL_K8S_AUTH" \
+          curl -X PATCH "$KUBE_SENTINEL_HOST/api/v1/deployments/kube-sentinel/kube-sentinel" \
+            -H "Authorization: $KUBE_SENTINEL_AUTH" \
             -H "Content-Type: application/json" \
             -d "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"kube-sentinel.kubernetes.io/restartedAt\":\"$RESTART_TIME\"}}}}}"

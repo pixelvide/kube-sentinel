@@ -138,7 +138,7 @@ ingress:
 ```
 
 - OAuth / redirects: if you enable OAuth (or any external redirect flows), update the redirect URLs in your OAuth provider to include the base path, e.g. `https://kube-sentinel.example.com/kube-sentinel/oauth/callback`.
-- Environment overrides: if you provide environment variables via `extraEnvs` or an existing secret, ensure `CLOUD_SENTINEL_K8S_BASE` is set consistently with the `basePath` value (otherwise behavior may differ).
+- Environment overrides: if you provide environment variables via `extraEnvs` or an existing secret, ensure `KUBE_SENTINEL_BASE` is set consistently with the `basePath` value (otherwise behavior may differ).
 
 ## Verifying Installation
 
