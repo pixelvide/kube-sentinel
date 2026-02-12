@@ -20,6 +20,7 @@ type User struct {
 	// Provider is a transient field used during OIDC authentication to pass the provider name.
 	Provider    string      `json:"provider,omitempty" gorm:"-"`
 	// OIDCGroups is a transient field used during OIDC authentication to pass group claims.
+	// These groups are used for RBAC role mapping.
 	OIDCGroups  SliceString `json:"oidc_groups,omitempty" gorm:"-"`
 	LastLoginAt *time.Time  `json:"lastLoginAt,omitempty" gorm:"type:timestamp;index"`
 	Enabled     bool        `json:"enabled" gorm:"type:boolean;default:true"`
