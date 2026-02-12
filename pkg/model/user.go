@@ -53,7 +53,7 @@ type PersonalAccessToken struct {
 }
 
 func (PersonalAccessToken) TableName() string {
-	return common.GetCoreTableName("personal_access_tokens")
+	return common.GetAppTableName("personal_access_tokens")
 }
 
 type UserIdentity struct {
@@ -69,7 +69,7 @@ type UserIdentity struct {
 }
 
 func (UserIdentity) TableName() string {
-	return common.GetCoreTableName("user_identities")
+	return common.GetAppTableName("user_identities")
 }
 
 func (u *User) Key() string {
