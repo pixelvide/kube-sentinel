@@ -24,7 +24,6 @@ type User struct {
 	Sub         string      `json:"sub,omitempty" gorm:"-"`
 
 	Roles             []common.Role `json:"roles,omitempty" gorm:"-"`
-	SidebarPreference string        `json:"sidebar_preference,omitempty" gorm:"type:text"`
 	Config            *UserConfig   `json:"config,omitempty" gorm:"foreignKey:UserID"`
 }
 

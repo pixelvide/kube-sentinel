@@ -15,7 +15,8 @@ type UserConfig struct {
 	StorageNamespace string `json:"storage_namespace" gorm:"uniqueIndex;not null"`
 
 	// Settings
-	IsAIChatEnabled bool `json:"is_ai_chat_enabled" gorm:"default:true"`
+	IsAIChatEnabled   bool   `json:"is_ai_chat_enabled" gorm:"default:true"`
+	SidebarPreference string `json:"sidebar_preference,omitempty" gorm:"type:text"`
 
 	// Relationships
 	User User `json:"-" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

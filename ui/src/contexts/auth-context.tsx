@@ -16,14 +16,13 @@ interface User {
   avatar_url: string
   provider: string
   roles?: { name: string }[]
-  sidebar_preference?: string
 
   isAdmin(): boolean
 }
 
 interface AuthContextType {
   user: User | null
-  config: { is_ai_chat_enabled: boolean } | null
+  config: { is_ai_chat_enabled: boolean; sidebar_preference?: string } | null
   isLoading: boolean
   providers: string[]
   login: (provider?: string) => Promise<void>
@@ -49,9 +48,10 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
-  const [config, setConfig] = useState<{ is_ai_chat_enabled: boolean } | null>(
-    null
-  )
+  const [config, setConfig] = useState<{
+    is_ai_chat_enabled: boolean
+    sidebar_preference?: string
+  } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [providers, setProviders] = useState<string[]>([])
 

@@ -340,21 +340,29 @@ export const SidebarConfigProvider: React.FC<SidebarConfigProviderProps> = ({
   const [config, setConfig] = useState<SidebarConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasUpdate, setHasUpdate] = useState(false)
-  const { user } = useAuth()
+  const { user, config: userConfigData } = useAuth()
 
   const loadConfig = useCallback(async () => {
-    if (user && user.sidebar_preference && user.sidebar_preference != '') {
-      const userConfig = JSON.parse(user.sidebar_preference)
-      setConfig(userConfig)
+    if (
+      user &&
+      userConfigData?.sidebar_preference &&
+      userConfigData.sidebar_preference !== ''
+    ) {
+      try {
+        const userConfig = JSON.parse(userConfigData.sidebar_preference)
+        setConfig(userConfig)
 
-      const currentVersion = userConfig.version || 0
-      if (currentVersion < CURRENT_CONFIG_VERSION) {
-        setHasUpdate(true)
+        const currentVersion = userConfig.version || 0
+        if (currentVersion < CURRENT_CONFIG_VERSION) {
+          setHasUpdate(true)
+        }
+        return
+      } catch (e) {
+        console.error('Failed to parse sidebar preference:', e)
       }
-      return
     }
     setConfig(defaultConfigs())
-  }, [user])
+  }, [user, userConfigData])
 
   const saveConfig = useCallback(
     async (newConfig: SidebarConfig) => {
