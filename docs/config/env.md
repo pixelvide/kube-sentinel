@@ -16,6 +16,8 @@ Kube Sentinel supports several environment variables to customize its behavior.
 - **DB_DSN**: Database connection DSN.
     - For `sqlite`: Path to the database file (e.g., `data/kube-sentinel.db`). Default is `dev.db`.
     - For `mysql`/`postgres`: Standard connection string (e.g., `user:pass@tcp(host:3306)/dbname`).
+- **DB_SCHEMA_CORE**: PostgreSQL schema name for core tables (e.g., `apps`, `app_configs`). Defaults to `public`.
+- **DB_SCHEMA_APP**: PostgreSQL schema name for application-specific tables (e.g., `users`, `clusters`, `audit_logs`). Defaults to `public`.
 
 ## Authentication & Authorization
 

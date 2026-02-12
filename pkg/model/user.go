@@ -17,10 +17,13 @@ type User struct {
 	Password    string      `json:"-" gorm:"type:varchar(255)"`
 	Name        string      `json:"name,omitempty" gorm:"type:varchar(100);index"`
 	AvatarURL   string      `json:"avatar_url,omitempty" gorm:"type:varchar(500)"`
+	// Provider is a transient field used during OIDC authentication to pass the provider name.
 	Provider    string      `json:"provider,omitempty" gorm:"-"`
+	// OIDCGroups is a transient field used during OIDC authentication to pass group claims.
 	OIDCGroups  SliceString `json:"oidc_groups,omitempty" gorm:"-"`
 	LastLoginAt *time.Time  `json:"lastLoginAt,omitempty" gorm:"type:timestamp;index"`
 	Enabled     bool        `json:"enabled" gorm:"type:boolean;default:true"`
+	// Sub is a transient field used during OIDC authentication to pass the subject identifier.
 	Sub         string      `json:"sub,omitempty" gorm:"-"`
 
 	Roles             []common.Role `json:"roles,omitempty" gorm:"-"`
