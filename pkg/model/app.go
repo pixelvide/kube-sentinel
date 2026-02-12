@@ -44,7 +44,7 @@ type AppUser struct {
 }
 
 func (AppUser) TableName() string {
-	return common.GetAppTableName("app_users")
+	return common.GetCoreTableName("app_users")
 }
 
 const (

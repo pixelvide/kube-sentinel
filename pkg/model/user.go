@@ -17,22 +17,25 @@ type User struct {
 	Password    string      `json:"-" gorm:"type:varchar(255)"`
 	Name        string      `json:"name,omitempty" gorm:"type:varchar(100);index"`
 	AvatarURL   string      `json:"avatar_url,omitempty" gorm:"type:varchar(500)"`
-	// Provider is a transient field used during OIDC authentication to pass the provider name.
-	Provider    string      `json:"provider,omitempty" gorm:"-"`
-	// OIDCGroups is a transient field used during OIDC authentication to pass group claims.
-	// These groups are used for RBAC role mapping.
-	OIDCGroups  SliceString `json:"oidc_groups,omitempty" gorm:"-"`
 	LastLoginAt *time.Time  `json:"lastLoginAt,omitempty" gorm:"type:timestamp;index"`
 	Enabled     bool        `json:"enabled" gorm:"type:boolean;default:true"`
-	// Sub is a transient field used during OIDC authentication to pass the subject identifier.
-	Sub         string      `json:"sub,omitempty" gorm:"-"`
 
-	Roles             []common.Role `json:"roles,omitempty" gorm:"-"`
-	Config            *UserConfig   `json:"config,omitempty" gorm:"foreignKey:UserID"`
+	// Transient fields (OIDC/Authentication)
+	// Provider is a transient field used during OIDC authentication to pass the provider name.
+	Provider string `json:"provider,omitempty" gorm:"-"`
+	// OIDCGroups is a transient field used during OIDC authentication to pass group claims.
+	// These groups are used for RBAC role mapping.
+	OIDCGroups SliceString `json:"oidc_groups,omitempty" gorm:"-"`
+	// Sub is a transient field used during OIDC authentication to pass the subject identifier.
+	Sub string `json:"sub,omitempty" gorm:"-"`
+
+	// Relations
+	Roles  []common.Role `json:"roles,omitempty" gorm:"-"`
+	Config *UserConfig   `json:"config,omitempty" gorm:"foreignKey:UserID"`
 }
 
 func (User) TableName() string {
-	return common.GetAppTableName("users")
+	return common.GetCoreTableName("users")
 }
 
 type PersonalAccessToken struct {
@@ -50,7 +53,7 @@ type PersonalAccessToken struct {
 }
 
 func (PersonalAccessToken) TableName() string {
-	return common.GetAppTableName("personal_access_tokens")
+	return common.GetCoreTableName("personal_access_tokens")
 }
 
 type UserIdentity struct {
@@ -66,7 +69,7 @@ type UserIdentity struct {
 }
 
 func (UserIdentity) TableName() string {
-	return common.GetAppTableName("user_identities")
+	return common.GetCoreTableName("user_identities")
 }
 
 func (u *User) Key() string {
