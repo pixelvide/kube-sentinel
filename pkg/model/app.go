@@ -14,6 +14,10 @@ type App struct {
 	Enabled bool   `gorm:"default:true" json:"enabled"`
 }
 
+func (App) TableName() string {
+	return common.GetCoreTableName("apps")
+}
+
 type AppConfig struct {
 	Model
 	AppID uint   `gorm:"not null;uniqueIndex:idx_app_key" json:"app_id"`
@@ -22,6 +26,10 @@ type AppConfig struct {
 
 	// Relationships
 	App App `gorm:"foreignKey:AppID" json:"app,omitempty"`
+}
+
+func (AppConfig) TableName() string {
+	return common.GetCoreTableName("app_configs")
 }
 
 type AppUser struct {
@@ -33,6 +41,10 @@ type AppUser struct {
 	// Relationships
 	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	App  App  `gorm:"foreignKey:AppID" json:"app,omitempty"`
+}
+
+func (AppUser) TableName() string {
+	return common.GetAppTableName("app_users")
 }
 
 const (

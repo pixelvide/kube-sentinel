@@ -1,5 +1,7 @@
 package model
 
+import "github.com/pixelvide/kube-sentinel/pkg/common"
+
 type GitlabHosts struct {
 	Model
 	Host    string `gorm:"not null;uniqueIndex:idx_user_host" json:"gitlab_host"`
@@ -7,5 +9,5 @@ type GitlabHosts struct {
 }
 
 func (GitlabHosts) TableName() string {
-	return "gitlab_hosts"
+	return common.GetAppTableName("gitlab_hosts")
 }

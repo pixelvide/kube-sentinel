@@ -33,6 +33,8 @@ var (
 	NodeTerminalImage = "busybox:latest"
 	DBType            = "sqlite"
 	DBDSN             = "dev.db"
+	DBSchemaCore      = "public"
+	DBSchemaApp       = "public"
 
 	KubeSentinelEncryptKey = "kube-sentinel-default-encryption-key-change-in-production"
 
@@ -44,6 +46,21 @@ var (
 
 	APIKeyProvider = "api_key"
 )
+
+func GetTableName(schema, baseName string) string {
+	if DBType == "postgres" && schema != "public" {
+		return schema + "." + baseName
+	}
+	return baseName
+}
+
+func GetAppTableName(baseName string) string {
+	return GetTableName(DBSchemaApp, baseName)
+}
+
+func GetCoreTableName(baseName string) string {
+	return GetTableName(DBSchemaCore, baseName)
+}
 
 func LoadEnvs() {
 	if secret := os.Getenv("JWT_SECRET"); secret != "" {
@@ -67,6 +84,14 @@ func LoadEnvs() {
 			klog.Fatalf("Invalid DB_TYPE: %s, must be one of sqlite, mysql, postgres", dbType)
 		}
 		DBType = dbType
+	}
+
+	if schema := os.Getenv("DB_SCHEMA_CORE"); schema != "" {
+		DBSchemaCore = schema
+	}
+
+	if schema := os.Getenv("DB_SCHEMA_APP"); schema != "" {
+		DBSchemaApp = schema
 	}
 
 	if key := os.Getenv("KUBE_SENTINEL_ENCRYPT_KEY"); key != "" {

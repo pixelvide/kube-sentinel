@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +22,7 @@ type UserConfig struct {
 }
 
 func (UserConfig) TableName() string {
-	return "user_configs"
+	return common.GetAppTableName("user_configs")
 }
 
 func (u *UserConfig) BeforeCreate(tx *gorm.DB) (err error) {

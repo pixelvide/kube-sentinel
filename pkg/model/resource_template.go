@@ -1,5 +1,7 @@
 package model
 
+import "github.com/pixelvide/kube-sentinel/pkg/common"
+
 type ResourceTemplate struct {
 	Model
 	Name        string `json:"name" gorm:"type:varchar(255);uniqueIndex;not null"`
@@ -8,5 +10,5 @@ type ResourceTemplate struct {
 }
 
 func (ResourceTemplate) TableName() string {
-	return "k8s_resource_templates"
+	return common.GetAppTableName("k8s_resource_templates")
 }

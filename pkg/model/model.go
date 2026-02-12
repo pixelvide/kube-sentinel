@@ -77,6 +77,16 @@ func InitDB() {
 			if err != nil {
 				panic("failed to connect database: " + err.Error())
 			}
+			if common.DBSchemaCore != "public" {
+				if err := DB.Exec("CREATE SCHEMA IF NOT EXISTS " + common.DBSchemaCore).Error; err != nil {
+					panic("failed to create schema: " + err.Error())
+				}
+			}
+			if common.DBSchemaApp != "public" && common.DBSchemaApp != common.DBSchemaCore {
+				if err := DB.Exec("CREATE SCHEMA IF NOT EXISTS " + common.DBSchemaApp).Error; err != nil {
+					panic("failed to create schema: " + err.Error())
+				}
+			}
 		}
 	})
 

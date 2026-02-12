@@ -1,5 +1,7 @@
 package model
 
+import "github.com/pixelvide/kube-sentinel/pkg/common"
+
 type Cluster struct {
 	Model
 	Name           string       `json:"name" gorm:"type:varchar(100);uniqueIndex;not null"`
@@ -13,7 +15,7 @@ type Cluster struct {
 }
 
 func (Cluster) TableName() string {
-	return "k8s_clusters"
+	return common.GetAppTableName("k8s_clusters")
 }
 
 func AddCluster(cluster *Cluster) error {

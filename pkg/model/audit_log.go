@@ -1,5 +1,7 @@
 package model
 
+import "github.com/pixelvide/kube-sentinel/pkg/common"
+
 type AuditLog struct {
 	Model
 	AppID        uint   `json:"appId" gorm:"index"`
@@ -17,5 +19,5 @@ type AuditLog struct {
 }
 
 func (AuditLog) TableName() string {
-	return "audit_logs"
+	return common.GetAppTableName("audit_logs")
 }

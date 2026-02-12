@@ -28,6 +28,10 @@ type User struct {
 	Config            *UserConfig   `json:"config,omitempty" gorm:"foreignKey:UserID"`
 }
 
+func (User) TableName() string {
+	return common.GetAppTableName("users")
+}
+
 type PersonalAccessToken struct {
 	Model
 	UserID      uint       `json:"userId" gorm:"not null;index"`
@@ -42,6 +46,10 @@ type PersonalAccessToken struct {
 	User User `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
+func (PersonalAccessToken) TableName() string {
+	return common.GetAppTableName("personal_access_tokens")
+}
+
 type UserIdentity struct {
 	Model
 	UserID      uint        `json:"user_id" gorm:"index;not null;uniqueIndex:idx_user_provider"`
@@ -52,6 +60,10 @@ type UserIdentity struct {
 
 	// Relationships
 	User User `json:"user" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+
+func (UserIdentity) TableName() string {
+	return common.GetAppTableName("user_identities")
 }
 
 func (u *User) Key() string {

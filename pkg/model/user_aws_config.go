@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +17,7 @@ type UserAWSConfig struct {
 }
 
 func (UserAWSConfig) TableName() string {
-	return "user_aws_configs"
+	return common.GetAppTableName("user_aws_configs")
 }
 
 // GetUserAWSConfig retrieves the user AWS config for a given user ID.

@@ -1,5 +1,7 @@
 package model
 
+import "github.com/pixelvide/kube-sentinel/pkg/common"
+
 type Role struct {
 	Model
 
@@ -17,7 +19,7 @@ type Role struct {
 }
 
 func (Role) TableName() string {
-	return "k8s_roles"
+	return common.GetAppTableName("k8s_roles")
 }
 
 // RoleAssignment maps a role to a subject which can be a user or an OIDC group.
@@ -32,7 +34,7 @@ type RoleAssignment struct {
 }
 
 func (RoleAssignment) TableName() string {
-	return "k8s_role_assignments"
+	return common.GetAppTableName("k8s_role_assignments")
 }
 
 // Convenience constants for SubjectType

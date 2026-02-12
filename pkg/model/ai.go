@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +21,7 @@ type AIProviderProfile struct {
 }
 
 func (AIProviderProfile) TableName() string {
-	return "ai_provider_profiles"
+	return common.GetAppTableName("ai_provider_profiles")
 }
 
 type AISettings struct {
@@ -34,7 +35,7 @@ type AISettings struct {
 }
 
 func (AISettings) TableName() string {
-	return "k8s_ai_settings"
+	return common.GetAppTableName("k8s_ai_settings")
 }
 
 type AIChatSession struct {
@@ -48,7 +49,7 @@ type AIChatSession struct {
 }
 
 func (AIChatSession) TableName() string {
-	return "k8s_ai_chat_sessions"
+	return common.GetAppTableName("k8s_ai_chat_sessions")
 }
 
 type AIChatMessage struct {
@@ -63,5 +64,5 @@ type AIChatMessage struct {
 }
 
 func (AIChatMessage) TableName() string {
-	return "k8s_ai_chat_messages"
+	return common.GetAppTableName("k8s_ai_chat_messages")
 }

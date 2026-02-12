@@ -1,6 +1,10 @@
 package model
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+)
 
 type OAuthProvider struct {
 	Model
@@ -16,6 +20,10 @@ type OAuthProvider struct {
 
 	// Auto-generated redirect URL
 	RedirectURL string `json:"-" gorm:"-"`
+}
+
+func (OAuthProvider) TableName() string {
+	return common.GetAppTableName("oauth_providers")
 }
 
 // GetAllOAuthProviders returns all OAuth providers from database

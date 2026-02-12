@@ -1,5 +1,7 @@
 package model
 
+import "github.com/pixelvide/kube-sentinel/pkg/common"
+
 type UserGitlabConfig struct {
 	Model
 	UserID       uint   `json:"user_id" gorm:"not null;uniqueIndex:idx_user_gitlab_config_unique"`
@@ -13,5 +15,5 @@ type UserGitlabConfig struct {
 }
 
 func (UserGitlabConfig) TableName() string {
-	return "user_gitlab_configs"
+	return common.GetAppTableName("user_gitlab_configs")
 }

@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 	"gorm.io/datatypes"
 )
 
@@ -17,7 +18,7 @@ type ClusterKnowledgeBase struct {
 }
 
 func (ClusterKnowledgeBase) TableName() string {
-	return "k8s_cluster_knowledge_bases"
+	return common.GetAppTableName("k8s_cluster_knowledge_bases")
 }
 
 // AddKnowledge adds a new knowledge entry.
