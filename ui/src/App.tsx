@@ -5,13 +5,13 @@ import { useTranslation } from 'react-i18next'
 import { Outlet, useSearchParams } from 'react-router-dom'
 
 import { AppSidebar } from './components/app-sidebar'
+import { FloatingAIChat } from './components/floating-ai-chat'
 import { GlobalSearch } from './components/global-search'
 import {
   GlobalSearchProvider,
   useGlobalSearch,
 } from './components/global-search-provider'
 import { SiteHeader } from './components/site-header'
-import { FloatingAIChat } from './components/floating-ai-chat'
 import { SidebarInset, SidebarProvider } from './components/ui/sidebar'
 import { Toaster } from './components/ui/sonner'
 import { ClusterProvider } from './contexts/cluster-context'

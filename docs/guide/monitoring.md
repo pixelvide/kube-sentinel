@@ -1,6 +1,6 @@
 # Monitoring
 
-Cloud Sentinel K8s provides comprehensive monitoring capabilities for your Kubernetes clusters through integration with Prometheus and built-in visualization tools.
+Kube Sentinel provides comprehensive monitoring capabilities for your Kubernetes clusters through integration with Prometheus and built-in visualization tools.
 
 ![Monitoring](/screenshots/monitor.png)
 
@@ -27,6 +27,6 @@ This granular view helps in diagnosing performance bottlenecks and resource cont
 
 ## Prometheus Integration
 
-To enable these rich monitoring features, Cloud Sentinel K8s must be connected to a Prometheus instance.
+To enable these rich monitoring features, Kube Sentinel must be connected to a Prometheus instance.
 
 To learn how to configure Prometheus monitoring, please refer to the [Prometheus Setup Guide](../config/prometheus-setup).

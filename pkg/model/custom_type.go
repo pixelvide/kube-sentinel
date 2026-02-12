@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/utils"
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
 )
 
 type SecretString string

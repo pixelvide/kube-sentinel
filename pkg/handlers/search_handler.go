@@ -10,9 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/golang-lru/v2/expirable"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/handlers/resources"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/utils"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/handlers/resources"
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
 )
 
 type SearchHandler struct {

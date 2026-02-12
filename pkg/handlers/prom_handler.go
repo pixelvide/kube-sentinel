@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/prometheus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metricsv1beta1 "k8s.io/metrics/pkg/apis/metrics/v1beta1"
 )

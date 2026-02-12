@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"

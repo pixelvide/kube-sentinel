@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  PACKAGE_NAME: cloud-sentinel-k8s
+  PACKAGE_NAME: kube-sentinel
   DAYS_OLD: 7
 
 jobs:

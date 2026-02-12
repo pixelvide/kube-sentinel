@@ -1,10 +1,10 @@
 # Prometheus Setup Guide
 
-This guide explains how to configure Cloud Sentinel K8s's monitoring integration with Prometheus to achieve real-time metrics and monitoring functionality.
+This guide explains how to configure Kube Sentinel's monitoring integration with Prometheus to achieve real-time metrics and monitoring functionality.
 
 ## Overview
 
-Cloud Sentinel K8s's integration with Prometheus provides:
+Kube Sentinel's integration with Prometheus provides:
 
 - Real-time cluster resource metrics
 - Historical data visualization
@@ -45,7 +45,7 @@ For more control over the installation, you can manually install Prometheus comp
 
 Follow the official documentation for each component for detailed installation instructions.
 
-## Connecting Cloud Sentinel K8s to Prometheus
+## Connecting Kube Sentinel to Prometheus
 
 Users with the **admin** role can access the settings entry in the upper right corner of the page to enter the cluster management interface.
 

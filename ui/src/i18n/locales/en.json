@@ -225,7 +225,7 @@
     "tryAgainHint": "You can try logging in with a different account that has the required permissions.",
     "noLoginMethods": "No login methods configured",
     "configureAuth": "Please configure authentication providers in your environment",
-    "footer": "© {{year}} Cloud Sentinel K8s. All rights reserved.",
+    "footer": "© {{year}} Kube Sentinel. All rights reserved.",
     "documentation": "Documentation",
     "errors": {
       "accessDenied": "Access Denied",
@@ -312,7 +312,7 @@
   },
   "settingsHint": {
     "title": "Complete Your Setup",
-    "description": "Configure essential settings to get the most out of Cloud Sentinel K8s",
+    "description": "Configure essential settings to get the most out of Kube Sentinel",
     "p8s": {
       "description": "Configure Prometheus"
     },
@@ -361,7 +361,7 @@
     "errors": {
       "loadFailed": "Failed to load clusters"
     },
-    "deleteConfirmation": "This action will only remove the current cluster's configuration in cloud-sentinel-k8s and will not delete any cluster resources.",
+    "deleteConfirmation": "This action will only remove the current cluster's configuration in kube-sentinel and will not delete any cluster resources.",
     "dialog": {
       "createTitle": "Add Cluster",
       "editTitle": "Edit Cluster",
@@ -424,7 +424,7 @@
   },
   "initialization": {
     "title": "Initial Setup",
-    "welcome": "Welcome! Let's set up your Cloud Sentinel K8s dashboard",
+    "welcome": "Welcome! Let's set up your Kube Sentinel dashboard",
     "subtitle": "Complete the following steps to get started",
     "description": "Configure your admin user and connect cluster",
     "step1": {

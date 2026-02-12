@@ -41,8 +41,8 @@ docs/.vitepress/dist
 docs/node_modules
 docs/.vitepress/cache
 
-cloud-sentinel-k8s
-!charts/cloud-sentinel-k8s
+kube-sentinel
+!charts/kube-sentinel
 
 # Environment variables
 .env

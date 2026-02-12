@@ -18,7 +18,7 @@ export function Footer() {
               {t('login.documentation')}
             </a>
             <a
-              href="https://github.com/pixelvide/cloud-sentinel-k8s"
+              href="https://github.com/pixelvide/kube-sentinel"
               target="_blank"
               className="hover:text-gray-700 transition-colors"
             >

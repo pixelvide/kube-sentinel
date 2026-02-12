@@ -1,10 +1,10 @@
-# Makefile for Cloud Sentinel K8s project
+# Makefile for Kube Sentinel project
 .PHONY: help dev build clean test docker-build docker-run frontend backend install deps
 
 # Variables
-BINARY_NAME=cloud-sentinel-k8s
+BINARY_NAME=kube-sentinel
 UI_DIR=ui
-DOCKER_IMAGE=cloud-sentinel-k8s
+DOCKER_IMAGE=kube-sentinel
 DOCKER_TAG=latest
 
 # Version information
@@ -14,9 +14,9 @@ COMMIT_ID ?= $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
 
 # Build flags
 LDFLAGS=-ldflags "-s -w \
-	-X 'github.com/pixelvide/cloud-sentinel-k8s/pkg/version.Version=$(VERSION)' \
-	-X 'github.com/pixelvide/cloud-sentinel-k8s/pkg/version.BuildDate=$(BUILD_DATE)' \
-	-X 'github.com/pixelvide/cloud-sentinel-k8s/pkg/version.CommitID=$(COMMIT_ID)'"
+	-X 'github.com/pixelvide/kube-sentinel/pkg/version.Version=$(VERSION)' \
+	-X 'github.com/pixelvide/kube-sentinel/pkg/version.BuildDate=$(BUILD_DATE)' \
+	-X 'github.com/pixelvide/kube-sentinel/pkg/version.CommitID=$(COMMIT_ID)'"
 
 # Default target
 .DEFAULT_GOAL := build
@@ -69,17 +69,17 @@ package-release:
 	@echo "🔄 Packaging..."
 	tar -czvf bin/$(BINARY_NAME)-$(shell git describe --tags --match 'v*' | grep -oE 'v[0-9]+\.[0-9][0-9]*(\.[0-9]+)?').tar.gz bin/*
 
-package-binaries: ## Package each cloud-sentinel-k8s binary file separately
-	@echo "🔄 Packaging cloud-sentinel-k8s binaries separately..."
+package-binaries: ## Package each kube-sentinel binary file separately
+	@echo "🔄 Packaging kube-sentinel binaries separately..."
 	@VERSION=$$(git describe --tags --match 'v*' | grep -oE 'v[0-9]+\.[0-9][0-9]*(\.[0-9]+)?'); \
-	for file in bin/cloud-sentinel-k8s-*; do \
+	for file in bin/kube-sentinel-*; do \
 		if [ -f "$$file" ]; then \
 			filename=$$(basename "$$file"); \
 			echo "📦 Packaging $$filename with version $$VERSION..."; \
 			tar -czvf "bin/$$filename-$$VERSION.tar.gz" "$$file"; \
 		fi; \
 	done
-	@echo "✅ All cloud-sentinel-k8s binaries packaged successfully!"
+	@echo "✅ All kube-sentinel binaries packaged successfully!"
 
 frontend: static ## Build frontend only
 

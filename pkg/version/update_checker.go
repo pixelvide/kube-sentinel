@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	githubLatestReleaseAPI = "https://api.github.com/repos/pixelvide/cloud-sentinel-k8s/releases/latest"
+	githubLatestReleaseAPI = "https://api.github.com/repos/pixelvide/kube-sentinel/releases/latest"
 	versionCheckTimeout    = 3 * time.Second
 	versionCacheTTL        = time.Hour
 )
@@ -61,7 +61,7 @@ func checkForUpdate(ctx context.Context, currentVersion string) updateCheckResul
 		return result
 	}
 
-	req.Header.Set("User-Agent", "cloud-sentinel-k8s-version-checker/"+currentVersion)
+	req.Header.Set("User-Agent", "kube-sentinel-version-checker/"+currentVersion)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
 	resp, err := http.DefaultClient.Do(req)

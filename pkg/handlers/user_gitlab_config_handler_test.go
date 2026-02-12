@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )

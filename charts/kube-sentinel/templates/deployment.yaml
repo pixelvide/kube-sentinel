@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "cloud-sentinel-k8s.fullname" . }}
+  name: {{ include "kube-sentinel.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "cloud-sentinel-k8s.labels" . | nindent 4 }}
+    {{- include "kube-sentinel.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "cloud-sentinel-k8s.selectorLabels" . | nindent 6 }}
+      {{- include "kube-sentinel.selectorLabels" . | nindent 6 }}
   {{- with .Values.deploymentStrategy }}
   strategy:
     {{- toYaml . | nindent 4 }}
@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "cloud-sentinel-k8s.labels" . | nindent 8 }}
+        {{- include "kube-sentinel.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -30,7 +30,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "cloud-sentinel-k8s.serviceAccountName" . }}
+      serviceAccountName: {{ include "kube-sentinel.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -43,7 +43,7 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/app/cloud-sentinel-k8s"]
+          command: ["/app/kube-sentinel"]
           {{- if .Values.debug }}
           args: ["-v", "1"]
           {{- end }}
@@ -53,7 +53,7 @@ spec:
               protocol: TCP
           envFrom:
             - secretRef:
-                name: {{ include "cloud-sentinel-k8s.secret" . }}
+                name: {{ include "kube-sentinel.secret" . }}
           env:
             {{- if .Values.host }}
             - name: HOST
@@ -89,15 +89,15 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- if and (eq .Values.db.type "sqlite")}}
-            - name: {{ include "cloud-sentinel-k8s.fullname" . }}-storage
+            - name: {{ include "kube-sentinel.fullname" . }}-storage
               mountPath: {{ .Values.db.sqlite.persistence.mountPath }}
           {{- end }}
       volumes:
       {{- if eq .Values.db.type "sqlite"}} 
-        - name: {{ include "cloud-sentinel-k8s.fullname" . }}-storage
+        - name: {{ include "kube-sentinel.fullname" . }}-storage
       {{- if .Values.db.sqlite.persistence.pvc.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "cloud-sentinel-k8s.fullname" . }}-storage
+            claimName: {{ include "kube-sentinel.fullname" . }}-storage
       {{- else if .Values.db.sqlite.persistence.hostPath.enabled }}
           hostPath:
             path: {{ .Values.db.sqlite.persistence.hostPath.path }}

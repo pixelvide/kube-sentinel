@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/rbac"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/rbac"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/klog/v2"

@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
-func InjectCloudSentinelK8sBase(htmlContent string, base string) string {
+func InjectKubeSentinelBase(htmlContent string, base string) string {
 	baseScript := fmt.Sprintf(`<script>window.__dynamic_base__='%s';</script>`, base)
 	re := regexp.MustCompile(`<head>`)
 	return re.ReplaceAllString(htmlContent, "<head>\n    "+baseScript)

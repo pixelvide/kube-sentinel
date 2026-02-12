@@ -3,13 +3,13 @@
 set -e
 
 NAMESPACE="${NAMESPACE:-kube-system}"
-SA_NAME="${SA_NAME:-cloud-sentinel-k8s-admin}"
+SA_NAME="${SA_NAME:-kube-sentinel-admin}"
 SECRET_NAME="${SECRET_NAME:-${SA_NAME}-token}"
-OUTPUT_FILE="${OUTPUT_FILE:-cloud-sentinel-k8s-kubeconfig.yaml}"
+OUTPUT_FILE="${OUTPUT_FILE:-kube-sentinel-kubeconfig.yaml}"
 
 cleanup() {
     echo "======================================"
-    echo "Cloud Sentinel K8s Resources Cleanup"
+    echo "Kube Sentinel Resources Cleanup"
     echo "======================================"
     echo ""
     echo "This will delete the following resources:"
@@ -42,11 +42,11 @@ cleanup() {
 
 create() {
     echo "======================================"
-    echo "Cloud Sentinel K8s Kubeconfig Generator"
+    echo "Kube Sentinel Kubeconfig Generator"
     echo "======================================"
     echo ""
     echo "This script creates a Service Account and generates a kubeconfig"
-    echo "that can be used with Cloud Sentinel K8s (no exec plugins required)."
+    echo "that can be used with Kube Sentinel (no exec plugins required)."
     echo ""
     echo "Configuration:"
     echo "  Namespace:    $NAMESPACE"
@@ -143,9 +143,9 @@ echo "======================================"
 echo ""
 echo "Kubeconfig has been saved to: $OUTPUT_FILE"
 echo ""
-echo "You can now use this file to add the cluster to Cloud Sentinel K8s:"
+echo "You can now use this file to add the cluster to Kube Sentinel:"
 echo "  1. Copy the contents of $OUTPUT_FILE"
-echo "  2. Go to Cloud Sentinel K8s UI -> Settings -> Clusters -> Add Cluster"
+echo "  2. Go to Kube Sentinel UI -> Settings -> Clusters -> Add Cluster"
 echo "  3. Paste the kubeconfig content"
 echo ""
 echo "To test the kubeconfig:"
@@ -164,9 +164,9 @@ Commands:
 
 Environment Variables:
   NAMESPACE     Kubernetes namespace (default: kube-system)
-  SA_NAME       Service Account name (default: cloud-sentinel-k8s-admin)
-  SECRET_NAME   Secret name (default: cloud-sentinel-k8s-admin-token)
-  OUTPUT_FILE   Output kubeconfig file (default: cloud-sentinel-k8s-kubeconfig.yaml)
+  SA_NAME       Service Account name (default: kube-sentinel-admin)
+  SECRET_NAME   Secret name (default: kube-sentinel-admin-token)
+  OUTPUT_FILE   Output kubeconfig file (default: kube-sentinel-kubeconfig.yaml)
 
 Examples:
   # Create resources with defaults

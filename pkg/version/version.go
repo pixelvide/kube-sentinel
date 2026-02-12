@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 )
 
 var (

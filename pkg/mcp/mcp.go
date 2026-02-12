@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
 	"k8s.io/klog/v2"
 )
 
@@ -16,7 +16,7 @@ type MCPServer struct {
 
 func NewMCPServer(cm *cluster.ClusterManager) *MCPServer {
 	s := server.NewMCPServer(
-		"cloud-sentinel-mcp",
+		"kube-sentinel-mcp",
 		"1.0.0",
 		server.WithLogging(),
 	)

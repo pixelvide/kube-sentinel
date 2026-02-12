@@ -5,24 +5,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Pod } from 'kubernetes-types/core/v1'
 
 import {
+  AIChatSession,
+  AIModelsResponse,
   AIProviderProfile,
   AISettings,
-  AIModelsResponse,
   ChatRequest,
   ChatResponse,
-  AIChatSession,
 } from '@/types/ai'
-
-export interface ClusterKnowledgeBase {
-  id: number
-  cluster_id: number
-  content: string
-  added_by: string
-  metadata?: Record<string, unknown>
-  created_at: string
-  updated_at: string
-}
-
 // Resource Analysis API
 import {
   AuditLogResponse,
@@ -51,6 +40,16 @@ import {
 import { API_BASE_URL, apiClient } from './api-client'
 import { getWebSocketUrl, withSubPath } from './subpath'
 import useWebSocket, { WebSocketMessage } from './useWebSocket'
+
+export interface ClusterKnowledgeBase {
+  id: number
+  cluster_id: number
+  content: string
+  added_by: string
+  metadata?: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
 
 type ResourcesItems<T extends ResourceType> = ResourcesTypeMap[T]['items']
 
@@ -268,8 +267,8 @@ export const resizePod = async (
 
 type DeepPartial<T> = T extends object
   ? {
-    [P in keyof T]?: DeepPartial<T[P]>
-  }
+      [P in keyof T]?: DeepPartial<T[P]>
+    }
   : T
 export const patchResource = async <T extends ResourceType>(
   resource: T,
@@ -1589,19 +1588,29 @@ export const createRole = async (data: Partial<Role>) => {
 
 // Knowledge Base API
 export const getClusterKnowledge = (clusterID: number) => {
-  return apiClient.get<{ data: ClusterKnowledgeBase[] }>(`/admin/clusters/${clusterID}/knowledge`)
+  return apiClient.get<{ data: ClusterKnowledgeBase[] }>(
+    `/admin/clusters/${clusterID}/knowledge`
+  )
 }
 
 export const addClusterKnowledge = (clusterID: number, content: string) => {
-  return apiClient.post<{ data: ClusterKnowledgeBase }>(`/admin/clusters/${clusterID}/knowledge`, {
-    content,
-    added_by: 'User (Manual)',
-    metadata: { source: 'manual_ui' },
-  })
+  return apiClient.post<{ data: ClusterKnowledgeBase }>(
+    `/admin/clusters/${clusterID}/knowledge`,
+    {
+      content,
+      added_by: 'User (Manual)',
+      metadata: { source: 'manual_ui' },
+    }
+  )
 }
 
-export const deleteClusterKnowledge = (clusterID: number, knowledgeID: number) => {
-  return apiClient.delete(`/admin/clusters/${clusterID}/knowledge/${knowledgeID}`)
+export const deleteClusterKnowledge = (
+  clusterID: number,
+  knowledgeID: number
+) => {
+  return apiClient.delete(
+    `/admin/clusters/${clusterID}/knowledge/${knowledgeID}`
+  )
 }
 
 export const updateRole = async (id: number, data: Partial<Role>) => {
@@ -1964,7 +1973,6 @@ export const fetchAdminAIConfig = (): Promise<{
 }> => {
   return fetchAPI('/admin/ai/config')
 }
-
 
 export const updateAIGovernance = (data: {
   allow_user_keys: string

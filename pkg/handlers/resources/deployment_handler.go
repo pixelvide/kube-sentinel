@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -32,6 +32,6 @@ func (h *DeploymentHandler) Restart(c *gin.Context, namespace, name string) erro
 	if deployment.Spec.Template.Annotations == nil {
 		deployment.Spec.Template.Annotations = make(map[string]string)
 	}
-	deployment.Spec.Template.Annotations["cloud-sentinel-k8s.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+	deployment.Spec.Template.Annotations["kube-sentinel.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 	return cs.K8sClient.Update(c.Request.Context(), &deployment)
 }

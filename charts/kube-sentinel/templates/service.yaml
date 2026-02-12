@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "cloud-sentinel-k8s.fullname" . }}
+  name: {{ include "kube-sentinel.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "cloud-sentinel-k8s.labels" . | nindent 4 }}
+    {{- include "kube-sentinel.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -13,4 +13,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "cloud-sentinel-k8s.selectorLabels" . | nindent 4 }}
+    {{- include "kube-sentinel.selectorLabels" . | nindent 4 }}

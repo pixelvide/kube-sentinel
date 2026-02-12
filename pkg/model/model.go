@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/glebarez/sqlite"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

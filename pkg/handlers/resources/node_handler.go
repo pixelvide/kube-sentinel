@@ -7,9 +7,9 @@ import (
 	"sort"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/kube"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/kube"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

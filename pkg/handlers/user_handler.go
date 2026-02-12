@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/rbac"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/rbac"
 	"k8s.io/klog/v2"
 )
 

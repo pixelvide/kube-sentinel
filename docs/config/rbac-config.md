@@ -1,10 +1,10 @@
 # RBAC Configuration Guide
 
-This guide explains how to configure Role-Based Access Control (RBAC) in Cloud Sentinel K8s to efficiently manage user permissions and resource access.
+This guide explains how to configure Role-Based Access Control (RBAC) in Kube Sentinel to efficiently manage user permissions and resource access.
 
 ## Overview
 
-Cloud Sentinel K8s's RBAC system supports:
+Kube Sentinel's RBAC system supports:
 
 - Defining custom roles with specific permissions
 - Assigning roles to users or OAuth groups

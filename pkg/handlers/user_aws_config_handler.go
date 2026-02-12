@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/utils"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
 	"gorm.io/gorm"
 	"k8s.io/klog/v2"
 )

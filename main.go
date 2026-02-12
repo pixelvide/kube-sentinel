@@ -16,18 +16,18 @@ import (
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/internal"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/auth"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/handlers"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/handlers/resources"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/mcp"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/middleware"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/rbac"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/utils"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/version"
+	"github.com/pixelvide/kube-sentinel/internal"
+	"github.com/pixelvide/kube-sentinel/pkg/auth"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/handlers"
+	"github.com/pixelvide/kube-sentinel/pkg/handlers/resources"
+	"github.com/pixelvide/kube-sentinel/pkg/mcp"
+	"github.com/pixelvide/kube-sentinel/pkg/middleware"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/rbac"
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
+	"github.com/pixelvide/kube-sentinel/pkg/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"k8s.io/klog/v2"
@@ -63,7 +63,7 @@ func setupStatic(r *gin.Engine) {
 		}
 
 		htmlContent := string(content)
-		htmlContent = utils.InjectCloudSentinelK8sBase(htmlContent, base)
+		htmlContent = utils.InjectKubeSentinelBase(htmlContent, base)
 
 		c.Header("Content-Type", "text/html; charset=utf-8")
 		c.String(http.StatusOK, htmlContent)
@@ -312,7 +312,7 @@ func main() {
 			klog.Fatalf("Failed to start server: %v", err)
 		}
 	}()
-	klog.Infof("Cloud Sentinel K8s server started on port %s", common.Port)
+	klog.Infof("Kube Sentinel server started on port %s", common.Port)
 	klog.Infof("Version: %s, Build Date: %s, Commit: %s",
 		version.Version, version.BuildDate, version.CommitID)
 

@@ -1,6 +1,6 @@
 # Security Scanning
 
-Cloud Sentinel K8s integrates with the [Trivy Operator](https://aquasecurity.github.io/trivy-operator/) to provide comprehensive security scanning for your Kubernetes workloads. This includes vulnerability scanning, configuration auditing, and secret detection.
+Kube Sentinel integrates with the [Trivy Operator](https://aquasecurity.github.io/trivy-operator/) to provide comprehensive security scanning for your Kubernetes workloads. This includes vulnerability scanning, configuration auditing, and secret detection.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ Once Trivy Operator is installed, navigate to **Security** in the sidebar to acc
 
 ## Report Types
 
-Cloud Sentinel K8s displays information from multiple Trivy report types:
+Kube Sentinel displays information from multiple Trivy report types:
 
 ### Vulnerability Reports
 Scans container images for known CVEs (Common Vulnerabilities and Exposures). Each vulnerability includes:

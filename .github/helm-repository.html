@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Sentinel K8s Helm Repository</title>
+  <title>Kube Sentinel Helm Repository</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -62,7 +62,7 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>☁️ Cloud Sentinel K8s Helm Repository</h1>
+      <h1>☁️ Kube Sentinel Helm Repository</h1>
       <p>Modern Kubernetes Dashboard</p>
     </div>
 
@@ -71,16 +71,16 @@
     <div class="step">
       <h3>1. Add Repository</h3>
       <div class="code">
-        helm repo add cloud-sentinel-k8s https://pixelvide.github.io/cloud-sentinel-k8s<br />helm repo update
+        helm repo add kube-sentinel https://pixelvide.github.io/kube-sentinel<br />helm repo update
       </div>
     </div>
 
     <div class="step">
       <h3>2. Install Chart</h3>
-      <div class="code">helm install cloud-sentinel-k8s cloud-sentinel-k8s/cloud-sentinel-k8s -n kube-system</div>
+      <div class="code">helm install kube-sentinel kube-sentinel/kube-sentinel -n kube-system</div>
     </div>
     <h2>Available Versions</h2>
-    <div class="code">helm search repo cloud-sentinel-k8s</div>
+    <div class="code">helm search repo kube-sentinel</div>
     or view the <a href="./index.yaml">Repository Index</a>.
   </div>
 </body>

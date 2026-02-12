@@ -1,27 +1,27 @@
 # Chart Values
 
-This document describes all available configuration options for the Cloud Sentinel K8s Helm Chart.
+This document describes all available configuration options for the Kube Sentinel Helm Chart.
 
 ## Basic Configuration
 
 | Parameter          | Description                                                | Default               |
 | ------------------ | ---------------------------------------------------------- | --------------------- |
 | `replicaCount`     | Number of replicas                                         | `1`                   |
-| `image.repository` | Container image repository                                 | `ghcr.io/pixelvide/cloud-sentinel-k8s` |
+| `image.repository` | Container image repository                                 | `ghcr.io/pixelvide/kube-sentinel` |
 | `image.pullPolicy` | Image pull policy                                          | `IfNotPresent`        |
 | `image.tag`        | Image tag. If set, will override the chart's `appVersion`. | `""`                  |
 | `imagePullSecrets` | Image pull secrets for private repositories                | `[]`                  |
 | `nameOverride`     | Override chart name                                        | `""`                  |
 | `fullnameOverride` | Override full name                                         | `""`                  |
 | `debug`            | Enable debug mode                                          | `false`               |
-| `basePath`         | Base path where Cloud Sentinel K8s is served. See notes below. | `""`                 |
+| `basePath`         | Base path where Kube Sentinel is served. See notes below. | `""`                 |
 
 ## Authentication & Security
 
 | Parameter              | Description                                                                              | Default                                              |
 | ---------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `jwtSecret`            | Secret key used for signing JWT tokens. Change this in production.                       | `"cloud-sentinel-k8s-default-jwt-secret-key-change-in-production"` |
-| `encryptKey`           | Secret key used for encrypting sensitive data. Change this in production.                | `"cloud-sentinel-k8s-default-encryption-key-change-in-production"` |
+| `jwtSecret`            | Secret key used for signing JWT tokens. Change this in production.                       | `"kube-sentinel-default-jwt-secret-key-change-in-production"` |
+| `encryptKey`           | Secret key used for encrypting sensitive data. Change this in production.                | `"kube-sentinel-default-encryption-key-change-in-production"` |
 | `host`                 | Hostname for the application                                                             | `""`                                                 |
 
 ## Database Configuration
@@ -44,7 +44,7 @@ This document describes all available configuration options for the Cloud Sentin
 | `db.sqlite.persistence.hostPath.path`     | hostPath path                                             | `/path/to/host/dir` |
 | `db.sqlite.persistence.hostPath.type`     | hostPath type                                             | `DirectoryOrCreate` |
 | `db.sqlite.persistence.mountPath`         | Mount path inside container                               | `/data`             |
-| `db.sqlite.persistence.filename`          | SQLite filename inside mountPath                          | `cloud-sentinel-k8s.db`           |
+| `db.sqlite.persistence.filename`          | SQLite filename inside mountPath                          | `kube-sentinel.db`           |
 
 ## Environment Variables
 
@@ -111,7 +111,7 @@ rbac:
 ```yaml
 ingress:
   hosts:
-    - host: cloud-sentinel-k8s.pixelvide.cloud
+    - host: kube-sentinel.pixelvide.cloud
       paths:
         - path: /
           pathType: ImplementationSpecific

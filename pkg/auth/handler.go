@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/rbac"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/utils"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/rbac"
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
 	"k8s.io/klog/v2"
 )
 
@@ -332,7 +332,7 @@ func (h *AuthHandler) RequireAuth() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		// bot token
 		if authHeader != "" {
-			if after, ok := strings.CutPrefix(authHeader, "cloud-sentinel-k8s"); ok {
+			if after, ok := strings.CutPrefix(authHeader, "kube-sentinel"); ok {
 				h.RequireAPIKeyAuth(c, after)
 				return
 			}

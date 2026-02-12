@@ -68,7 +68,7 @@ jobs:
       - name: Generate tags
         id: tags
         run: |
-          echo "tags=ghcr.io/${{ github.repository_owner }}/cloud-sentinel-k8s:main" >> $GITHUB_OUTPUT
+          echo "tags=ghcr.io/${{ github.repository_owner }}/kube-sentinel:main" >> $GITHUB_OUTPUT
           echo "image_tag=main" >> $GITHUB_OUTPUT
 
       - name: Build

@@ -104,12 +104,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Link to={homeUrl} onClick={handleMenuItemClick}>
                   <img
                     src={Icon}
-                    alt="Cloud Sentinel K8s Logo"
+                    alt="Kube Sentinel Logo"
                     className="ml-1 h-8 w-8"
                   />
-                  <span className="text-base font-semibold">
-                    Cloud Sentinel K8s
-                  </span>
+                  <span className="text-base font-semibold">Kube Sentinel</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -138,12 +136,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <div className="flex items-center gap-2">
                     <img
                       src={Icon}
-                      alt="Cloud Sentinel K8s Logo"
+                      alt="Kube Sentinel Logo"
                       className="h-8 w-8"
                     />
                     <div className="flex flex-col">
                       <span className="text-base font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                        Cloud Sentinel
+                        Kube Sentinel
                       </span>
                       <VersionInfo />
                     </div>
@@ -160,8 +158,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       }}
                       className="absolute right-0 top-0 mr-1 mt-1 rounded-sm bg-red-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-red-500 hover:bg-red-500/20"
                       title={t(
-                        'A newer Cloud Sentinel K8s version is available',
-                        'A newer Cloud Sentinel K8s version is available'
+                        'A newer Kube Sentinel version is available',
+                        'A newer Kube Sentinel version is available'
                       )}
                     >
                       New
@@ -197,7 +195,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 isActive={isActive('/security')}
                 className="transition-all duration-200 hover:bg-accent/60 active:scale-95 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:shadow-sm"
               >
-                <Link to={getClusterUrl('/security')} onClick={handleMenuItemClick}>
+                <Link
+                  to={getClusterUrl('/security')}
+                  onClick={handleMenuItemClick}
+                >
                   <ShieldCheck className="text-sidebar-primary" />
                   <span className="font-medium">Security</span>
                 </Link>

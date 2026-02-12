@@ -1,6 +1,6 @@
 # Resource Management
 
-Cloud Sentinel K8s offers comprehensive tools for managing your Kubernetes resources directly from the dashboard. You can view detailed information, perform operations, and monitor the status of your workloads.
+Kube Sentinel offers comprehensive tools for managing your Kubernetes resources directly from the dashboard. You can view detailed information, perform operations, and monitor the status of your workloads.
 
 ## Resource Operations
 
@@ -20,7 +20,7 @@ You can trigger a rolling restart of your workloads:
 1. Click the **Restart** button in the top right corner.
 2. Confirm the action in the dialog.
 
-This will update the resource's pod template with an annotation (e.g., `cloud-sentinel-k8s.kubernetes.io/restartedAt`) to trigger a rollout.
+This will update the resource's pod template with an annotation (e.g., `kube-sentinel.kubernetes.io/restartedAt`) to trigger a rollout.
 
 ### Deleting
 
@@ -34,7 +34,7 @@ This action is irreversible. Please proceed with caution.
 
 ## Live YAML Editing
 
-Cloud Sentinel K8s includes a built-in YAML editor with syntax highlighting and validation.
+Kube Sentinel includes a built-in YAML editor with syntax highlighting and validation.
 
 1. Navigate to the **YAML** tab in the resource detail view.
 2. Edit the configuration directly in the editor.

@@ -4,10 +4,10 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: {{ .Values.gateway.name | default (include "cloud-sentinel-k8s.fullname" .) }}
+  name: {{ .Values.gateway.name | default (include "kube-sentinel.fullname" .) }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "cloud-sentinel-k8s.labels" . | nindent 4 }}
+    {{- include "kube-sentinel.labels" . | nindent 4 }}
   {{- with .Values.gateway.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -50,14 +50,14 @@ metadata:
   name: {{ .name | required "httpRoute name is required" }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "cloud-sentinel-k8s.labels" $ | nindent 4 }}
+    {{- include "kube-sentinel.labels" $ | nindent 4 }}
   {{- with .annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   parentRefs:
-    - name: {{ if not $.Values.gateway.create }}{{ $.Values.gateway.name | required "gateway.name is required when gateway.create is false" }}{{ else }}{{ $.Values.gateway.name | default (include "cloud-sentinel-k8s.fullname" $) }}{{ end }}
+    - name: {{ if not $.Values.gateway.create }}{{ $.Values.gateway.name | required "gateway.name is required when gateway.create is false" }}{{ else }}{{ $.Values.gateway.name | default (include "kube-sentinel.fullname" $) }}{{ end }}
       {{- if and (not $.Values.gateway.create) $.Values.gateway.namespace }}
       namespace: {{ $.Values.gateway.namespace }}
       {{- end }}
@@ -89,7 +89,7 @@ spec:
         {{- end }}
         {{- end }}
       backendRefs:
-        - name: {{ include "cloud-sentinel-k8s.fullname" $ }}
+        - name: {{ include "kube-sentinel.fullname" $ }}
           port: {{ $.Values.service.port }}
     {{- end }}
 {{- end }}

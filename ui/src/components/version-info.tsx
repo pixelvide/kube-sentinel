@@ -9,7 +9,7 @@ export function VersionInfo() {
     e.preventDefault()
     e.stopPropagation()
     // GitHub repository URL - you can modify this to match your repository
-    const repoUrl = 'https://github.com/pixelvide/cloud-sentinel-k8s'
+    const repoUrl = 'https://github.com/pixelvide/kube-sentinel'
     const commitUrl = `${repoUrl}/commit/${versionInfo.commitId}`
     window.open(commitUrl, '_blank')
   }

@@ -1,4 +1,4 @@
-# Default values for cloud-sentinel-k8s.
+# Default values for kube-sentinel.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,7 +7,7 @@ replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: ghcr.io/pixelvide/cloud-sentinel-k8s
+  repository: ghcr.io/pixelvide/kube-sentinel
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
@@ -36,24 +36,24 @@ debug: false
 # External Host for the application
 # Used in generate OAuth redirect URLs
 # Leave empty to obtain from request headers
-# Example: https://cloud-sentinel-k8s.pixelvide.cloud
+# Example: https://kube-sentinel.pixelvide.cloud
 host: ""
 
 # Base path for the application
-# If you are serving cloud-sentinel-k8s under a subpath, set this value accordingly.
+# If you are serving kube-sentinel under a subpath, set this value accordingly.
 # Remember to also set the ingress path to match.
-# Example: "/cloud-sentinel-k8s"
+# Example: "/kube-sentinel"
 basePath: ""
 
 # This is the key used for signing JWT tokens
 # Change this in production
 # Ignored if using existingSecret
-jwtSecret: "cloud-sentinel-k8s-default-jwt-secret-key-change-in-production"
+jwtSecret: "kube-sentinel-default-jwt-secret-key-change-in-production"
 
 # This is the key used for encrypting sensitive data
 # Change this in production
 # Ignored if using existingSecret
-encryptKey: "cloud-sentinel-k8s-default-encryption-key-change-in-production"
+encryptKey: "kube-sentinel-default-encryption-key-change-in-production"
 
 # Superuser configuration
 # Used to create an initial superuser account on first startup
@@ -120,7 +120,7 @@ db:
       # where to mount inside the container
       mountPath: /data
       # sqlite filename inside the mountPath
-      filename: cloud-sentinel-k8s.db
+      filename: kube-sentinel.db
     # Additional sqlite database connection options
     # Example: "_journal_mode=WAL&_busy_timeout=5000"
     options: ""
@@ -182,15 +182,15 @@ ingress:
   className: "nginx"
   annotations: {}
   hosts:
-    - host: cloud-sentinel-k8s.pixelvide.cloud
+    - host: kube-sentinel.pixelvide.cloud
       paths:
         - path: /
           pathType: ImplementationSpecific
   # tls:
   #  - hosts:
-  #      - cloud-sentinel-k8s.pixelvide.cloud
+  #      - kube-sentinel.pixelvide.cloud
 
-# Gateway API resources for exposing Cloud Sentinel K8s
+# Gateway API resources for exposing Kube Sentinel
 # Requires Gateway API CRDs to be installed in the cluster
 # For more information: https://gateway-api.sigs.k8s.io/
 gateway:
@@ -222,22 +222,22 @@ gateway:
     # - name: https
     #   port: 443
     #   protocol: HTTPS
-    #   hostname: "cloud-sentinel-k8s.example.com"
+    #   hostname: "kube-sentinel.example.com"
     #   allowedRoutes:
     #     namespaces:
     #       from: Same
     #   tls:
     #     mode: Terminate
     #     certificateRefs:
-    #       - name: cloud-sentinel-k8s-tls-secret
+    #       - name: kube-sentinel-tls-secret
   # HTTPRoute configuration (supports multiple routes)
   httpRoutes:
-    - name: cloud-sentinel-k8s
+    - name: kube-sentinel
       # Annotations for the HTTPRoute
       annotations: {}
       # Hostnames to match (optional, matches all if empty)
       hostnames: []
-        # - cloud-sentinel-k8s.example.com
+        # - kube-sentinel.example.com
       # Routing rules
       rules:
         - matches:
@@ -245,7 +245,7 @@ gateway:
                 type: PathPrefix
                 value: /
     # Example: additional route for different hostname/path
-    # - name: cloud-sentinel-k8s-api
+    # - name: kube-sentinel-api
     #   annotations: {}
     #   hostnames:
     #     - api.example.com

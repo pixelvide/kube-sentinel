@@ -32,10 +32,10 @@ import { PodTable } from '@/components/pod-table'
 import { RelatedResourcesTable } from '@/components/related-resource-table'
 import { ResourceDeleteConfirmationDialog } from '@/components/resource-delete-confirmation-dialog'
 import { ResourceHistoryTable } from '@/components/resource-history-table'
+import { SecurityTab } from '@/components/security/security-tab'
 import { Terminal } from '@/components/terminal'
 import { VolumeTable } from '@/components/volume-table'
 import { YamlEditor } from '@/components/yaml-editor'
-import { SecurityTab } from '@/components/security/security-tab'
 
 interface JobStatusBadge {
   label: string
@@ -386,46 +386,46 @@ export function JobDetail(props: { namespace: string; name: string }) {
           },
           ...(pods && pods.length > 0
             ? [
-              {
-                value: 'pods',
-                label: (
-                  <>
-                    Pods{' '}
-                    {pods && <Badge variant="secondary">{pods.length}</Badge>}
-                  </>
-                ),
-                content: <PodTable pods={pods} />,
-              },
-              {
-                value: 'logs',
-                label: 'Logs',
-                content: (
-                  <div className="space-y-6">
-                    <LogViewer
-                      namespace={namespace}
-                      pods={pods}
-                      containers={job.spec?.template.spec?.containers}
-                      initContainers={job.spec?.template.spec?.initContainers}
-                      labelSelector={`job-name=${name}`}
-                    />
-                  </div>
-                ),
-              },
-              {
-                value: 'terminal',
-                label: 'Terminal',
-                content: (
-                  <div className="space-y-6">
-                    <Terminal
-                      namespace={namespace}
-                      pods={pods}
-                      containers={job.spec?.template.spec?.containers}
-                      initContainers={job.spec?.template.spec?.initContainers}
-                    />
-                  </div>
-                ),
-              },
-            ]
+                {
+                  value: 'pods',
+                  label: (
+                    <>
+                      Pods{' '}
+                      {pods && <Badge variant="secondary">{pods.length}</Badge>}
+                    </>
+                  ),
+                  content: <PodTable pods={pods} />,
+                },
+                {
+                  value: 'logs',
+                  label: 'Logs',
+                  content: (
+                    <div className="space-y-6">
+                      <LogViewer
+                        namespace={namespace}
+                        pods={pods}
+                        containers={job.spec?.template.spec?.containers}
+                        initContainers={job.spec?.template.spec?.initContainers}
+                        labelSelector={`job-name=${name}`}
+                      />
+                    </div>
+                  ),
+                },
+                {
+                  value: 'terminal',
+                  label: 'Terminal',
+                  content: (
+                    <div className="space-y-6">
+                      <Terminal
+                        namespace={namespace}
+                        pods={pods}
+                        containers={job.spec?.template.spec?.containers}
+                        initContainers={job.spec?.template.spec?.initContainers}
+                      />
+                    </div>
+                  ),
+                },
+              ]
             : []),
           {
             value: 'related',
@@ -459,25 +459,25 @@ export function JobDetail(props: { namespace: string; name: string }) {
           },
           ...(volumes
             ? [
-              {
-                value: 'volumes',
-                label: (
-                  <>
-                    Volumes{' '}
-                    {volumes && (
-                      <Badge variant="secondary">{volumes.length}</Badge>
-                    )}
-                  </>
-                ),
-                content: (
-                  <VolumeTable
-                    namespace={namespace}
-                    volumes={volumes}
-                    containers={containers}
-                  />
-                ),
-              } as const,
-            ]
+                {
+                  value: 'volumes',
+                  label: (
+                    <>
+                      Volumes{' '}
+                      {volumes && (
+                        <Badge variant="secondary">{volumes.length}</Badge>
+                      )}
+                    </>
+                  ),
+                  content: (
+                    <VolumeTable
+                      namespace={namespace}
+                      volumes={volumes}
+                      containers={containers}
+                    />
+                  ),
+                } as const,
+              ]
             : []),
           {
             value: 'monitor',

@@ -2,12 +2,12 @@ import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Cloud Sentinel K8s",
+  title: "Kube Sentinel",
   description: "A modern, intuitive Kubernetes dashboard",
 
-  base: "/cloud-sentinel-k8s/",
+  base: "/kube-sentinel/",
   sitemap: {
-    hostname: "https://pixelvide.github.io/cloud-sentinel-k8s/",
+    hostname: "https://pixelvide.github.io/kube-sentinel/",
     lastmodDateOnly: false,
   },
 
@@ -39,7 +39,7 @@ export default defineConfig({
     },
     langMenuLabel: "Language",
     editLink: {
-      pattern: "https://github.com/pixelvide/cloud-sentinel-k8s/tree/main/docs/:path",
+      pattern: "https://github.com/pixelvide/kube-sentinel/tree/main/docs/:path",
       text: "Edit this page on GitHub",
     },
 
@@ -55,7 +55,7 @@ export default defineConfig({
         {
           text: "Introduction",
           items: [
-            { text: "What is Cloud Sentinel K8s?", link: "/guide/" },
+            { text: "What is Kube Sentinel?", link: "/guide/" },
             { text: "Getting Started", link: "/guide/installation" },
           ],
         },
@@ -96,11 +96,11 @@ export default defineConfig({
 
     },
 
-    socialLinks: [{ icon: "github", link: "https://github.com/pixelvide/cloud-sentinel-k8s" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/pixelvide/kube-sentinel" }],
 
     footer: {
       message: "Released under the Apache License.",
-      copyright: "Copyright © 2026-present Cloud Sentinel K8s Contributors",
+      copyright: "Copyright © 2026-present Kube Sentinel Contributors",
     },
   },
 });

@@ -49,7 +49,9 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
-  const [config, setConfig] = useState<{ is_ai_chat_enabled: boolean } | null>(null)
+  const [config, setConfig] = useState<{ is_ai_chat_enabled: boolean } | null>(
+    null
+  )
   const [isLoading, setIsLoading] = useState(true)
   const [providers, setProviders] = useState<string[]>([])
 

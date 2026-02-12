@@ -1,4 +1,4 @@
-module github.com/pixelvide/cloud-sentinel-k8s
+module github.com/pixelvide/kube-sentinel
 
 go 1.25.0
 

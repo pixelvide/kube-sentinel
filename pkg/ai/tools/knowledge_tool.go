@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
 	openai "github.com/sashabaranov/go-openai"
 	"gorm.io/datatypes"
 )

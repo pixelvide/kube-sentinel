@@ -1,6 +1,6 @@
 # Resource History
 
-Cloud Sentinel K8s records the operation history of Kubernetes resources (create, update, delete, and changes via YAML Apply). On the details page, you can view the time of each change, the operator, whether it succeeded, and the YAML differences before and after the change, and roll back as needed.
+Kube Sentinel records the operation history of Kubernetes resources (create, update, delete, and changes via YAML Apply). On the details page, you can view the time of each change, the operator, whether it succeeded, and the YAML differences before and after the change, and roll back as needed.
 
 :::: tip
 You need the appropriate resource "read" permission to view its history; "write" permission is required to edit or roll back.

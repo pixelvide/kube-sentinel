@@ -21,7 +21,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.repository_owner == 'pixelvide' }}
 
     steps:
-      - name: restart cloud-sentinel-k8s deployment
+      - name: restart kube-sentinel deployment
         env:
           CLOUD_SENTINEL_K8S_HOST: ${{ secrets.CLOUD_SENTINEL_K8S_TEST_HOST }}
           CLOUD_SENTINEL_K8S_AUTH: ${{ secrets.CLOUD_SENTINEL_K8S_TEST_AUTH }}
@@ -31,7 +31,7 @@ jobs:
             exit 0
           fi
           RESTART_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          curl -X PATCH "$CLOUD_SENTINEL_K8S_HOST/api/v1/deployments/cloud-sentinel-k8s/cloud-sentinel-k8s" \
+          curl -X PATCH "$CLOUD_SENTINEL_K8S_HOST/api/v1/deployments/kube-sentinel/kube-sentinel" \
             -H "Authorization: $CLOUD_SENTINEL_K8S_AUTH" \
             -H "Content-Type: application/json" \
-            -d "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"cloud-sentinel-k8s.kubernetes.io/restartedAt\":\"$RESTART_TIME\"}}}}}"
+            -d "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"kube-sentinel.kubernetes.io/restartedAt\":\"$RESTART_TIME\"}}}}}"

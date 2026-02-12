@@ -1,6 +1,6 @@
-# What is Cloud Sentinel K8s?
+# What is Kube Sentinel?
 
-Cloud Sentinel K8s is a lightweight, modern Kubernetes dashboard that provides an intuitive interface for managing and monitoring Kubernetes clusters. It offers real-time metrics, comprehensive resource management, multi-cluster support, and a beautiful user experience.
+Kube Sentinel is a lightweight, modern Kubernetes dashboard that provides an intuitive interface for managing and monitoring Kubernetes clusters. It offers real-time metrics, comprehensive resource management, multi-cluster support, and a beautiful user experience.
 
 ![Dashboard Overview](/screenshots/overview.png)
 
@@ -31,7 +31,7 @@ Cloud Sentinel K8s is a lightweight, modern Kubernetes dashboard that provides a
 - ☸️ **Helm Release Management** - View and list Helm releases deployed in your cluster
 - 🏷️ **Quick Image Tag Selector** - Easily select and change container image tags based on Docker and container registry APIs
 - 🎨 **Customizable Sidebar** - Customize sidebar visibility and order, and add CRDs for quick access
-- 🔌 **Kube Proxy** - Access pods or services directly through Cloud Sentinel K8s, no more `kubectl port-forward`
+- 🔌 **Kube Proxy** - Access pods or services directly through Kube Sentinel, no more `kubectl port-forward`
 
 ### 📈 **Monitoring & Observability**
 
@@ -52,4 +52,4 @@ Cloud Sentinel K8s is a lightweight, modern Kubernetes dashboard that provides a
 
 ## Getting Started
 
-Ready to explore Cloud Sentinel K8s? Check out the [installation guide](./installation).
+Ready to explore Kube Sentinel? Check out the [installation guide](./installation).

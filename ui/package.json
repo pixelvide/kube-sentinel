@@ -1,5 +1,5 @@
 {
-  "name": "cloud-sentinel-k8s",
+  "name": "kube-sentinel",
   "private": true,
   "version": "0.13.1",
   "type": "module",

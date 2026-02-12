@@ -19,7 +19,7 @@ else
   SED_CMD="sed -i.bak -E"
 fi
 
-CHART_DIR="charts/cloud-sentinel-k8s"
+CHART_DIR="charts/kube-sentinel"
 
 # Cleanup backup files on exit
 trap 'find . -name "*.bak" -type f -delete' EXIT
@@ -45,15 +45,15 @@ update_file() {
 }
 
 # Update Root README
-# Replace docker tag: ghcr.io/pixelvide/cloud-sentinel-k8s:0.0.0
-$SED_CMD "s|(ghcr.io/pixelvide/cloud-sentinel-k8s:)[0-9]+\.[0-9]+\.[0-9]+|\1$VERSION|g" README.md
+# Replace docker tag: ghcr.io/pixelvide/kube-sentinel:0.0.0
+$SED_CMD "s|(ghcr.io/pixelvide/kube-sentinel:)[0-9]+\.[0-9]+\.[0-9]+|\1$VERSION|g" README.md
 # Replace helm install URL version: refs/tags/v0.0.0
 $SED_CMD "s|(refs/tags/v)[0-9]+\.[0-9]+\.[0-9]+|\1$VERSION|g" README.md
 
 # Update Chart README
 # Update app version mentions if any? Or usually just keep in sync.
 # Previous script did a simple replace. Let's try to be specific for App Version or Image Tag.
-$SED_CMD "s|(ghcr.io/pixelvide/cloud-sentinel-k8s:)[0-9]+\.[0-9]+\.[0-9]+|\1$VERSION|g" "$CHART_DIR/README.md"
+$SED_CMD "s|(ghcr.io/pixelvide/kube-sentinel:)[0-9]+\.[0-9]+\.[0-9]+|\1$VERSION|g" "$CHART_DIR/README.md"
 # Update Version badge: ![Version: v0.0.0] -> ![Version: v1.0.0]
 $SED_CMD "s|(Version: v)[0-9]+\.[0-9]+\.[0-9]+|\1$VERSION|g" "$CHART_DIR/README.md"
 # Update Version link: Version-v0.0.0 -> Version-v1.0.0

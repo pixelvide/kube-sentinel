@@ -1,6 +1,6 @@
 # Configuration Overview
 
-Cloud Sentinel K8s offers a variety of configuration options to adapt to your specific Kubernetes environment and requirements. This section covers the primary configuration areas.
+Kube Sentinel offers a variety of configuration options to adapt to your specific Kubernetes environment and requirements. This section covers the primary configuration areas.
 
 - [User Management](./user-management)
 - [Authentication](./oauth-setup)

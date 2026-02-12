@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "cloud-sentinel-k8s.name" -}}
+{{- define "kube-sentinel.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "cloud-sentinel-k8s.fullname" -}}
+{{- define "kube-sentinel.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "cloud-sentinel-k8s.chart" -}}
+{{- define "kube-sentinel.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "cloud-sentinel-k8s.labels" -}}
-helm.sh/chart: {{ include "cloud-sentinel-k8s.chart" . }}
-{{ include "cloud-sentinel-k8s.selectorLabels" . }}
+{{- define "kube-sentinel.labels" -}}
+helm.sh/chart: {{ include "kube-sentinel.chart" . }}
+{{ include "kube-sentinel.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,27 +45,27 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "cloud-sentinel-k8s.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "cloud-sentinel-k8s.name" . }}
+{{- define "kube-sentinel.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kube-sentinel.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "cloud-sentinel-k8s.serviceAccountName" -}}
+{{- define "kube-sentinel.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "cloud-sentinel-k8s.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "kube-sentinel.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
 
-{{- define "cloud-sentinel-k8s.secret" -}}
+{{- define "kube-sentinel.secret" -}}
 {{- if .Values.secret.existingSecret }}
 {{- .Values.secret.existingSecret }}
 {{- else }}
-{{- printf "%s-secret" (include "cloud-sentinel-k8s.fullname" .) }}
+{{- printf "%s-secret" (include "kube-sentinel.fullname" .) }}
 {{- end }}
 {{- end }}

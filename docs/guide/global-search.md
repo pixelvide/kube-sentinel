@@ -1,6 +1,6 @@
 # Global Search
 
-Cloud Sentinel K8s provides a powerful global search feature that allows you to quickly find any resource in your cluster. You can search by resource name, labels, or annotations.
+Kube Sentinel provides a powerful global search feature that allows you to quickly find any resource in your cluster. You can search by resource name, labels, or annotations.
 
 You can activate the global search via the search bar at the top or by using the shortcut `Ctrl + K` (Windows/Linux) or `Cmd + K` (macOS) on any page.
 
@@ -26,14 +26,14 @@ This will only search for Pods whose names start with `nginx`.
 
 More supported resource types and their abbreviations can be found in the code:
 
-https://github.com/pixelvide/cloud-sentinel-k8s/blob/b16a4701994e32e5251ee21707f940aa312a449d/pkg/utils/search.go#L12-L35
+https://github.com/pixelvide/kube-sentinel/blob/b16a4701994e32e5251ee21707f940aa312a449d/pkg/utils/search.go#L12-L35
 
 ## Limitations
 
 - For performance reasons, the search will not be triggered when the input character length is less than 3.
 - Fuzzy search is not supported.
 - Does not support cross-cluster search.
-- Search will initiate a listAll request to the cluster, so if there are too many resources in the cluster, it may cause the search to slow down. (cloud-sentinel-k8s will cache search results for 10 minutes)
+- Search will initiate a listAll request to the cluster, so if there are too many resources in the cluster, it may cause the search to slow down. (kube-sentinel will cache search results for 10 minutes)
 
 ## Known Issue
 

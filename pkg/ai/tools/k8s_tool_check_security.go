@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
 	openai "github.com/sashabaranov/go-openai"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useAuth } from '@/contexts/auth-context'
 import { IconRobot } from '@tabler/icons-react'
+import { Plus } from 'lucide-react'
 
 import { useIsMobile } from '@/hooks/use-mobile'
 import { Separator } from '@/components/ui/separator'
@@ -12,8 +13,6 @@ import { LanguageToggle } from './language-toggle'
 import { ModeToggle } from './mode-toggle'
 import { Search } from './search'
 import { UserMenu } from './user-menu'
-
-import { useAuth } from '@/contexts/auth-context'
 
 export function SiteHeader() {
   const isMobile = useIsMobile()

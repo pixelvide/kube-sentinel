@@ -50,17 +50,17 @@ RUN go mod download
 COPY . .
 
 COPY --from=frontend-builder /app/static ./static
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o cloud-sentinel-k8s .
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o kube-sentinel .
 
 FROM gcr.io/distroless/static
 
 WORKDIR /app
 
-COPY --from=backend-builder /app/cloud-sentinel-k8s .
+COPY --from=backend-builder /app/kube-sentinel .
 COPY --from=glab-builder /go/bin/glab /usr/local/bin/glab
 COPY --from=aws-iam-authenticator-builder /go/bin/aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
 COPY --from=helm-builder /usr/local/bin/helm /usr/local/bin/helm
 
 EXPOSE 8080
 
-CMD ["./cloud-sentinel-k8s"]
+CMD ["./kube-sentinel"]

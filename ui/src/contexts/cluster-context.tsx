@@ -5,9 +5,9 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { Cluster } from '@/types/api'
+import { apiClient } from '@/lib/api-client'
 import { withSubPath } from '@/lib/subpath'
 
-import { apiClient } from '@/lib/api-client'
 import { useAuth } from './auth-context'
 
 interface ClusterContextType {

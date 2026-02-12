@@ -4,7 +4,7 @@ outline: deep
 
 # Kube Proxy
 
-Cloud Sentinel K8s has a built-in kubectl Proxy feature that allows you to access Pods or Services directly through Cloud Sentinel K8s without running `kubectl port-forward` locally.
+Kube Sentinel has a built-in kubectl Proxy feature that allows you to access Pods or Services directly through Kube Sentinel without running `kubectl port-forward` locally.
 
 ## How to Use
 

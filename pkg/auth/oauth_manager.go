@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
 	"k8s.io/klog/v2"
 )
 
@@ -85,7 +85,7 @@ func (om *OAuthManager) GenerateJWT(user *model.User, refreshToken string) (stri
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
-			Issuer:    "cloud-sentinel-k8s",
+			Issuer:    "kube-sentinel",
 		},
 	}
 

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/utils"
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
 	"k8s.io/klog/v2"
 )
 

@@ -55,9 +55,9 @@ import { EventTable } from '@/components/event-table'
 import { LabelsAnno } from '@/components/lables-anno'
 import { NodeMonitoring } from '@/components/node-monitoring'
 import { PodTable } from '@/components/pod-table'
+import { SecurityTab } from '@/components/security/security-tab'
 import { Terminal } from '@/components/terminal'
 import { YamlEditor } from '@/components/yaml-editor'
-import { SecurityTab } from '@/components/security/security-tab'
 
 export function NodeDetail(props: { name: string }) {
   const { name } = props
@@ -736,8 +736,8 @@ export function NodeDetail(props: { name: string }) {
                                 Capacity:{' '}
                                 {data.status?.capacity?.['ephemeral-storage']
                                   ? formatMemory(
-                                    data.status.capacity['ephemeral-storage']
-                                  )
+                                      data.status.capacity['ephemeral-storage']
+                                    )
                                   : 'N/A'}
                               </p>
                             </div>
@@ -745,10 +745,10 @@ export function NodeDetail(props: { name: string }) {
                               <p className="text-sm font-medium">
                                 {data.status?.allocatable?.['ephemeral-storage']
                                   ? formatMemory(
-                                    data.status.allocatable[
-                                    'ephemeral-storage'
-                                    ]
-                                  )
+                                      data.status.allocatable[
+                                        'ephemeral-storage'
+                                      ]
+                                    )
                                   : 'N/A'}
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -821,12 +821,13 @@ export function NodeDetail(props: { name: string }) {
                             >
                               <div className="flex items-center gap-2">
                                 <div
-                                  className={`w-2 h-2 rounded-full ${condition.health === 'True'
-                                    ? 'bg-green-500'
-                                    : condition.health === 'False'
-                                      ? 'bg-red-500'
-                                      : 'bg-yellow-500'
-                                    }`}
+                                  className={`w-2 h-2 rounded-full ${
+                                    condition.health === 'True'
+                                      ? 'bg-green-500'
+                                      : condition.health === 'False'
+                                        ? 'bg-red-500'
+                                        : 'bg-yellow-500'
+                                  }`}
                                 />
                                 <Badge
                                   variant={
@@ -877,25 +878,25 @@ export function NodeDetail(props: { name: string }) {
           },
           ...(relatedPods && relatedPods.length > 0
             ? [
-              {
-                value: 'pods',
-                label: (
-                  <>
-                    Pods{' '}
-                    {relatedPods && (
-                      <Badge variant="secondary">{relatedPods.length}</Badge>
-                    )}
-                  </>
-                ),
-                content: (
-                  <PodTable
-                    pods={relatedPods}
-                    isLoading={isLoadingRelated}
-                    hiddenNode
-                  />
-                ),
-              },
-            ]
+                {
+                  value: 'pods',
+                  label: (
+                    <>
+                      Pods{' '}
+                      {relatedPods && (
+                        <Badge variant="secondary">{relatedPods.length}</Badge>
+                      )}
+                    </>
+                  ),
+                  content: (
+                    <PodTable
+                      pods={relatedPods}
+                      isLoading={isLoadingRelated}
+                      hiddenNode
+                    />
+                  ),
+                },
+              ]
             : []),
           {
             value: 'monitor',

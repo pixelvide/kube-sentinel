@@ -22,9 +22,8 @@ import { LabelsAnno } from '@/components/lables-anno'
 import { RelatedResourcesTable } from '@/components/related-resource-table'
 import { ResourceDeleteConfirmationDialog } from '@/components/resource-delete-confirmation-dialog'
 import { ResourceHistoryTable } from '@/components/resource-history-table'
-import { YamlEditor } from '@/components/yaml-editor'
 import { SecurityTab } from '@/components/security/security-tab'
-
+import { YamlEditor } from '@/components/yaml-editor'
 
 export function SimpleResourceDetail<
   T extends Exclude<ResourceType, 'helmreleases'>,
@@ -262,7 +261,7 @@ export function SimpleResourceDetail<
                 kind={
                   (data as { kind?: string })?.kind ||
                   resourceType.charAt(0).toUpperCase() +
-                  resourceType.slice(1).replace(/s$/, '')
+                    resourceType.slice(1).replace(/s$/, '')
                 }
                 name={name}
                 namespace={namespace}

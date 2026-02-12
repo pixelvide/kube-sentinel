@@ -16,8 +16,8 @@ import { LoginPage } from './pages/login'
 import { Overview } from './pages/overview'
 import { ResourceDetail } from './pages/resource-detail'
 import { ResourceList } from './pages/resource-list'
-import { SettingsPage } from './pages/settings'
 import { SecurityDashboard } from './pages/security-dashboard'
+import { SettingsPage } from './pages/settings'
 
 const subPath = getSubPath()
 

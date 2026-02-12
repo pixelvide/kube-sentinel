@@ -9,7 +9,7 @@ import (
 
 	"strings"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
 	openai "github.com/sashabaranov/go-openai"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"

@@ -1,6 +1,6 @@
 # Logs
 
-You can easily view the logs of your pods in Cloud Sentinel K8s. The log view provides features like filtering, highlighting, and automatic scrolling.
+You can easily view the logs of your pods in Kube Sentinel. The log view provides features like filtering, highlighting, and automatic scrolling.
 
 ![Log](/screenshots/log.png)
 

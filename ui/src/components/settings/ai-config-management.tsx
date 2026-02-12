@@ -1,16 +1,28 @@
 import { useCallback, useEffect, useState } from 'react'
-import { IconRobot, IconStar, IconStarFilled, IconTrash, IconPlus } from '@tabler/icons-react'
+import { useAuth } from '@/contexts/auth-context'
+import {
+  IconPlus,
+  IconRobot,
+  IconStar,
+  IconStarFilled,
+  IconTrash,
+} from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { fetchAIProfiles, listAIConfigs, updateAIConfig, deleteAIConfig, fetchAdminAIConfig } from '@/lib/api'
 import { AIProviderProfile, AISettings } from '@/types/ai'
-import { useAuth } from '@/contexts/auth-context'
+import {
+  deleteAIConfig,
+  fetchAdminAIConfig,
+  fetchAIProfiles,
+  listAIConfigs,
+  updateAIConfig,
+} from '@/lib/api'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -27,13 +39,18 @@ export function AIConfigManagement() {
   const [saving, setSaving] = useState(false)
   const [profiles, setProfiles] = useState<AIProviderProfile[]>([])
   const [userConfigs, setUserConfigs] = useState<AISettings[]>([])
-  const [editingConfig, setEditingConfig] = useState<Partial<AISettings> | null>(null)
+  const [editingConfig, setEditingConfig] =
+    useState<Partial<AISettings> | null>(null)
   const [allowOverride, setAllowOverride] = useState(true)
 
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const [p, c, g] = await Promise.all([fetchAIProfiles(), listAIConfigs(), fetchAdminAIConfig()])
+      const [p, c, g] = await Promise.all([
+        fetchAIProfiles(),
+        listAIConfigs(),
+        fetchAdminAIConfig(),
+      ])
       setProfiles(p)
       setUserConfigs(c)
       setAllowOverride(g.allow_user_override !== 'false')
@@ -64,28 +81,42 @@ export function AIConfigManagement() {
     }
   }, [editingConfig, loadData, checkAuth, t])
 
-  const handleSetDefault = useCallback(async (config: AISettings) => {
-    try {
-      await updateAIConfig({ ...config, isDefault: true })
-      await loadData()
-      toast.success(t('aiConfig.defaultSet', 'Default profile updated'))
-    } catch {
-      toast.error(t('aiConfig.saveError', 'Failed to update default profile'))
-    }
-  }, [loadData, t])
+  const handleSetDefault = useCallback(
+    async (config: AISettings) => {
+      try {
+        await updateAIConfig({ ...config, isDefault: true })
+        await loadData()
+        toast.success(t('aiConfig.defaultSet', 'Default profile updated'))
+      } catch {
+        toast.error(t('aiConfig.saveError', 'Failed to update default profile'))
+      }
+    },
+    [loadData, t]
+  )
 
-  const handleDelete = useCallback(async (id: number) => {
-    if (!confirm(t('common.confirmDelete', 'Are you sure you want to delete this configuration?'))) return
-    try {
-      // We need a deleteAIConfig endpoint or use updateAIConfig with a flag
-      // Let's assume we have it or add it
-      await deleteAIConfig(id)
-      await loadData()
-      toast.success(t('aiConfig.deleted', 'Configuration removed'))
-    } catch {
-      toast.error(t('aiConfig.deleteError', 'Failed to remove configuration'))
-    }
-  }, [loadData, t])
+  const handleDelete = useCallback(
+    async (id: number) => {
+      if (
+        !confirm(
+          t(
+            'common.confirmDelete',
+            'Are you sure you want to delete this configuration?'
+          )
+        )
+      )
+        return
+      try {
+        // We need a deleteAIConfig endpoint or use updateAIConfig with a flag
+        // Let's assume we have it or add it
+        await deleteAIConfig(id)
+        await loadData()
+        toast.success(t('aiConfig.deleted', 'Configuration removed'))
+      } catch {
+        toast.error(t('aiConfig.deleteError', 'Failed to remove configuration'))
+      }
+    },
+    [loadData, t]
+  )
 
   if (loading) return <div>Loading AI Settings...</div>
 
@@ -101,7 +132,10 @@ export function AIConfigManagement() {
         <CardContent>
           <div className="text-center py-10 bg-muted/20 border border-dashed rounded-lg">
             <p className="text-muted-foreground italic">
-              {t('aiConfig.overrideDisabled', 'AI configuration override has been disabled by the administrator. System-wide default settings will be used.')}
+              {t(
+                'aiConfig.overrideDisabled',
+                'AI configuration override has been disabled by the administrator. System-wide default settings will be used.'
+              )}
             </p>
           </div>
         </CardContent>
@@ -109,7 +143,9 @@ export function AIConfigManagement() {
     )
   }
 
-  const selectedProfile = profiles.find((p) => p.id === editingConfig?.profileID)
+  const selectedProfile = profiles.find(
+    (p) => p.id === editingConfig?.profileID
+  )
 
   return (
     <div className="space-y-6">
@@ -120,7 +156,16 @@ export function AIConfigManagement() {
             {t('aiConfig.title', 'AI Assistant Profiles')}
           </CardTitle>
           {!editingConfig && (
-            <Button size="sm" onClick={() => setEditingConfig({ profileID: profiles[0]?.id, isActive: true, isDefault: userConfigs.length === 0 })}>
+            <Button
+              size="sm"
+              onClick={() =>
+                setEditingConfig({
+                  profileID: profiles[0]?.id,
+                  isActive: true,
+                  isDefault: userConfigs.length === 0,
+                })
+              }
+            >
               <IconPlus className="h-4 w-4 mr-2" />
               {t('aiConfig.add', 'Add Profile')}
             </Button>
@@ -129,38 +174,64 @@ export function AIConfigManagement() {
         <CardContent>
           {userConfigs.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
-              {t('aiConfig.noConfigs', 'No AI profiles configured. Add one to get started.')}
+              {t(
+                'aiConfig.noConfigs',
+                'No AI profiles configured. Add one to get started.'
+              )}
             </div>
           ) : (
             <div className="space-y-4">
               {userConfigs.map((cfg) => {
-                const profile = profiles.find(p => p.id === cfg.profileID)
+                const profile = profiles.find((p) => p.id === cfg.profileID)
                 return (
-                  <div key={cfg.id} className="flex items-center justify-between p-3 border rounded-lg bg-card/50">
+                  <div
+                    key={cfg.id}
+                    className="flex items-center justify-between p-3 border rounded-lg bg-card/50"
+                  >
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{profile?.name || 'Unknown Profile'}</span>
+                        <span className="font-medium">
+                          {profile?.name || 'Unknown Profile'}
+                        </span>
                         {cfg.isDefault && (
-                          <Badge variant="secondary" className="gap-1 px-1.5 h-5">
+                          <Badge
+                            variant="secondary"
+                            className="gap-1 px-1.5 h-5"
+                          >
                             <IconStarFilled className="h-3 w-3 text-yellow-500" />
                             {t('aiConfig.default', 'Default')}
                           </Badge>
                         )}
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {profile?.provider} {cfg.modelOverride ? `• ${cfg.modelOverride}` : ''}
+                        {profile?.provider}{' '}
+                        {cfg.modelOverride ? `• ${cfg.modelOverride}` : ''}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       {!cfg.isDefault && (
-                        <Button variant="ghost" size="icon" title={t('aiConfig.setAsDefault', 'Set as Default')} onClick={() => handleSetDefault(cfg)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title={t('aiConfig.setAsDefault', 'Set as Default')}
+                          onClick={() => handleSetDefault(cfg)}
+                        >
                           <IconStar className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" onClick={() => setEditingConfig(cfg)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditingConfig(cfg)}
+                      >
                         {t('common.edit', 'Edit')}
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => cfg.id && handleDelete(cfg.id)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => cfg.id && handleDelete(cfg.id)}
+                      >
                         <IconTrash className="h-4 w-4" />
                       </Button>
                     </div>
@@ -175,27 +246,40 @@ export function AIConfigManagement() {
       {editingConfig && (
         <Card>
           <CardHeader>
-            <CardTitle>{editingConfig.id ? t('aiConfig.edit', 'Edit Configuration') : t('aiConfig.add', 'Add Configuration')}</CardTitle>
+            <CardTitle>
+              {editingConfig.id
+                ? t('aiConfig.edit', 'Edit Configuration')
+                : t('aiConfig.add', 'Add Configuration')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="profile">{t('aiConfig.profile', 'AI Profile')}</Label>
+              <Label htmlFor="profile">
+                {t('aiConfig.profile', 'AI Profile')}
+              </Label>
               <Select
                 value={String(editingConfig.profileID)}
                 disabled={!!editingConfig.id}
                 onValueChange={(v) =>
-                  setEditingConfig({ ...editingConfig, profileID: parseInt(v), apiKey: '', modelOverride: '' })
+                  setEditingConfig({
+                    ...editingConfig,
+                    profileID: parseInt(v),
+                    apiKey: '',
+                    modelOverride: '',
+                  })
                 }
               >
                 <SelectTrigger id="profile">
                   <SelectValue placeholder="Select an AI profile" />
                 </SelectTrigger>
                 <SelectContent>
-                  {profiles.filter((p) => p.isEnabled).map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>
-                      {p.name} ({p.provider})
-                    </SelectItem>
-                  ))}
+                  {profiles
+                    .filter((p) => p.isEnabled)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={String(p.id)}>
+                        {p.name} ({p.provider})
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -211,7 +295,12 @@ export function AIConfigManagement() {
                     type="password"
                     placeholder="Leave blank to use system default"
                     value={editingConfig.apiKey || ''}
-                    onChange={(e) => setEditingConfig({ ...editingConfig, apiKey: e.target.value })}
+                    onChange={(e) =>
+                      setEditingConfig({
+                        ...editingConfig,
+                        apiKey: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
@@ -219,11 +308,15 @@ export function AIConfigManagement() {
                   <Label htmlFor="model">
                     {t('aiConfig.model', 'Model Override')}
                   </Label>
-                  {selectedProfile.allowedModels && selectedProfile.allowedModels.length > 0 ? (
+                  {selectedProfile.allowedModels &&
+                  selectedProfile.allowedModels.length > 0 ? (
                     <Select
                       value={editingConfig.modelOverride || 'default'}
                       onValueChange={(v) =>
-                        setEditingConfig({ ...editingConfig, modelOverride: v === 'default' ? '' : v })
+                        setEditingConfig({
+                          ...editingConfig,
+                          modelOverride: v === 'default' ? '' : v,
+                        })
                       }
                     >
                       <SelectTrigger id="model">
@@ -231,7 +324,8 @@ export function AIConfigManagement() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="default">
-                          {t('aiConfig.defaultModel', 'Default')}: {selectedProfile.defaultModel}
+                          {t('aiConfig.defaultModel', 'Default')}:{' '}
+                          {selectedProfile.defaultModel}
                         </SelectItem>
                         {selectedProfile.allowedModels.map((m) => (
                           <SelectItem key={m} value={m}>
@@ -246,7 +340,10 @@ export function AIConfigManagement() {
                       placeholder={`Default: ${selectedProfile.defaultModel}`}
                       value={editingConfig.modelOverride || ''}
                       onChange={(e) =>
-                        setEditingConfig({ ...editingConfig, modelOverride: e.target.value })
+                        setEditingConfig({
+                          ...editingConfig,
+                          modelOverride: e.target.value,
+                        })
                       }
                     />
                   )}
@@ -258,14 +355,20 @@ export function AIConfigManagement() {
               <Switch
                 id="isDefault"
                 checked={editingConfig.isDefault || false}
-                onCheckedChange={(checked) => setEditingConfig({ ...editingConfig, isDefault: checked })}
+                onCheckedChange={(checked) =>
+                  setEditingConfig({ ...editingConfig, isDefault: checked })
+                }
               />
-              <Label htmlFor="isDefault">{t('aiConfig.setAsDefault', 'Set as Default profile')}</Label>
+              <Label htmlFor="isDefault">
+                {t('aiConfig.setAsDefault', 'Set as Default profile')}
+              </Label>
             </div>
 
             <div className="flex gap-2 pt-4">
               <Button onClick={handleSave} disabled={saving}>
-                {saving ? t('common.saving', 'Saving...') : t('common.save', 'Save Changes')}
+                {saving
+                  ? t('common.saving', 'Saving...')
+                  : t('common.save', 'Save Changes')}
               </Button>
               <Button variant="ghost" onClick={() => setEditingConfig(null)}>
                 {t('common.cancel', 'Cancel')}

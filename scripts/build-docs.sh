@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-REPO_URL="https://github.com/pixelvide/cloud-sentinel-k8s.git"
+REPO_URL="https://github.com/pixelvide/kube-sentinel.git"
 # Fetch all tags
 git fetch --tags
 
@@ -9,7 +9,7 @@ git fetch --tags
 # You can adjust the grep/sort logic to fit your tagging scheme
 VERSIONS=($(git tag -l "v*" | grep -v "v0.0.0" | sort -V | tail -n 20))
 echo "Detected versions to build: ${VERSIONS[*]}"
-BASE_URL="/cloud-sentinel-k8s"
+BASE_URL="/kube-sentinel"
 
 # Setup directories
 WORK_DIR=$(pwd)
@@ -24,7 +24,7 @@ rm -rf "$DIST_DIR"
 echo "Building 'latest' documentation..."
 cd "$DOCS_DIR"
 # Ensure the base URL is correct for the main build
-# This assumes the config.mts has base: '/cloud-sentinel-k8s/'
+# This assumes the config.mts has base: '/kube-sentinel/'
 pnpm install
 pnpm run docs:build
 cd "$WORK_DIR"
@@ -65,7 +65,7 @@ for VERSION in "${VERSIONS[@]}"; do
   # IMPORTANT: We must dynamically inject the correct base URL for this version
   # We use sed to replace the base URL in the config file
   # Pattern matches: base: "..." or base: '...'
-  # We replace it with: base: "/cloud-sentinel-k8s/$VERSION/"
+  # We replace it with: base: "/kube-sentinel/$VERSION/"
   
   CONFIG_FILE=".vitepress/config.mts"
   if [ ! -f "$CONFIG_FILE" ]; then

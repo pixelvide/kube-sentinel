@@ -10,12 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/websocket"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/kube"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/rbac"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/utils"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/kube"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/rbac"
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -93,7 +93,7 @@ func (h *NodeTerminalHandler) HandleNodeTerminalWebSocket(c *gin.Context) {
 
 func (h *NodeTerminalHandler) createNodeAgent(ctx context.Context, cs *cluster.ClientSet, nodeName string) (string, error) {
 	podName := utils.GenerateNodeAgentName(nodeName)
-	// Define the cloud-sentinel-k8s node agent pod spec
+	// Define the kube-sentinel node agent pod spec
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName,
@@ -150,7 +150,7 @@ func (h *NodeTerminalHandler) createNodeAgent(ctx context.Context, cs *cluster.C
 	if err := cs.K8sClient.Get(ctx, namespacedName, object); err == nil {
 		if utils.IsPodErrorOrSuccess(object) {
 			if err := cs.K8sClient.Delete(ctx, object); err != nil {
-				return "", fmt.Errorf("failed to delete existing cloud-sentinel-k8s node agent pod: %w", err)
+				return "", fmt.Errorf("failed to delete existing kube-sentinel node agent pod: %w", err)
 			}
 		} else {
 			return podName, nil
@@ -160,13 +160,13 @@ func (h *NodeTerminalHandler) createNodeAgent(ctx context.Context, cs *cluster.C
 	// Create the pod
 	err := cs.K8sClient.Create(ctx, pod)
 	if err != nil {
-		return "", fmt.Errorf("failed to create cloud-sentinel-k8s node agent pod: %w", err)
+		return "", fmt.Errorf("failed to create kube-sentinel node agent pod: %w", err)
 	}
 
 	return podName, nil
 }
 
-// waitForPodReady waits for the cloud-sentinel-k8s node agent pod to be ready
+// waitForPodReady waits for the kube-sentinel node agent pod to be ready
 func (h *NodeTerminalHandler) waitForPodReady(ctx context.Context, cs *cluster.ClientSet, conn *websocket.Conn, podName string) error {
 	timeout := time.After(60 * time.Second)
 	ticker := time.NewTicker(2 * time.Second)

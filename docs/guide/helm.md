@@ -1,6 +1,6 @@
 # Helm Management
 
-Cloud Sentinel K8s provides a dedicated interface for viewing and managing Helm releases in your cluster.
+Kube Sentinel provides a dedicated interface for viewing and managing Helm releases in your cluster.
 
 ## Helm Releases
 

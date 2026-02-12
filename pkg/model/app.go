@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 	"k8s.io/klog/v2"
 )
 

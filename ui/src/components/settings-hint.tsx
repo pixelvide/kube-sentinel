@@ -112,7 +112,7 @@ export function SettingsHint({ onDismiss }: SettingsHintProps) {
         <CardDescription className="text-muted-foreground">
           {t(
             'settingsHint.description',
-            'Configure essential settings to get the most out of Cloud Sentinel K8s'
+            'Configure essential settings to get the most out of Kube Sentinel'
           )}
         </CardDescription>
       </CardHeader>

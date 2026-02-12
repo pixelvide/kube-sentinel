@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: cloud-sentinel-k8s
+  IMAGE_NAME: kube-sentinel
   GO_VERSION: "1.25"
   NODE_VERSION: "24"
 
@@ -94,14 +94,14 @@ jobs:
       - name: Package Helm chart
         run: |
           # Package chart
-          helm package charts/cloud-sentinel-k8s/
+          helm package charts/kube-sentinel/
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            bin/cloud-sentinel-k8s-*-${{ steps.check_version.outputs.tag_name }}.tar.gz
-            cloud-sentinel-k8s-*.tgz
+            bin/kube-sentinel-*-${{ steps.check_version.outputs.tag_name }}.tar.gz
+            kube-sentinel-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -124,7 +124,7 @@ jobs:
           VERSION=$(echo $TAG_NAME | sed 's/^v//')
 
           # Download the helm chart from the release
-          gh release download $TAG_NAME --pattern "cloud-sentinel-k8s-$VERSION.tgz"
+          gh release download $TAG_NAME --pattern "kube-sentinel-$VERSION.tgz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

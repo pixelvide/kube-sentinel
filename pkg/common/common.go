@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	AppName = "cloud-sentinel-k8s"
+	AppName = "kube-sentinel"
 
 	JWTExpirationSeconds = 24 * 60 * 60 // 24 hours
 
-	NodeTerminalPodName = "cloud-sentinel-k8s-node-terminal-agent"
+	NodeTerminalPodName = "kube-sentinel-node-terminal-agent"
 
 	KubectlAnnotation = "kubectl.kubernetes.io/last-applied-configuration"
 
@@ -25,7 +25,7 @@ const (
 
 var (
 	Port        = "8080"
-	JwtSecret   = "cloud-sentinel-k8s-default-jwt-secret-key-change-in-production"
+	JwtSecret   = "kube-sentinel-default-jwt-secret-key-change-in-production"
 	Host        = ""
 	Base        = ""
 	GitlabHosts = ""
@@ -34,7 +34,7 @@ var (
 	DBType            = "sqlite"
 	DBDSN             = "dev.db"
 
-	CloudSentinelK8sEncryptKey = "cloud-sentinel-k8s-default-encryption-key-change-in-production"
+	KubeSentinelEncryptKey = "kube-sentinel-default-encryption-key-change-in-production"
 
 	CookieExpirationSeconds = 2 * JWTExpirationSeconds // double jwt
 
@@ -70,7 +70,7 @@ func LoadEnvs() {
 	}
 
 	if key := os.Getenv("CLOUD_SENTINEL_K8S_ENCRYPT_KEY"); key != "" {
-		CloudSentinelK8sEncryptKey = key
+		KubeSentinelEncryptKey = key
 	} else {
 		klog.Warningf("CLOUD_SENTINEL_K8S_ENCRYPT_KEY is not set, using default key, this is not secure for production!")
 	}

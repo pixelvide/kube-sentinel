@@ -3,8 +3,8 @@ package rbac
 import (
 	"testing"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/model"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/model"
 )
 
 func TestCanAccess(t *testing.T) {

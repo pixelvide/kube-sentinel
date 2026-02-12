@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/cluster"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/helm"
-	v3 "github.com/pixelvide/cloud-sentinel-k8s/pkg/helm/types/v3"
+	"github.com/pixelvide/kube-sentinel/pkg/cluster"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/helm"
+	v3 "github.com/pixelvide/kube-sentinel/pkg/helm/types/v3"
 	"sigs.k8s.io/yaml"
 )
 

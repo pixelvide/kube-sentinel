@@ -29,11 +29,11 @@ ARG TARGETARCH
 
 WORKDIR /app
 
-COPY bin/cloud-sentinel-k8s-$TARGETARCH ./cloud-sentinel-k8s
+COPY bin/kube-sentinel-$TARGETARCH ./kube-sentinel
 COPY --from=glab-builder /go/bin/glab /usr/local/bin/glab
 COPY --from=aws-iam-authenticator-builder /go/bin/aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
 COPY --from=helm-builder /usr/local/bin/helm /usr/local/bin/helm
 
 EXPOSE 8080
 
-CMD ["./cloud-sentinel-k8s"]
+CMD ["./kube-sentinel"]

@@ -33,7 +33,6 @@ import {
   useUserList,
 } from '@/lib/api'
 import { formatDate } from '@/lib/utils'
-import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -57,6 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import { ResourceTableView } from '@/components/resource-table-view'
 
@@ -124,7 +124,8 @@ export function UserManagement() {
         queryClient.invalidateQueries({ queryKey: ['user-list'] })
         toast.success(t('userManagement.messages.updated', 'User updated'))
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to update AI chat status'
+        const message =
+          err instanceof Error ? err.message : 'Failed to update AI chat status'
         toast.error(message)
       }
     },
@@ -392,7 +393,7 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t('userManagement.messages.deleteError', 'Failed to delete user')
+          t('userManagement.messages.deleteError', 'Failed to delete user')
       )
     },
   })
@@ -408,7 +409,7 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t('userManagement.messages.createError', 'Failed to create user')
+          t('userManagement.messages.createError', 'Failed to create user')
       )
     },
   })
@@ -425,10 +426,10 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t(
-          'userManagement.messages.resetPasswordError',
-          'Failed to reset password'
-        )
+          t(
+            'userManagement.messages.resetPasswordError',
+            'Failed to reset password'
+          )
       )
     },
   })
@@ -444,7 +445,7 @@ export function UserManagement() {
     onError: (err: Error) => {
       toast.error(
         err.message ||
-        t('userManagement.messages.updateError', 'Failed to update user')
+          t('userManagement.messages.updateError', 'Failed to update user')
       )
     },
   })

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/common"
+	"github.com/pixelvide/kube-sentinel/pkg/common"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,7 +23,7 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func EncryptString(input string) string {
-	keyHash := sha256.Sum256([]byte(common.CloudSentinelK8sEncryptKey))
+	keyHash := sha256.Sum256([]byte(common.KubeSentinelEncryptKey))
 	block, err := aes.NewCipher(keyHash[:])
 	if err != nil {
 		return fmt.Sprintf("encryption_error: %v", err)
@@ -42,7 +42,7 @@ func EncryptString(input string) string {
 }
 
 func DecryptString(encrypted string) (string, error) {
-	keyHash := sha256.Sum256([]byte(common.CloudSentinelK8sEncryptKey))
+	keyHash := sha256.Sum256([]byte(common.KubeSentinelEncryptKey))
 	ciphertext, err := base64.StdEncoding.DecodeString(encrypted)
 	if err != nil {
 		return "", fmt.Errorf("failed to decode base64: %w", err)

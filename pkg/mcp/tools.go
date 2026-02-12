@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/pixelvide/cloud-sentinel-k8s/pkg/analyzer"
+	"github.com/pixelvide/kube-sentinel/pkg/analyzer"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
