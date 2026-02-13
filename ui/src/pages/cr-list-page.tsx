@@ -83,12 +83,16 @@ export function CRListPage() {
               if (type === 'date') {
                 return (
                   <span className="text-sm text-muted-foreground">
-                    {formatDate(value)}
+                    {typeof value === 'string' ? formatDate(value) : '-'}
                   </span>
                 )
               }
               return (
-                <span className="text-sm text-muted-foreground">{value}</span>
+                <span className="text-sm text-muted-foreground">
+                  {typeof value === 'object'
+                    ? JSON.stringify(value)
+                    : String(value)}
+                </span>
               )
             },
           })
