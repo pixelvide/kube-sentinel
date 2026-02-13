@@ -8,14 +8,18 @@ import (
 
 func TestLoadEnvs_JwtSecret(t *testing.T) {
 	// Case 1: JWT_SECRET is set
-	os.Setenv("JWT_SECRET", "my-secret-key")
+	if err := os.Setenv("JWT_SECRET", "my-secret-key"); err != nil {
+		t.Fatalf("Failed to set JWT_SECRET: %v", err)
+	}
 	LoadEnvs()
 	if JwtSecret != "my-secret-key" {
 		t.Errorf("Expected JwtSecret to be 'my-secret-key', got '%s'", JwtSecret)
 	}
 
 	// Case 2: JWT_SECRET is not set
-	os.Unsetenv("JWT_SECRET")
+	if err := os.Unsetenv("JWT_SECRET"); err != nil {
+		t.Fatalf("Failed to unset JWT_SECRET: %v", err)
+	}
 	JwtSecret = "" // Reset to ensure LoadEnvs regenerates it
 	LoadEnvs()
 	if JwtSecret == "" {
