@@ -16,6 +16,7 @@ type User struct {
 	Username    string     `json:"username" gorm:"type:varchar(50);uniqueIndex;not null"`
 	Password    string     `json:"-" gorm:"type:varchar(255)"`
 	Name        string     `json:"name,omitempty" gorm:"type:varchar(100);index"`
+	Email       string     `json:"email,omitempty" gorm:"type:varchar(255);index"`
 	AvatarURL   string     `json:"avatar_url,omitempty" gorm:"type:varchar(500)"`
 	LastLoginAt *time.Time `json:"lastLoginAt,omitempty" gorm:"type:timestamp;index"`
 	Enabled     bool       `json:"enabled" gorm:"type:boolean;default:true"`
@@ -118,6 +119,7 @@ func FindWithSubOrUpsertUser(user *User) error {
 		return errors.New("user sub is empty")
 	}
 	inputOIDCGroups := user.OIDCGroups
+	inputEmail := user.Email
 
 	var identity UserIdentity
 	// Try to find identity first
@@ -135,6 +137,11 @@ func FindWithSubOrUpsertUser(user *User) error {
 		now := time.Now()
 		user.LastLoginAt = &now
 		identity.LastLoginAt = &now
+
+		// Update Email if provided and not already set
+		if inputEmail != "" && user.Email == "" {
+			user.Email = inputEmail
+		}
 
 		// Update OIDC groups on identity if changed
 		if fmt.Sprintf("%v", identity.OIDCGroups) != fmt.Sprintf("%v", inputOIDCGroups) {
@@ -186,6 +193,9 @@ func FindWithSubOrUpsertUser(user *User) error {
 	if existingUser.ID != 0 {
 		now := time.Now()
 		existingUser.LastLoginAt = &now
+		if inputEmail != "" && existingUser.Email == "" {
+			existingUser.Email = inputEmail
+		}
 		if err := DB.Save(&existingUser).Error; err != nil {
 			klog.Errorf("Failed to update existing user: %v", err)
 			return err

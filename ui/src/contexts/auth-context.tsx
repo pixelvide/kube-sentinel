@@ -13,6 +13,7 @@ interface User {
   id: string
   username: string
   name: string
+  email?: string
   avatar_url: string
   provider: string
   roles?: { name: string }[]

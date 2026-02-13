@@ -479,6 +479,7 @@ export interface UserItem {
   enabled?: boolean
   avatar_url?: string
   name?: string
+  email?: string
   roles?: Role[]
   config?: UserConfig
 }
