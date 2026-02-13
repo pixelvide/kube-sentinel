@@ -45,7 +45,7 @@ func (h *SearchHandler) Search(c *gin.Context, query string, limit int) ([]commo
 	for name, searchFunc := range searchFuncs {
 		if guessSearchResources == "all" || name == guessSearchResources {
 			wg.Add(1)
-			go func(name string, searchFunc func(c *gin.Context, query string, limit int64) ([]common.SearchResult, error)) {
+			go func(searchFunc func(c *gin.Context, query string, limit int64) ([]common.SearchResult, error)) {
 				defer wg.Done()
 				// We wait for all goroutines to finish before returning, so using c is safe for read-only operations
 				results, err := searchFunc(c, q, int64(limit))
@@ -55,7 +55,7 @@ func (h *SearchHandler) Search(c *gin.Context, query string, limit int) ([]commo
 				mu.Lock()
 				allResults = append(allResults, results...)
 				mu.Unlock()
-			}(name, searchFunc)
+			}(searchFunc)
 		}
 	}
 	wg.Wait()
