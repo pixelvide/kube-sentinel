@@ -286,6 +286,11 @@ func (g *GenericProvider) GetUserInfo(accessToken string) (*model.User, error) {
 	} else if email, ok := userInfo["email"]; ok {
 		user.Username = fmt.Sprintf("%v", email)
 	}
+
+	if email, ok := userInfo["email"]; ok {
+		user.Email = fmt.Sprintf("%v", email)
+	}
+
 	if name, ok := userInfo["name"]; ok {
 		user.Name = fmt.Sprintf("%v", name)
 	} else if displayName, ok := userInfo["displayName"]; ok {
