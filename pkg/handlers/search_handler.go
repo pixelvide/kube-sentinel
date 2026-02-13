@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -35,19 +36,29 @@ func (h *SearchHandler) createCacheKey(query string) string {
 
 func (h *SearchHandler) Search(c *gin.Context, query string, limit int) ([]common.SearchResult, error) {
 	var allResults []common.SearchResult
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 
 	// Search in different resource types
 	searchFuncs := resources.SearchFuncs
 	guessSearchResources, q := utils.GuessSearchResources(query)
 	for name, searchFunc := range searchFuncs {
 		if guessSearchResources == "all" || name == guessSearchResources {
-			results, err := searchFunc(c, q, int64(limit))
-			if err != nil {
-				continue
-			}
-			allResults = append(allResults, results...)
+			wg.Add(1)
+			go func(name string, searchFunc func(c *gin.Context, query string, limit int64) ([]common.SearchResult, error)) {
+				defer wg.Done()
+				// We wait for all goroutines to finish before returning, so using c is safe for read-only operations
+				results, err := searchFunc(c, q, int64(limit))
+				if err != nil {
+					return
+				}
+				mu.Lock()
+				allResults = append(allResults, results...)
+				mu.Unlock()
+			}(name, searchFunc)
 		}
 	}
+	wg.Wait()
 
 	queryLower := strings.ToLower(q)
 	sortResults(allResults, queryLower)
