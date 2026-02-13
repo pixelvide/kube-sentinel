@@ -780,7 +780,9 @@ export function ResourceTable<T>({
                   </Button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
-              <TooltipContent>{t('resourceTable.toggleColumns')}</TooltipContent>
+              <TooltipContent>
+                {t('resourceTable.toggleColumns')}
+              </TooltipContent>
             </Tooltip>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>

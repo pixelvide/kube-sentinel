@@ -63,7 +63,10 @@ export function RBACManagement() {
         id: 'clusters',
         header: 'Clusters',
         cell: ({ row: { original: r } }) => (
-          <div className="text-sm text-muted-foreground">
+          <div
+            className="text-sm text-muted-foreground max-w-[200px] truncate"
+            title={r.clusters.join(', ')}
+          >
             {r.clusters.length > 0 ? (
               r.clusters.join(', ')
             ) : (
@@ -76,7 +79,10 @@ export function RBACManagement() {
         id: 'namespaces',
         header: 'Namespaces',
         cell: ({ row: { original: r } }) => (
-          <div className="text-sm text-muted-foreground">
+          <div
+            className="text-sm text-muted-foreground max-w-[200px] truncate"
+            title={r.namespaces.join(', ')}
+          >
             {r.namespaces.length > 0 ? (
               r.namespaces.join(', ')
             ) : (
@@ -90,7 +96,10 @@ export function RBACManagement() {
         id: 'Resources',
         header: 'Resources',
         cell: ({ row: { original: r } }) => (
-          <div className="text-sm text-muted-foreground">
+          <div
+            className="text-sm text-muted-foreground max-w-[200px] truncate"
+            title={r.resources.join(', ')}
+          >
             {r.resources.length > 0 ? (
               r.resources.join(', ')
             ) : (
@@ -103,7 +112,10 @@ export function RBACManagement() {
         id: 'verbs',
         header: 'Verbs',
         cell: ({ row: { original: r } }) => (
-          <div className="text-sm text-muted-foreground">
+          <div
+            className="text-sm text-muted-foreground max-w-[200px] truncate"
+            title={r.verbs.join(', ')}
+          >
             {r.verbs.length > 0 ? (
               r.verbs.join(', ')
             ) : (
@@ -122,9 +134,14 @@ export function RBACManagement() {
             r.assignments?.filter((a) => a.subjectType === 'group') || []
           const maxShow = 2
           return (
-            <div className="flex flex-wrap gap-1 text-xs max-w-[200px]">
+            <div className="flex flex-wrap gap-1 text-xs max-w-[300px]">
               {users.slice(0, maxShow).map((a) => (
-                <Badge key={a.id} variant="secondary" className="text-xs">
+                <Badge
+                  key={a.id}
+                  variant="secondary"
+                  className="text-xs max-w-full truncate"
+                  title={`user: ${a.subject}`}
+                >
                   user: {a.subject}
                 </Badge>
               ))}
@@ -134,7 +151,12 @@ export function RBACManagement() {
                 </Badge>
               )}
               {groups.slice(0, maxShow).map((a) => (
-                <Badge key={a.id} variant="secondary" className="text-xs">
+                <Badge
+                  key={a.id}
+                  variant="secondary"
+                  className="text-xs max-w-full truncate"
+                  title={`group: ${a.subject}`}
+                >
                   group: {a.subject}
                 </Badge>
               ))}

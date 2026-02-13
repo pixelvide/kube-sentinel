@@ -69,11 +69,9 @@ export function CRListPage() {
             ? printerColumn.jsonPath.slice(1)
             : printerColumn.jsonPath
 
-          return columnHelper.accessor(
-            (row) => getValueByPath(row, jsonPath),
-            {
-              id: jsonPath || printerColumn.name,
-              header: printerColumn.name,
+          return columnHelper.accessor((row) => getValueByPath(row, jsonPath), {
+            id: jsonPath || printerColumn.name,
+            header: printerColumn.name,
             cell: ({ getValue }) => {
               const type = printerColumn.type
               const value = getValue()

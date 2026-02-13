@@ -4,8 +4,8 @@ import { Pod } from 'kubernetes-types/core/v1'
 import { Link } from 'react-router-dom'
 
 import { MetricsData, PodWithMetrics } from '@/types/api'
-import { getPodStatus } from '@/lib/k8s'
 import { PodStatus } from '@/types/k8s'
+import { getPodStatus } from '@/lib/k8s'
 import { formatDate } from '@/lib/utils'
 
 import { MetricCell } from './metrics-cell'
