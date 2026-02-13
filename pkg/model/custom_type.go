@@ -36,7 +36,7 @@ func (s *SecretString) Scan(value interface{}) error {
 	if err != nil {
 		// Treat as plaintext if decryption fails
 		*s = SecretString(encryptedStr)
-		return nil
+		return nil //nolint:nilerr // Lazy migration: fall back to plaintext if decryption fails
 	}
 	*s = SecretString(decrypted)
 	return nil
