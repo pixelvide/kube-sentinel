@@ -37,10 +37,10 @@ export function RBACDialog({
   const [form, setForm] = useState<Partial<Role>>({
     name: '',
     description: '',
-    clusters: [],
-    namespaces: [],
-    resources: [],
-    verbs: [],
+    clusters: ['*'],
+    namespaces: ['*'],
+    resources: ['*'],
+    verbs: ['*'],
   })
 
   useEffect(() => {
@@ -116,6 +116,7 @@ export function RBACDialog({
               onChange={(e) => setInput(e.target.value)}
               onFocus={() => setFocused(true)}
               onBlur={() => {
+                add()
                 // Delay hiding suggestions to allow suggestion click to register
                 setTimeout(() => setFocused(false), 150)
               }}
