@@ -107,6 +107,16 @@ func GetImageTags(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "image param required"})
 		return
 	}
+
+	r, _ := utils.GetImageRegistryAndRepo(image)
+	if r != "" && r != "docker.io" {
+		if err := utils.IsSecureRegistry(r); err != nil {
+			klog.Warningf("Blocked access to insecure registry: %s", r)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
 	reg := getRegistry(image)
 	tags, err := reg.GetTags(c.Request.Context())
 	if err != nil {

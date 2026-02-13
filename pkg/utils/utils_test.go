@@ -29,6 +29,35 @@ func TestGetImageRegistryAndRepo(t *testing.T) {
 	}
 }
 
+func TestIsSecureRegistry(t *testing.T) {
+	testcases := []struct {
+		host      string
+		shouldErr bool
+	}{
+		{"docker.io", false},
+		{"quay.io", false},
+		{"gcr.io", false},
+		{"localhost", true},
+		{"localhost:5000", true},
+		{"127.0.0.1", true},
+		{"127.0.0.1:5000", true},
+		{"[::1]", true},
+		{"[::1]:5000", true},
+		{"google.com", false},
+		{"0.0.0.0", true},
+	}
+
+	for _, tc := range testcases {
+		err := IsSecureRegistry(tc.host)
+		if tc.shouldErr && err == nil {
+			t.Errorf("IsSecureRegistry(%q) should have failed but passed", tc.host)
+		}
+		if !tc.shouldErr && err != nil {
+			t.Errorf("IsSecureRegistry(%q) failed: %v", tc.host, err)
+		}
+	}
+}
+
 func TestGenerateNodeAgentName(t *testing.T) {
 	testcase := []struct {
 		nodeName string

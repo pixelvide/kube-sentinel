@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,6 +12,35 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/rand"
 )
+
+func IsSecureRegistry(host string) error {
+	hostName := host
+	// Remove port if present
+	if strings.Contains(host, ":") {
+		h, _, err := net.SplitHostPort(host)
+		if err == nil {
+			hostName = h
+		}
+	}
+
+	// Handle IPv6 literal
+	if strings.HasPrefix(hostName, "[") && strings.HasSuffix(hostName, "]") {
+		hostName = hostName[1 : len(hostName)-1]
+	}
+
+	if strings.ToLower(hostName) == "localhost" {
+		return errors.New("access to localhost is restricted")
+	}
+
+	ip := net.ParseIP(hostName)
+	if ip != nil {
+		if ip.IsLoopback() || ip.IsUnspecified() {
+			return errors.New("access to loopback/unspecified addresses is restricted")
+		}
+	}
+
+	return nil
+}
 
 func InjectKubeSentinelBase(htmlContent string, base string) string {
 	baseScript := fmt.Sprintf(`<script>window.__dynamic_base__='%s';</script>`, base)
