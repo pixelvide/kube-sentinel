@@ -59,6 +59,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 import { ConnectionIndicator } from './connection-indicator'
 import { ErrorMessage } from './error-message'
@@ -725,6 +730,7 @@ export function ResourceTable<T>({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 pr-4 w-full sm:w-[100px] md:w-[200px]"
+                  aria-label={t('common.search')}
                 />
               </div>
               {searchQuery && (
@@ -761,13 +767,25 @@ export function ResourceTable<T>({
 
           {/* Toggle columns Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="h-9 w-9">
-                <Settings2 className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    aria-label={t('resourceTable.toggleColumns')}
+                  >
+                    <Settings2 className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>{t('resourceTable.toggleColumns')}</TooltipContent>
+            </Tooltip>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {t('resourceTable.toggleColumns')}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {table
                 .getAllLeafColumns()
