@@ -11,11 +11,11 @@ type AIProviderProfile struct {
 	Model
 	Name              string      `json:"name"`
 	Provider          string      `json:"provider"` // "gemini", "openai", "azure", "custom"
-	BaseURL           string      `json:"baseUrl"`
-	DefaultModel      string      `json:"defaultModel"`
-	APIKey            string      `json:"apiKey" gorm:"type:text"` // Global key for this profile
-	IsSystem          bool        `json:"isSystem"`
-	IsEnabled         bool        `json:"isEnabled" gorm:"default:true"` // If false, profile is hidden from users
+	BaseURL           string       `json:"baseUrl"`
+	DefaultModel      string       `json:"defaultModel"`
+	APIKey            SecretString `json:"apiKey" gorm:"type:text"` // Global key for this profile
+	IsSystem          bool         `json:"isSystem"`
+	IsEnabled         bool         `json:"isEnabled" gorm:"default:true"` // If false, profile is hidden from users
 	AllowUserOverride bool        `json:"allowUserOverride"`             // If true, users can provide their own key
 	AllowedModels     SliceString `json:"allowedModels"`                 // Comma-separated in DB, array in JSON
 }

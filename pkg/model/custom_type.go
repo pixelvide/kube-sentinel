@@ -34,7 +34,9 @@ func (s *SecretString) Scan(value interface{}) error {
 	// Decrypt the string
 	decrypted, err := utils.DecryptString(encryptedStr)
 	if err != nil {
-		return fmt.Errorf("failed to decrypt SecretString: %w", err)
+		// Treat as plaintext if decryption fails
+		*s = SecretString(encryptedStr)
+		return nil
 	}
 	*s = SecretString(decrypted)
 	return nil

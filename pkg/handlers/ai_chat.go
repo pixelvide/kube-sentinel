@@ -124,7 +124,7 @@ func resolveAIConfig(user *model.User) (*ai.AIConfig, error) {
 		if err := model.DB.Where("is_system = ? AND is_enabled = ?", true, true).First(&profile).Error; err == nil {
 			resolvedConfig = &ai.AIConfig{
 				Provider:     profile.Provider,
-				APIKey:       profile.APIKey,
+				APIKey:       string(profile.APIKey),
 				BaseURL:      profile.BaseURL,
 				Model:        profile.DefaultModel,
 				DefaultModel: profile.DefaultModel,

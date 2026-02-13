@@ -57,7 +57,7 @@ func UpsertUserGitlabConfig(c *gin.Context) {
 			config = model.UserGitlabConfig{
 				UserID:       u.ID,
 				GitlabHostID: req.GitlabHostID,
-				Token:        req.Token,
+				Token:        model.SecretString(req.Token),
 			}
 			if err := model.DB.Create(&config).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -73,7 +73,7 @@ func UpsertUserGitlabConfig(c *gin.Context) {
 	}
 
 	// Update
-	config.Token = req.Token
+	config.Token = model.SecretString(req.Token)
 	// Reset validation status on token update
 	config.IsValidated = false
 
@@ -120,7 +120,7 @@ func ValidateUserGitlabConfig(c *gin.Context) {
 		return
 	}
 
-	if err := utils.GlabAuthLogin(config.GitlabHost.Host, config.Token, glabConfigDir); err != nil {
+	if err := utils.GlabAuthLogin(config.GitlabHost.Host, string(config.Token), glabConfigDir); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -190,7 +190,7 @@ func RestoreGitlabConfigs() {
 			continue
 		}
 
-		if err := utils.GlabAuthLogin(config.GitlabHost.Host, config.Token, glabConfigDir); err != nil {
+		if err := utils.GlabAuthLogin(config.GitlabHost.Host, string(config.Token), glabConfigDir); err != nil {
 			klog.Errorf("Failed to restore gitlab auth for user %d host %s: %v", config.UserID, config.GitlabHost.Host, err)
 			// Optional: Invalidate config if login fails?
 			// config.IsValidated = false

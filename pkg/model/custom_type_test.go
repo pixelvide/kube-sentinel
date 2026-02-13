@@ -2,6 +2,8 @@ package model
 
 import (
 	"testing"
+
+	"github.com/pixelvide/kube-sentinel/pkg/utils"
 )
 
 func TestSliceString_Scan(t *testing.T) {
@@ -108,6 +110,77 @@ func TestLowerCaseString_Value(t *testing.T) {
 			}
 			if val != tt.expected {
 				t.Errorf("Value() got = %v, want %v", val, tt.expected)
+			}
+		})
+	}
+}
+
+func TestSecretString_Scan(t *testing.T) {
+	encrypted := utils.EncryptString("secret-value")
+
+	tests := []struct {
+		name     string
+		input    interface{}
+		expected SecretString
+		wantErr  bool
+	}{
+		{"nil value", nil, "", false},
+		{"empty string", "", "", false},
+		{"encrypted string", encrypted, "secret-value", false},
+		{"plaintext string (decryption failure)", "plaintext-value", "plaintext-value", false},
+		{"byte slice", []byte("plaintext-bytes"), "plaintext-bytes", false},
+		{"unsupported type", 123, "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var s SecretString
+			err := s.Scan(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Scan() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !tt.wantErr && s != tt.expected {
+				t.Errorf("Scan() got = %v, want %v", s, tt.expected)
+			}
+		})
+	}
+}
+
+func TestSecretString_Value(t *testing.T) {
+	tests := []struct {
+		name  string
+		input SecretString
+	}{
+		{"empty string", ""},
+		{"normal string", "my-secret"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			val, err := tt.input.Value()
+			if err != nil {
+				t.Errorf("Value() error = %v", err)
+			}
+			if tt.input == "" {
+				if val != "" {
+					t.Errorf("Value() got = %v, want empty string", val)
+				}
+			} else {
+				strVal, ok := val.(string)
+				if !ok {
+					t.Errorf("Value() returned non-string type: %T", val)
+				}
+				if strVal == string(tt.input) {
+					t.Errorf("Value() returned unencrypted string: %v", strVal)
+				}
+				// Verify it can be decrypted back
+				decrypted, err := utils.DecryptString(strVal)
+				if err != nil {
+					t.Errorf("Failed to decrypt Value() result: %v", err)
+				}
+				if decrypted != string(tt.input) {
+					t.Errorf("Decrypted value = %v, want %v", decrypted, tt.input)
+				}
 			}
 		})
 	}
