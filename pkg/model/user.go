@@ -13,12 +13,12 @@ import (
 
 type User struct {
 	Model
-	Username    string      `json:"username" gorm:"type:varchar(50);uniqueIndex;not null"`
-	Password    string      `json:"-" gorm:"type:varchar(255)"`
-	Name        string      `json:"name,omitempty" gorm:"type:varchar(100);index"`
-	AvatarURL   string      `json:"avatar_url,omitempty" gorm:"type:varchar(500)"`
-	LastLoginAt *time.Time  `json:"lastLoginAt,omitempty" gorm:"type:timestamp;index"`
-	Enabled     bool        `json:"enabled" gorm:"type:boolean;default:true"`
+	Username    string     `json:"username" gorm:"type:varchar(50);uniqueIndex;not null"`
+	Password    string     `json:"-" gorm:"type:varchar(255)"`
+	Name        string     `json:"name,omitempty" gorm:"type:varchar(100);index"`
+	AvatarURL   string     `json:"avatar_url,omitempty" gorm:"type:varchar(500)"`
+	LastLoginAt *time.Time `json:"lastLoginAt,omitempty" gorm:"type:timestamp;index"`
+	Enabled     bool       `json:"enabled" gorm:"type:boolean;default:true"`
 
 	// Transient fields (OIDC/Authentication)
 	// Provider is a transient field used during OIDC authentication to pass the provider name.
