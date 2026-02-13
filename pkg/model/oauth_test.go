@@ -67,9 +67,9 @@ func TestOAuthProvider_AppIsolation(t *testing.T) {
 
 	// Switch back to App1
 	model.CurrentApp = app1
-	p1_again, err := model.GetOAuthProviderByName("google")
+	p1Again, err := model.GetOAuthProviderByName("google")
 	assert.NoError(t, err)
-	assert.Equal(t, provider1.ID, p1_again.ID)
+	assert.Equal(t, provider1.ID, p1Again.ID)
 
 	// List providers
 	providers1, err := model.GetAllOAuthProviders()
