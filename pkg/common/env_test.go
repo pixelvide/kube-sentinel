@@ -1,5 +1,6 @@
 package common
 
+// Verify JWT_SECRET generation
 import (
 	"os"
 	"testing"
