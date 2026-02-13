@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pixelvide/kube-sentinel/pkg/cluster"
@@ -30,9 +32,30 @@ func (h *ProxyHandler) HandleProxy(c *gin.Context) {
 	}
 	name := c.Param("name")
 	namespace := c.Param("namespace")
+	path := c.Param("path")
+
+	if err := ValidateProxyRequest(namespace, name, path); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	if !rbac.CanAccess(user, kind, "get", cs.Name, namespace) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}
-	kube.HandleProxy(c, cs.K8sClient, kind, namespace, name, c.Param("path"))
+	kube.HandleProxy(c, cs.K8sClient, kind, namespace, name, path)
+}
+
+func ValidateProxyRequest(namespace, name, path string) error {
+	if strings.Contains(namespace, "/") || strings.Contains(namespace, "..") {
+		return errors.New("invalid namespace")
+	}
+	if strings.Contains(name, "/") || strings.Contains(name, "..") {
+		return errors.New("invalid name")
+	}
+	// Path should not allow traversing up
+	if strings.Contains(path, "..") {
+		return errors.New("invalid path: contains '..'")
+	}
+	return nil
 }
