@@ -47,6 +47,8 @@ var (
 	InsecureSkipVerify  = false
 
 	APIKeyProvider = "api_key"
+
+	AllowedOrigins []string
 )
 
 func GetTableName(schema, baseName string) string {
@@ -137,5 +139,13 @@ func LoadEnvs() {
 	if v := os.Getenv("INSECURE_SKIP_VERIFY"); v == "true" {
 		InsecureSkipVerify = true
 		klog.Warning("INSECURE_SKIP_VERIFY is set to true, SSL certificate verification will be skipped")
+	}
+
+	if v := os.Getenv("ALLOWED_ORIGINS"); v != "" {
+		AllowedOrigins = strings.Split(v, ",")
+		for i := range AllowedOrigins {
+			AllowedOrigins[i] = strings.TrimSpace(AllowedOrigins[i])
+		}
+		klog.Infof("CORS Allowed Origins: %v", AllowedOrigins)
 	}
 }
