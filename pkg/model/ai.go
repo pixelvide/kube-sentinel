@@ -66,3 +66,4 @@ type AIChatMessage struct {
 func (AIChatMessage) TableName() string {
 	return common.GetAppTableName("ai_chat_messages")
 }
+// Force PR update
