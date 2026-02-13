@@ -2,13 +2,12 @@ import { useCallback, useMemo, useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import * as yaml from 'js-yaml'
 import { CustomResourceDefinition } from 'kubernetes-types/apiextensions/v1'
-import { get } from 'lodash'
 import { Eye } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
 import { CustomResource, ResourceType } from '@/types/api'
 import { useResource } from '@/lib/api'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getValueByPath } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -70,9 +69,11 @@ export function CRListPage() {
             ? printerColumn.jsonPath.slice(1)
             : printerColumn.jsonPath
 
-          return columnHelper.accessor((row) => get(row, jsonPath), {
-            id: jsonPath || printerColumn.name,
-            header: printerColumn.name,
+          return columnHelper.accessor(
+            (row) => getValueByPath(row, jsonPath),
+            {
+              id: jsonPath || printerColumn.name,
+              header: printerColumn.name,
             cell: ({ getValue }) => {
               const type = printerColumn.type
               const value = getValue()

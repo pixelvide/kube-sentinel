@@ -268,3 +268,28 @@ export function enrichNodeConditionsWithHealth(data: NodeCondition[]) {
     }
   })
 }
+
+/**
+ * Access a value in an object or array by a string path.
+ * Supports dot notation and array indices (e.g. "a.b[0].c").
+ */
+export function getValueByPath(obj: unknown, path: string): unknown {
+  if (obj === null || obj === undefined || !path) {
+    return undefined
+  }
+
+  // Handle array indexing like a[0].b -> a.0.b
+  const normalizedPath = path.replace(/\[(\d+)\]/g, '.$1')
+  const keys = normalizedPath.split('.')
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let result: any = obj
+  for (const key of keys) {
+    if (result === null || result === undefined) {
+      return undefined
+    }
+    result = result[key]
+  }
+
+  return result
+}
