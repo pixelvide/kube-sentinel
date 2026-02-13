@@ -1,6 +1,8 @@
 package common
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"os"
 	"strings"
 	"time"
@@ -25,7 +27,7 @@ const (
 
 var (
 	Port        = "8080"
-	JwtSecret   = "kube-sentinel-default-jwt-secret-key-change-in-production"
+	JwtSecret   = ""
 	Host        = ""
 	Base        = ""
 	GitlabHosts = ""
@@ -65,6 +67,15 @@ func GetCoreTableName(baseName string) string {
 func LoadEnvs() {
 	if secret := os.Getenv("JWT_SECRET"); secret != "" {
 		JwtSecret = secret
+	} else {
+		// Generate random secret if not provided to avoid hardcoded secrets
+		b := make([]byte, 32)
+		_, err := rand.Read(b)
+		if err != nil {
+			klog.Fatalf("Failed to generate random JWT secret: %v", err)
+		}
+		JwtSecret = base64.StdEncoding.EncodeToString(b)
+		klog.Warning("JWT_SECRET is not set, using a randomly generated secret. Sessions will be invalidated on restart.")
 	}
 
 	if port := os.Getenv("PORT"); port != "" {
