@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/pixelvide/kube-sentinel/compare/v1.0.0...v1.0.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* **auth:** persist OIDCGroups in JWT for RBAC ([#97](https://github.com/pixelvide/kube-sentinel/issues/97)) ([9eb80e6](https://github.com/pixelvide/kube-sentinel/commit/9eb80e68e85c599cb6d37c121439e010d763fbf4))
+* **security:** [HIGH] Fix path traversal in proxy handler ([#95](https://github.com/pixelvide/kube-sentinel/issues/95)) ([d8ab2d0](https://github.com/pixelvide/kube-sentinel/commit/d8ab2d0e7a715a8d3fa3c6b703ae7ff26cfc3598))
+
 ## [1.0.0](https://github.com/pixelvide/kube-sentinel/compare/v0.13.1...v1.0.0) (2026-02-13)
 
 
