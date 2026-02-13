@@ -78,7 +78,7 @@ func TestUserGitlabConfigHandlers(t *testing.T) {
 		var resp model.UserGitlabConfig
 		err = json.Unmarshal(w.Body.Bytes(), &resp)
 		assert.NoError(t, err)
-		assert.Equal(t, "test-token", resp.Token)
+		assert.Equal(t, "test-token", string(resp.Token))
 		assert.Equal(t, host.ID, resp.GitlabHostID)
 	})
 
@@ -118,7 +118,7 @@ func TestUserGitlabConfigHandlers(t *testing.T) {
 		var resp model.UserGitlabConfig
 		err = json.Unmarshal(w.Body.Bytes(), &resp)
 		assert.NoError(t, err)
-		assert.Equal(t, "updated-token", resp.Token)
+		assert.Equal(t, "updated-token", string(resp.Token))
 		assert.Equal(t, config.ID, resp.ID) // should be same ID
 	})
 
