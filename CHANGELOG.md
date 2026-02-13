@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.0.0](https://github.com/pixelvide/kube-sentinel/compare/v0.13.1...v1.0.0) (2026-02-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* Renamed all CLOUD_SENTINEL_K8S_* environment variables to KUBE_SENTINEL_*. This includes ENCRYPT_KEY, BASE, USERNAME, PASSWORD, and CI/CD variables.
+
+### Features
+
+* add app_id to oauth_providers and move to core schema ([#86](https://github.com/pixelvide/kube-sentinel/issues/86)) ([9ab5b61](https://github.com/pixelvide/kube-sentinel/commit/9ab5b6119d16475cb10c132ee7bc679b8f7f9f75))
+* Add Email field to User model and capture from OIDC ([#92](https://github.com/pixelvide/kube-sentinel/issues/92)) ([9129957](https://github.com/pixelvide/kube-sentinel/commit/912995788097c4414d87482c8b62ca7bf6d98bef))
+* cleanup untagged image ([#72](https://github.com/pixelvide/kube-sentinel/issues/72)) ([a8c972d](https://github.com/pixelvide/kube-sentinel/commit/a8c972dd2368bee8666baf6105ab009c9dc46f6e))
+* support custom postgres schema configuration ([#83](https://github.com/pixelvide/kube-sentinel/issues/83)) ([0b5f26f](https://github.com/pixelvide/kube-sentinel/commit/0b5f26fc155ca1fe6b5913188c78a84701e34423))
+* **ui:** improve resource table accessibility ([#93](https://github.com/pixelvide/kube-sentinel/issues/93)) ([0ff4787](https://github.com/pixelvide/kube-sentinel/commit/0ff4787799f8cca69d9e7acb259a13d84ede1e09))
+
+
+### Bug Fixes
+
+* [CRITICAL] Fix hardcoded JWT secret ([#88](https://github.com/pixelvide/kube-sentinel/issues/88)) ([492102f](https://github.com/pixelvide/kube-sentinel/commit/492102f2177541c640a9aecc9c9526e135b73335))
+* **security:** [HIGH] Fix CORS vulnerability by restricting allowed origins ([#90](https://github.com/pixelvide/kube-sentinel/issues/90)) ([59f1875](https://github.com/pixelvide/kube-sentinel/commit/59f1875826d026f89261ba8400a19ab47764fce4))
+* **security:** prevent SSRF in image tags handler ([#89](https://github.com/pixelvide/kube-sentinel/issues/89)) ([b54230c](https://github.com/pixelvide/kube-sentinel/commit/b54230c9efbf0881c4c9cf7a9948eb01982489e6))
+
+
+### Code Refactoring
+
+* Rename CLOUD_SENTINEL_K8S_* environment variables to KUBE_SENTINEL_* ([#82](https://github.com/pixelvide/kube-sentinel/issues/82)) ([580bca1](https://github.com/pixelvide/kube-sentinel/commit/580bca1c7b37f04435de83ac119e2db1fd9e08d3))
+
 ## [0.13.1](https://github.com/pixelvide/kube-sentinel/compare/v0.13.0...v0.13.1) (2026-01-28)
 
 
