@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/pixelvide/kube-sentinel/compare/v1.1.0...v1.1.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* Encrypt AI API keys in database ([#104](https://github.com/pixelvide/kube-sentinel/issues/104)) ([ae436b3](https://github.com/pixelvide/kube-sentinel/commit/ae436b39285383e475ba2e89556e27d3402e64d4))
+
 ## [1.1.0](https://github.com/pixelvide/kube-sentinel/compare/v1.0.1...v1.1.0) (2026-02-13)
 
 
