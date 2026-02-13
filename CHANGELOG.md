@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/pixelvide/kube-sentinel/compare/v1.0.1...v1.1.0) (2026-02-13)
+
+
+### Features
+
+* encrypt GitLab tokens and AI API keys ([#103](https://github.com/pixelvide/kube-sentinel/issues/103)) ([00f2210](https://github.com/pixelvide/kube-sentinel/commit/00f221013fe6cbc5062ee232931a8f3ef36c6151))
+
+
+### Bug Fixes
+
+* **auth:** correct handling of empty OIDC groups during login ([#99](https://github.com/pixelvide/kube-sentinel/issues/99)) ([4a136a2](https://github.com/pixelvide/kube-sentinel/commit/4a136a2a0c496925b695d72246f0ed25fb2b112e))
+* RBAC role creation defaults and input handling ([#101](https://github.com/pixelvide/kube-sentinel/issues/101)) ([3a86494](https://github.com/pixelvide/kube-sentinel/commit/3a86494538d10096143af2bfcccc9e180f2b5cd6))
+* RBAC table column overflow issues ([#102](https://github.com/pixelvide/kube-sentinel/issues/102)) ([82e1af7](https://github.com/pixelvide/kube-sentinel/commit/82e1af7fe0476e9fce6678895acd8616d1a2258f))
+
 ## [1.0.1](https://github.com/pixelvide/kube-sentinel/compare/v1.0.0...v1.0.1) (2026-02-13)
 
 
