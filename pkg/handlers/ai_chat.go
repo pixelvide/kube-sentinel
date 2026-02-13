@@ -110,7 +110,7 @@ func resolveAIConfig(user *model.User) (*ai.AIConfig, error) {
 
 			resolvedConfig = &ai.AIConfig{
 				Provider:     profile.Provider,
-				APIKey:       userSettings.APIKey,
+				APIKey:       string(userSettings.APIKey),
 				BaseURL:      profile.BaseURL,
 				Model:        modelOverride,
 				DefaultModel: profile.DefaultModel,

@@ -4,7 +4,7 @@ import "github.com/pixelvide/kube-sentinel/pkg/common"
 
 type UserGitlabConfig struct {
 	Model
-	UserID       uint   `json:"user_id" gorm:"not null;uniqueIndex:idx_user_gitlab_config_unique"`
+	UserID       uint         `json:"user_id" gorm:"not null;uniqueIndex:idx_user_gitlab_config_unique"`
 	GitlabHostID uint         `json:"gitlab_host_id" gorm:"not null;uniqueIndex:idx_user_gitlab_config_unique"`
 	Token        SecretString `json:"token" gorm:"type:text;not null"`
 	IsValidated  bool         `json:"is_validated" gorm:"default:false"`

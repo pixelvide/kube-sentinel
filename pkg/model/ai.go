@@ -9,15 +9,15 @@ import (
 
 type AIProviderProfile struct {
 	Model
-	Name              string      `json:"name"`
-	Provider          string      `json:"provider"` // "gemini", "openai", "azure", "custom"
+	Name              string       `json:"name"`
+	Provider          string       `json:"provider"` // "gemini", "openai", "azure", "custom"
 	BaseURL           string       `json:"baseUrl"`
 	DefaultModel      string       `json:"defaultModel"`
 	APIKey            SecretString `json:"apiKey" gorm:"type:text"` // Global key for this profile
 	IsSystem          bool         `json:"isSystem"`
 	IsEnabled         bool         `json:"isEnabled" gorm:"default:true"` // If false, profile is hidden from users
-	AllowUserOverride bool        `json:"allowUserOverride"`             // If true, users can provide their own key
-	AllowedModels     SliceString `json:"allowedModels"`                 // Comma-separated in DB, array in JSON
+	AllowUserOverride bool         `json:"allowUserOverride"`             // If true, users can provide their own key
+	AllowedModels     SliceString  `json:"allowedModels"`                 // Comma-separated in DB, array in JSON
 }
 
 func (AIProviderProfile) TableName() string {
@@ -26,12 +26,12 @@ func (AIProviderProfile) TableName() string {
 
 type AISettings struct {
 	Model
-	UserID        uint   `json:"userID" gorm:"uniqueIndex:idx_user_profile"`
-	ProfileID     uint   `json:"profileID" gorm:"uniqueIndex:idx_user_profile"`
-	APIKey        string `json:"apiKey"`
-	ModelOverride string `json:"modelOverride"`
-	IsActive      bool   `json:"isActive"`
-	IsDefault     bool   `json:"isDefault"` // If true, this is the user's default AI profile
+	UserID        uint         `json:"userID" gorm:"uniqueIndex:idx_user_profile"`
+	ProfileID     uint         `json:"profileID" gorm:"uniqueIndex:idx_user_profile"`
+	APIKey        SecretString `json:"apiKey" gorm:"type:text"`
+	ModelOverride string       `json:"modelOverride"`
+	IsActive      bool         `json:"isActive"`
+	IsDefault     bool         `json:"isDefault"` // If true, this is the user's default AI profile
 }
 
 func (AISettings) TableName() string {
