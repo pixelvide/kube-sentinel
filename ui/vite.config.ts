@@ -24,7 +24,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           monaco: ['monaco-editor'],
-          lodash: ['lodash'],
           recharts: ['recharts'],
         },
       },
