@@ -381,6 +381,7 @@ func (h *AuthHandler) RequireAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		user.OIDCGroups = claims.OIDCGroups
 		user.Roles = rbac.GetUserRoles(*user)
 		c.Set("user", *user)
 
