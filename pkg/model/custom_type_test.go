@@ -12,7 +12,7 @@ func TestSliceString_Scan(t *testing.T) {
 		wantErr  bool
 	}{
 		{"nil value", nil, nil, false},
-		{"empty string", "", SliceString{""}, false},
+		{"empty string", "", SliceString{}, false},
 		{"comma separated string", "a,b,c", SliceString{"a", "b", "c"}, false},
 		{"byte slice", []byte("x,y,z"), SliceString{"x", "y", "z"}, false},
 		{"single value string", "single", SliceString{"single"}, false},
