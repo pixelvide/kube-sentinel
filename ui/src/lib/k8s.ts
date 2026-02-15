@@ -8,9 +8,28 @@ import { DeploymentStatusType, PodStatus, SimpleContainer } from '@/types/k8s'
 
 import { getAge } from './utils'
 
+// Cache for pod status to avoid repeated calculations
+const podStatusCache = new WeakMap<object, PodStatus>()
+
 // This function retrieves the status of a Pod in Kubernetes.
 // @see https://github.com/kubernetes/kubernetes/blob/master/pkg/printers/internalversion/printers.go#L881
 export function getPodStatus(pod?: Pod): PodStatus {
+  if (!pod) {
+    return computePodStatus(pod)
+  }
+
+  // Check cache
+  if (podStatusCache.has(pod)) {
+    return podStatusCache.get(pod)!
+  }
+
+  // Compute and cache
+  const status = computePodStatus(pod)
+  podStatusCache.set(pod, status)
+  return status
+}
+
+function computePodStatus(pod?: Pod): PodStatus {
   if (!pod || !pod.status) {
     return {
       readyContainers: 0,
