@@ -21,6 +21,7 @@ interface SimpleTableProps<T> {
   data: T[]
   columns: Column<T>[]
   emptyMessage?: string
+  getRowId?: (item: T) => string
   pagination?: {
     enabled: boolean
     pageSize?: number
@@ -35,6 +36,7 @@ export function SimpleTable<T>({
   columns,
   emptyMessage = 'No data available',
   pagination,
+  getRowId,
 }: SimpleTableProps<T>) {
   const isControlled =
     pagination &&
@@ -131,7 +133,10 @@ export function SimpleTable<T>({
             </TableRow>
           ) : (
             paginatedData.map((item, rowIndex) => (
-              <TableRow key={rowIndex}>
+              <TableRow
+                key={getRowId ? getRowId(item) : rowIndex}
+                data-row-key={getRowId ? getRowId(item) : rowIndex}
+              >
                 {columns.map((column, colIndex) => (
                   <TableCell
                     key={colIndex}

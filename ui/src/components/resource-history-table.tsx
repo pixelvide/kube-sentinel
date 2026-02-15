@@ -263,6 +263,7 @@ export function ResourceHistoryTable<T extends ResourceType>({
             data={history || []}
             columns={historyColumns}
             emptyMessage={t('resourceHistory.noHistoryFound')}
+            getRowId={(history) => history.id.toString()}
             pagination={{
               enabled: true,
               pageSize,

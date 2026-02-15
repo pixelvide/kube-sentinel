@@ -170,6 +170,7 @@ export function PodTable(props: {
           data={pods || []}
           columns={podColumns}
           emptyMessage="No pods found"
+          getRowId={(pod) => pod.metadata?.uid || ''}
           pagination={{
             enabled: true,
             pageSize: 20,

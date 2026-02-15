@@ -189,6 +189,7 @@ export function VolumeTable({
           data={tableData}
           columns={columns}
           emptyMessage="No volumes configured for this resource."
+          getRowId={(volume) => volume.name}
           pagination={{
             enabled: tableData.length > 10,
             pageSize: 10,
