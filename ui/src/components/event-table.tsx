@@ -106,6 +106,7 @@ export function EventTable(props: {
           data={events || []}
           columns={eventColumns}
           emptyMessage={t('events.noEventsFound')}
+          getRowId={(event) => event.metadata?.uid || ''}
         />
       </CardContent>
     </Card>

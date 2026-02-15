@@ -75,6 +75,7 @@ export function ServiceTable(props: {
           data={services || []}
           columns={serviceColumns}
           emptyMessage="No services found"
+          getRowId={(service) => service.metadata?.uid || ''}
         />
       </CardContent>
     </Card>

@@ -5,3 +5,7 @@
 ## 2026-02-13 - [Memoization of Helper Functions]
 **Learning:** When multiple components or table columns call the same expensive helper function (like `getPodStatus`) with the same object reference, memoizing the helper function itself using a `WeakMap` is a clean and effective optimization that avoids refactoring all call sites.
 **Action:** Use `WeakMap` to cache results of expensive stateless functions that take an object as input.
+
+## 2026-02-13 - [Stable Keys in Generic Tables]
+**Learning:** Generic table components (like `SimpleTable`) were using array indices as React keys (`key={rowIndex}`). This forces unnecessary re-renders of all rows when the list order changes (e.g. sorting) and can lead to incorrect state preservation.
+**Action:** Add an optional `getRowId` prop to generic table components and use stable IDs (like `metadata.uid`) as keys whenever possible.
