@@ -7,7 +7,7 @@ hero:
   text: "A modern, intuitive Kubernetes dashboard"
   tagline: "Lightweight, powerful cluster management and monitoring tool"
   image:
-    src: /logo.svg
+    src: /logo.png
     alt: Kube Sentinel Logo
   actions:
     - theme: brand
