@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/pixelvide/kube-sentinel/compare/v1.1.1...v1.1.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* **helm:** show failed and pending releases in list view ([#108](https://github.com/pixelvide/kube-sentinel/issues/108)) ([edc7274](https://github.com/pixelvide/kube-sentinel/commit/edc727456c870210e4bd649b2ca7f3c5a8d09519))
+
 ## [1.1.1](https://github.com/pixelvide/kube-sentinel/compare/v1.1.0...v1.1.1) (2026-02-13)
 
 
