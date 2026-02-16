@@ -68,6 +68,10 @@ func ListReleases(config *rest.Config, namespace string) ([]*release.Release, er
 
 	client := action.NewList(actionConfig)
 	client.Deployed = true
+	client.Failed = true
+	client.Pending = true
+	client.Uninstalling = true
+	client.Uninstalled = true
 
 	if namespace == "" || namespace == "_all" {
 		client.AllNamespaces = true
