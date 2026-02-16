@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Logo from '@/assets/icon.svg'
+import Logo from '@/assets/logo.png'
 import { IconCheck, IconLoader, IconUser } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router-dom'
@@ -46,13 +46,12 @@ function InitStep({
     <div className={`space-y-4 ${isPending ? 'opacity-50' : ''}`}>
       <div className="flex items-center space-x-3">
         <div
-          className={`flex aspect-square h-10 w-10 items-center justify-center rounded-full border-2 flex-shrink-0 ${
-            completed
+          className={`flex aspect-square h-10 w-10 items-center justify-center rounded-full border-2 flex-shrink-0 ${completed
               ? 'border-green-500 bg-green-500 text-white'
               : isActive
                 ? 'border-blue-500 bg-blue-50 text-blue-600'
                 : 'border-gray-300 bg-gray-50 text-gray-400'
-          }`}
+            }`}
         >
           {completed ? (
             <IconCheck className="h-5 w-5" />
@@ -62,24 +61,22 @@ function InitStep({
         </div>
         <div>
           <h3
-            className={`text-lg font-medium ${
-              completed
+            className={`text-lg font-medium ${completed
                 ? 'text-green-600'
                 : isActive
                   ? 'text-gray-900'
                   : 'text-gray-400'
-            }`}
+              }`}
           >
             {title}
           </h3>
           <p
-            className={`text-xs text-muted-foreground ${
-              completed
+            className={`text-xs text-muted-foreground ${completed
                 ? 'text-green-600'
                 : isActive
                   ? 'text-gray-600'
                   : 'text-gray-400'
-            }`}
+              }`}
           >
             {description}
           </p>
