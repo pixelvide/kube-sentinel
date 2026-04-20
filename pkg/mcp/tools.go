@@ -185,7 +185,7 @@ func (m *MCPServer) handleRunSecurityScan(ctx context.Context, request mcp.CallT
 		return mcp.NewToolResultText(fmt.Sprintf("Error fetching resource: %v", err)), nil
 	}
 
-	results := analyzer.Analyze(ctx, cs.K8sClient, obj)
+	results := analyzer.Analyze(ctx, cs.K8sClient, cs.PromClient, obj)
 	data, err := json.MarshalIndent(results, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal security results: %w", err)

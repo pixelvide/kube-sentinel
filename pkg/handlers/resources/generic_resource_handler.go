@@ -185,7 +185,7 @@ func (h *GenericResourceHandler[T, V]) GetAnalysis(c *gin.Context) {
 
 	obj := object.(client.Object)
 	cs := c.MustGet("cluster").(*cluster.ClientSet)
-	analysis := analyzer.Analyze(c.Request.Context(), cs.K8sClient, obj)
+	analysis := analyzer.Analyze(c.Request.Context(), cs.K8sClient, cs.PromClient, obj)
 
 	c.JSON(http.StatusOK, analysis)
 }

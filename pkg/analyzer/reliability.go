@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
 	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -15,7 +16,7 @@ type SingleReplicaAnalyzer struct{}
 
 func (a *SingleReplicaAnalyzer) Name() string { return "SingleReplica" }
 
-func (a *SingleReplicaAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *SingleReplicaAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var replicas int32
 	var kind string
 
@@ -57,7 +58,7 @@ type ProbeAnalyzer struct{}
 
 func (a *ProbeAnalyzer) Name() string { return "MissingProbes" }
 
-func (a *ProbeAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *ProbeAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var containers []corev1.Container
 	var name string
 
@@ -108,7 +109,7 @@ type MissingPDBAnalyzer struct{}
 
 func (a *MissingPDBAnalyzer) Name() string { return "MissingPDB" }
 
-func (a *MissingPDBAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *MissingPDBAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var selector *metav1.LabelSelector
 	var namespace string
 	var kind string

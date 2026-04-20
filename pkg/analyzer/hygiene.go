@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
 	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -13,7 +14,7 @@ type DanglingServiceAnalyzer struct{}
 
 func (a *DanglingServiceAnalyzer) Name() string { return "DanglingService" }
 
-func (a *DanglingServiceAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *DanglingServiceAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	svc, ok := obj.(*corev1.Service)
 	if !ok {
 		return nil, nil
@@ -48,7 +49,7 @@ type EmptyNamespaceAnalyzer struct{}
 
 func (a *EmptyNamespaceAnalyzer) Name() string { return "EmptyNamespace" }
 
-func (a *EmptyNamespaceAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *EmptyNamespaceAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	ns, ok := obj.(*corev1.Namespace)
 	if !ok {
 		return nil, nil

@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
 	"fmt"
 	"strings"
 
@@ -15,7 +16,7 @@ type ImmutableTagAnalyzer struct{}
 
 func (a *ImmutableTagAnalyzer) Name() string { return "ImmutableTags" }
 
-func (a *ImmutableTagAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *ImmutableTagAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var containers []corev1.Container
 	var initContainers []corev1.Container
 	var name string
@@ -80,7 +81,7 @@ type PrivilegedContainerAnalyzer struct{}
 
 func (a *PrivilegedContainerAnalyzer) Name() string { return "PrivilegedContainer" }
 
-func (a *PrivilegedContainerAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *PrivilegedContainerAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var containers []corev1.Container
 	var initContainers []corev1.Container
 	var name string
@@ -131,7 +132,7 @@ type RootUserAnalyzer struct{}
 
 func (a *RootUserAnalyzer) Name() string { return "RootUser" }
 
-func (a *RootUserAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *RootUserAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var containers []corev1.Container
 	var initContainers []corev1.Container
 	var podSecurityContext *corev1.PodSecurityContext
@@ -225,7 +226,7 @@ type HostPathAnalyzer struct{}
 
 func (a *HostPathAnalyzer) Name() string { return "HostPathVolume" }
 
-func (a *HostPathAnalyzer) Analyze(ctx context.Context, c client.Client, obj client.Object) ([]Anomaly, error) {
+func (a *HostPathAnalyzer) Analyze(ctx context.Context, c client.Client, promClient *prometheus.Client, obj client.Object) ([]Anomaly, error) {
 	var volumes []corev1.Volume
 	var name string
 

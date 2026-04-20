@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/pixelvide/cloud-sentinel-k8s/pkg/prometheus"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -19,13 +20,13 @@ func Register(a Analyzer) {
 	analyzers = append(analyzers, a)
 }
 
-func Analyze(ctx context.Context, k8sClient client.Client, obj client.Object) *ResourceAnalysis {
+func Analyze(ctx context.Context, k8sClient client.Client, promClient *prometheus.Client, obj client.Object) *ResourceAnalysis {
 	mu.RLock()
 	defer mu.RUnlock()
 
 	var anomalies []Anomaly
 	for _, a := range analyzers {
-		results, err := a.Analyze(ctx, k8sClient, obj)
+		results, err := a.Analyze(ctx, k8sClient, promClient, obj)
 		if err != nil {
 			klog.Errorf("Analyzer %s failed: %v", a.Name(), err)
 			continue
