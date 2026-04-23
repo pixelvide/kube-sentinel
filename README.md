@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="./docs/assets/logo.svg" alt="Kube Sentinel Logo" width="128" height="128">
+<img src="./docs/assets/logo.png" alt="Kube Sentinel Logo" width="128" height="128">
 
 _A modern, intuitive Kubernetes dashboard_
 
