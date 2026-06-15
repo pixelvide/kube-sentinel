@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import Logo from '@/assets/icon.svg'
 import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +27,7 @@ export function LoginPage() {
   const [loginLoading, setLoginLoading] = useState<string | null>(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
   const error = searchParams.get('error')
@@ -143,7 +145,11 @@ export function LoginPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <img src={Logo} className="h-10 w-10 dark:invert" />{' '}
+              <img
+                src={Logo}
+                alt="Kube Sentinel Logo"
+                className="h-10 w-10 dark:invert"
+              />{' '}
               <h1 className="text-2xl font-bold">Kube Sentinel</h1>
             </div>
             <p className="text-gray-600">{t('login.kubernetesDashboard')}</p>
@@ -220,14 +226,35 @@ export function LoginPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="password">{t('login.password')}</Label>
-                        <Input
-                          id="password"
-                          type="password"
-                          placeholder={t('login.enterPassword')}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder={t('login.enterPassword')}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={
+                              showPassword
+                                ? t('login.hidePassword')
+                                : t('login.showPassword')
+                            }
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-gray-500" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
                       {passwordError && (
                         <Alert variant="destructive">

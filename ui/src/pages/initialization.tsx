@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import Logo from '@/assets/icon.svg'
-import { IconCheck, IconLoader, IconUser } from '@tabler/icons-react'
+import {
+  IconCheck,
+  IconEye,
+  IconEyeOff,
+  IconLoader,
+  IconUser,
+} from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -99,7 +105,9 @@ export function InitializationPage() {
   // User form state
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [name, setName] = useState('')
 
   // If loading, show spinner
@@ -223,31 +231,73 @@ export function InitializationPage() {
                     <Label htmlFor="password">
                       {t('initialization.step1.passwordRequired')}
                     </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder={t(
-                        'initialization.step1.passwordPlaceholder'
-                      )}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder={t(
+                          'initialization.step1.passwordPlaceholder'
+                        )}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={
+                          showPassword
+                            ? t('login.hidePassword')
+                            : t('login.showPassword')
+                        }
+                      >
+                        {showPassword ? (
+                          <IconEyeOff className="h-4 w-4 text-gray-500" />
+                        ) : (
+                          <IconEye className="h-4 w-4 text-gray-500" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">
                       {t('initialization.step1.confirmPasswordRequired')}
                     </Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder={t(
-                        'initialization.step1.confirmPasswordPlaceholder'
-                      )}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder={t(
+                          'initialization.step1.confirmPasswordPlaceholder'
+                        )}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        aria-label={
+                          showConfirmPassword
+                            ? t('login.hidePassword')
+                            : t('login.showPassword')
+                        }
+                      >
+                        {showConfirmPassword ? (
+                          <IconEyeOff className="h-4 w-4 text-gray-500" />
+                        ) : (
+                          <IconEye className="h-4 w-4 text-gray-500" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <Button
                     type="submit"

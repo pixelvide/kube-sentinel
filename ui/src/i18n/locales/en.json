@@ -217,6 +217,8 @@
     "password": "Password",
     "enterUsername": "Enter your username",
     "enterPassword": "Enter your password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "signingIn": "Signing in...",
     "signInWithPassword": "Sign In with Password",
     "orContinueWith": "Or continue with",
