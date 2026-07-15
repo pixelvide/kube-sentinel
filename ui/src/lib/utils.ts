@@ -68,7 +68,7 @@ export function formatDate(
   try {
     const s = format(date, 'yyyy-MM-dd HH:mm:ss')
     return addTo ? `${s} (${formatDistance(new Date(), date)})` : s
-  } catch (e) {
+  } catch {
     return 'N/A'
   }
 }
