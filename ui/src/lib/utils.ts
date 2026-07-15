@@ -1,5 +1,5 @@
 import { clsx, type ClassValue } from 'clsx'
-import { format, formatDistance } from 'date-fns'
+import { format, formatDistance, isValid } from 'date-fns'
 import { TFunction } from 'i18next'
 import { NodeCondition } from 'kubernetes-types/core/v1'
 import { twMerge } from 'tailwind-merge'
@@ -56,10 +56,21 @@ export function getAge(timestamp: string): string {
   }
 }
 
-export function formatDate(timestamp: string, addTo = false): string {
+export function formatDate(
+  timestamp: string | undefined | null,
+  addTo = false
+): string {
+  if (!timestamp) return 'N/A'
+
   const date = new Date(timestamp)
-  const s = format(date, 'yyyy-MM-dd HH:mm:ss')
-  return addTo ? `${s} (${formatDistance(new Date(), date)})` : s
+  if (!isValid(date)) return 'N/A'
+
+  try {
+    const s = format(date, 'yyyy-MM-dd HH:mm:ss')
+    return addTo ? `${s} (${formatDistance(new Date(), date)})` : s
+  } catch (e) {
+    return 'N/A'
+  }
 }
 
 export function formatChartXTicks(

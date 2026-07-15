@@ -7,6 +7,7 @@ import {
   ClusterRedirector,
   RootRedirector,
 } from './components/route-redirectors'
+import { ErrorBoundary } from './components/ui/error-boundary'
 import { getSubPath } from './lib/subpath'
 import { CRListPage } from './pages/cr-list-page'
 import { HelmChartListPage } from './pages/helm-chart-list-page'
@@ -44,6 +45,7 @@ export const router = createBrowserRouter(
           </ProtectedRoute>
         </InitCheckRoute>
       ),
+      errorElement: <ErrorBoundary />,
       children: [
         {
           index: true,
